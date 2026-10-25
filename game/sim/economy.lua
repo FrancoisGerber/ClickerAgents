@@ -1,0 +1,59 @@
+-- Buying things and recomputing the derived numbers. The only place that writes
+-- credits, levels or tool ownership.
+local F = require("sim.formulas")
+local Upgrades = require("data.upgrades")
+
+local M = {}
+
+-- total throughput, probe damage and the per-vuln payout, from the current state
+function M.recalc(st)
+  local dps = 0
+  for _, a in ipairs(st.agents) do dps = dps + F.agent_dps(a) end
+  st.dps = math.floor(dps)
+  st.creditsKill = F.credits_per_vuln(st.zone)
+  st.click = math.max(1, math.floor(1 + 0.005 * st.dps))
+end
+
+function M.next_cost(st, i)
+  local a = st.agents[i]
+  return F.agent_cost(a.cost, a.lv + 1)
+end
+
+function M.unlocked(st, i)
+  local a = st.agents[i]
+  return a.lock == nil or st.zone >= a.lock
+end
+
+function M.buy(st, i)
+  local a = st.agents[i]
+  if not a or not M.unlocked(st, i) then return false end
+  local cost = M.next_cost(st, i)
+  if st.credits < cost then return false end
+  st.credits = st.credits - cost
+  a.lv = a.lv + 1
+  M.recalc(st)
+  return true
+end
+
+function M.buy_max(st, i)
+  local bought = 0
+  while M.buy(st, i) do bought = bought + 1 end
+  return bought
+end
+
+-- amount 0 means MAX, matching the START button's cycle
+function M.buy_amount(st, i, amount)
+  if amount == 0 then return M.buy_max(st, i) end
+  local bought = 0
+  for _ = 1, amount do
+    if not M.buy(st, i) then break end
+    bought = bought + 1
+  end
+  return bought
+end
+
+function M.select(st, i)
+  st.sel = math.max(1, math.min(#st.agents, i))
+end
+
+return M

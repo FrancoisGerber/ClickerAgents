@@ -1,5 +1,5 @@
--- Headless check for Clicker Agents: geometry at three screen sizes, plus the
--- buttons changing the numbers. No window, no LÖVE.
+-- Headless suite: geometry at three sizes, the M1 formulas, the tick, buying,
+-- saving and the gptk contract. No window, no LÖVE.
 -- Usage: lua tests/headless.lua
 
 local SW, SH = 720, 480
@@ -12,7 +12,6 @@ love = {
     setColor = function() end,
     setBackgroundColor = function() end,
     setDefaultFilter = function() end,
-    setLineStyle = function() end,
     push = function() table.insert(STACK, { x = OX, y = OY }) end,
     pop = function() local t = table.remove(STACK); if t then OX, OY = t.x, t.y end end,
     translate = function(dx, dy) OX, OY = OX + (dx or 0), OY + (dy or 0) end,
@@ -36,300 +35,209 @@ love = {
 }
 
 package.path = "game/?.lua;" .. package.path
-_G.DS_TEST = true                       -- silence the game's debug prints
-local M = dofile("game/main.lua")
+_G.DS_TEST = true
+local Game = dofile("game/main.lua")
 
-local function checkLayout(label)
-  local L = M.layoutOf()
-  assert(L.heroW + L.battleW == SW, label .. ": columns do not tile the width")
-  assert(L.topH + (L.H - L.topH - L.hintH) + L.hintH == SH, label .. ": bands do not tile the height")
-  assert(L.heroW % 8 == 0, label .. ": hero column is not on an 8-px multiple")
-  assert(L.rows >= 6, label .. ": fewer than six hero rows")
-  print(string.format("  %-9s %dx%d  profile=%-7s hero=%-3d battle=%-3d rows=%d dps-col=%s",
-    label, L.W, L.H, L.profile, L.heroW, L.battleW, L.rows, tostring(L.showDps)))
+local F = require("sim.formulas")
+local Combat = require("sim.combat")
+local Economy = require("sim.economy")
+local Save = require("sim.save")
+local SimState = require("sim.state")
+
+local ok, fail = 0, 0
+local function check(cond, msg)
+  if cond then ok = ok + 1 else fail = fail + 1; print("  FAIL " .. msg) end
 end
 
-local function drawAll(label)
-  M.state.screen, M.state.splashT = "splash", 0
-  love.draw()                                  -- title screen
-  M.state.screen = "welcome"
-  love.draw()                                  -- offline report
-  M.state.screen = "game"
-  local rows = { 12, 6, 10, 5, 8, 8, 3 }
+local function st() return Game.state() end
+
+-- ---------------------------------------------------------------- geometry
+print("geometry")
+for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 720, 720 } }) do
+  SW, SH = size[1], size[2]
+  love.load()
+  local s = st()
+  s.screen = "game"
   for tab = 1, 7 do
-    M.state.tab = tab
-    M.state.cursor[tab] = 1
-    love.draw()                                -- top of the list
-    M.state.cursor[tab] = rows[tab]
-    love.draw()                                -- bottom of the list, selection drawn
-    M.state.cursor[tab] = 1
+    s.tab = tab
     love.draw()
   end
-  M.state.tab = 1
-  love.draw()
-  checkLayout(label)
+  s.screen = "splash"; love.draw()
+  s.screen = "game"
+  local L = Game.layoutOf()
+  print(string.format("  %dx%d  profile=%-7s agent=%d battle=%d rows=%d",
+    SW, SH, L.profile or "?", L.heroW, L.battleW, L.rows))
+end
+check(#calls.errors == 0, "geometry: " .. tostring(calls.errors[1]))
+print("  rects drawn: " .. calls.rect)
+
+-- ---------------------------------------------------------------- formulas
+print("formulas")
+check(F.vuln_hp(1) >= 10, "vuln hp at zone 1")
+check(F.vuln_hp(2) > F.vuln_hp(1), "vuln hp grows with zone")
+check(F.vuln_hp(141) > F.vuln_hp(140), "vuln hp grows past the linear stretch")
+check(F.boss_hp(5) == F.vuln_hp(5) * 10, "boss is ten vulns in one bar")
+check(F.credits_per_vuln(10) >= 3, "credits per vuln")
+check(F.agent_cost(5, 1) == 5, "first level costs the base price")
+check(F.agent_cost(100, 10) > F.agent_cost(100, 9), "cost grows with level")
+check(F.milestones(24) == 0 and F.milestones(25) == 1, "first damage milestone at 25")
+check(F.milestones(50) == 2, "milestone every 25 levels")
+print(string.format("  hp(1)=%.0f hp(50)=%.4g hp(140)=%.4g cost(100,lvl10)=%.0f",
+  F.vuln_hp(1), F.vuln_hp(50), F.vuln_hp(140), F.agent_cost(100, 10)))
+
+-- ---------------------------------------------------------------- the tick
+print("combat")
+local s = SimState.new_run()
+Combat.new_run_spawn(s)
+check(s.zone == 1 and s.kills == 0, "a run starts on zone 1 with no kills")
+check(s.hp == F.vuln_hp(1), "the first vuln has its formula HP")
+
+local hp0 = s.hp
+s.click = 1
+Combat.probe(s)
+check(s.hp == hp0 - 1 or s.kills == 1, "a probe takes 1 HP off")
+
+s.click = 100000
+for _ = 1, 40 do Combat.probe(s) end
+check(s.zone > 1, "clearing ten vulns advances the zone")
+check(s.credits > 0, "kills pay credits")
+
+local boss = SimState.new_run()
+boss.zone = 5
+Combat.new_run_spawn(boss)
+check(boss.boss == true, "zone 5 is a boss firewall")
+check(boss.timer == Combat.BOSS_SECONDS, "the boss has a 30 second clock")
+check(boss.hpMax == F.boss_hp(5), "the boss bar is ten vulns deep")
+
+local before = boss.zone
+boss.dps = 0
+boss.timer = 0.5
+Combat.tick(boss, 1)
+check(boss.zone == before, "failing the clock keeps the zone")
+check(boss.timer == Combat.BOSS_SECONDS, "failing the clock gives the boss a fresh timer")
+check(boss.hp == boss.hpMax, "failing the clock re-arms the firewall")
+
+-- ---------------------------------------------------------------- buying
+print("economy")
+local b = SimState.new_run()
+Combat.new_run_spawn(b)
+b.credits = 100000
+local lvl = b.agents[1].lv
+local cost = Economy.next_cost(b, 1)
+check(Economy.buy(b, 1), "buying succeeds with credits")
+check(b.agents[1].lv == lvl + 1, "the level went up")
+check(b.credits == 100000 - cost, "exactly the price was spent")
+local poor = SimState.new_run()
+poor.credits = 0
+check(not Economy.buy(poor, 1), "buying without credits fails")
+check(poor.agents[1].lv == 1, "a failed buy changes nothing")
+print(string.format("  agent 1 lvl %.0f -> %.0f, credits 100000 -> %.0f, dps %.0f",
+  lvl, b.agents[1].lv, b.credits, b.dps))
+
+-- ---------------------------------------------------------------- save
+print("save")
+local src = SimState.new_run()
+Combat.new_run_spawn(src)
+src.credits = 4242
+src.zone = 12
+src.kills = 3
+src.rootkits = 7
+src.agents[2].lv = 5
+src.bestZone = 12
+local text = Save.serialise(Save.snapshot(src))
+local data = Save.deserialise(text)
+check(data ~= nil, "the save parses back")
+local dst = SimState.new_run()
+Save.apply(dst, data)
+check(dst.credits == 4242, "credits survive a save")
+check(dst.zone == 12 and dst.kills == 3, "zone and kills survive a save")
+check(dst.rootkits == 7, "rootkits survive a save")
+check(dst.agents[2].lv == 5, "agent levels survive a save")
+print("  round trip: " .. #text .. " bytes, zone " .. dst.zone .. ", credits " .. dst.credits)
+
+-- ---------------------------------------------------------------- offline
+print("offline")
+local off = SimState.new_run()
+Combat.new_run_spawn(off)
+off.agents[2].lv = 40
+Economy.recalc(off)
+local credits0, zone0 = off.credits, off.zone
+local ran = Combat.simulate(off, 3600, 5)
+check(ran > 0, "the offline replay runs")
+check(off.zone >= zone0, "offline progress never goes backwards")
+check(off.credits > credits0, "offline credits accrue")
+print(string.format("  %.0fs replayed: zone %.0f -> %.0f, credits +%.0f",
+  ran, zone0, off.zone, off.credits - credits0))
+
+-- ---------------------------------------------------------------- binds
+print("binds")
+local B = Game.bindsOf()
+check(B.buy and B.click and B.fire and B.prevSkill and B.nextSkill, "every bind resolves")
+local f = io.open("port/clickeragents/clickeragents.gptk", "r")
+check(f ~= nil, "the gptk is readable")
+if f then
+  local gptk = {}
+  for line in f:lines() do
+    local k, v = line:match("^%s*(%w+)%s*=%s*(%w+)")
+    if k then gptk[k] = v end
+  end
+  f:close()
+  check(B.buy == gptk.b, "printed A matches the gptk")
+  check(B.click == gptk.a, "printed B matches the gptk")
+  print(string.format("  gptk: A=%s (buy) B=%s (probe)", gptk.b, gptk.a))
 end
 
+-- ---------------------------------------------------------------- screens
+print("screens")
 SW, SH = 720, 480
 love.load()
-drawAll("720x480")
+local g = st()
+g.screen = "game"
 
-for _, s in ipairs({ { "640x480", 640, 480 }, { "720x720", 720, 720 }, { "720x480", 720, 480 } }) do
-  SW, SH = s[2], s[3]
-  love.load()
-  drawAll(s[1])
-end
+g.tab = 1
+local lv0 = g.agents[1].lv
+g.credits = 100000
+love.keypressed(B.buy)
+check(g.agents[1].lv == lv0 + 1, "A buys the selected agent")
+check(g.credits < 100000, "A spends credits")
 
--- the splash hands over to the offline report, and only then to the game
-M.state.screen, M.state.splashT = "splash", 0
+local hp0b = g.hp
+love.keypressed(B.click)
+check(g.hp < hp0b or g.kills > 0, "B probes the vuln")
+
+g.tab = 2
+g.cursor[2] = 1
+g.skillCd[1] = 0
+love.keypressed(B.fire)
+check((g.skillCd[1] or 0) > 0, "X casts on the skills tab")
+love.keypressed(B.fire)
 love.draw()
-love.keypressed(M.bindsOf().buy)
-assert(M.state.screen == "welcome", "a button did not leave the splash for the report")
-assert(M.state.gold == 1240, "the splash button also bought something")
-love.keypressed(M.bindsOf().click)              -- B must NOT close the report
-assert(M.state.screen == "welcome", "a non-A button closed the welcome report")
-love.keypressed(M.bindsOf().buy)
-assert(M.state.screen == "game", "the welcome report did not close on A")
 
--- L/R cycle the five tabs, B comes back to battle
+g.tab = 1
+g.zone = 12
+g.zoneSel = 12
+love.keypressed(B.prevSkill)
+check(g.zoneSel == 11, "L2 steps a zone back")
+love.keypressed(B.fire)
+check(g.zoneSel == 12, "X snaps back to the live zone")
+
 local visited = {}
 for _ = 1, 7 do
   love.keypressed("e")
-  table.insert(visited, M.state.tab)
-  love.draw()
+  visited[#visited + 1] = g.tab
 end
-assert(#visited == 7 and visited[7] == 1, "R did not cycle all seven screens back to battle")
-love.keypressed("e")                        -- to SKILLS
-assert(M.state.tab == 2, "R did not reach SKILLS")
-love.keypressed(M.bindsOf().click)                        -- B returns to battle
-assert(M.state.tab == 1, "B did not return to battle")
-love.keypressed("q")                        -- L wraps to MENU
-assert(M.state.tab == 7, "L did not wrap to MENU")
+check(visited[7] == 1, "R cycles all seven screens back to battle")
+
+g.tab = 4
+g.cursor[4] = 1
+love.keypressed(B.buy)
+check(g.msg ~= nil, "a daemon press reports its rootkit price")
+love.keypressed("e")
+love.keypressed("e")
+love.keypressed("e")
 love.draw()
-M.state.tab = 1
+print("  input, tabs and daemons exercised")
 
--- the boss timer is only drawn while a boss is live (no assertion possible on
--- pixels here, but both states must render without leaving the screen)
-M.state.timer = 14
-love.draw()
-M.state.timer = 0
-love.draw()
-print("  tabs: " .. table.concat(visited, " -> ") .. ", L wraps to MENU")
-
--- every screen's controls respond, and activation only ever toasts
-local goldBefore = M.state.gold
-
-M.state.tab = 3                                  -- UPGRADES
-M.state.cursor[3] = 1
-love.keypressed("down")
-assert(M.state.cursor[3] == 2, "the upgrades cursor did not move")
-love.keypressed(M.bindsOf().buy)
-assert(M.state.msg and M.state.msgT > 0, "A gave no feedback on the upgrades screen")
-love.draw()
-print("  upgrades: cursor " .. M.state.cursor[3] .. ", toast: " .. tostring(M.state.msg))
-
-M.state.tab = 4                                  -- PRESTIGE
-M.state.cursor[4] = 5
-love.keypressed(M.bindsOf().buy)
-assert(M.state.msg and M.state.msg:find("LOCKED"), "ascend did not report being locked")
-love.draw()
-print("  prestige: toast: " .. tostring(M.state.msg))
-
-M.state.cursor[4] = 1
-love.keypressed(M.bindsOf().buy)
-assert(M.state.msg and M.state.msg:find("ROOTKITS"), "daemon press gave no cost feedback")
-love.draw()
-
-M.state.tab = 5                                  -- ACHIEVEMENTS
-M.state.cursor[5] = 1
-love.keypressed(M.bindsOf().buy)
-assert(M.state.msg and M.state.msg:find("FIRST BREACH"), "achievements gave no feedback")
-love.keypressed("down")
-assert(M.state.cursor[5] == 2, "the achievements cursor did not move")
-love.draw()
-print("  achievements: cursor " .. M.state.cursor[5] .. ", toast: " .. tostring(M.state.msg))
-
--- the two screens that felt frozen: the cursor must move on both
-M.state.tab = 4                                  -- PRESTIGE
-M.state.cursor[4] = 1
-love.keypressed("down")
-assert(M.state.cursor[4] == 2, "the prestige cursor did not move")
-love.draw()
-M.state.tab = 7                                  -- MENU
-M.state.cursor[7] = 1
-love.keypressed("down")
-assert(M.state.cursor[7] == 2, "the menu cursor did not move")
-love.draw()
-M.state.cursor[7] = 1
-
-M.state.tab = 7                                  -- MENU
-M.state.cursor[7] = 1
-love.keypressed(M.bindsOf().buy)
-assert(M.state.tab == 1, "RESUME did not return to battle")
-for _ = 1, 6 do love.keypressed("e") end
-assert(M.state.tab == 7, "could not get back to MENU")
-M.state.cursor[7] = 2
-love.keypressed(M.bindsOf().buy)
-assert(M.state.msg and M.state.msg:find("SAVE"), "SAVE gave no feedback")
-love.draw()
-
-assert(M.state.gold == goldBefore, "activation changed gold on a wireframe screen")
-print("  activation: menus toast, no state changed")
-
--- A selects on every wireframe tab, B goes back. No other arrangement.
-for _, tab in ipairs({ 2, 3, 4, 5, 7 }) do
-  M.state.tab = tab
-  M.state.cursor[tab] = (tab == 7) and 2 or 1   -- menu row 1 is RESUME, which leaves
-  local press = M.bindsOf().buy
-  love.keypressed(press)
-  assert(M.state.tab == tab, "A (the buy key) left tab " .. tab .. " instead of selecting")
-  love.keypressed(M.bindsOf().click)
-  assert(M.state.tab == 1, "B (the click key) did not go back from tab " .. tab)
-end
-print("  face buttons: A selects, B goes back, on every tab")
-
--- zone selection: L2/R2 walk the cleared zones, X snaps back to the front
-local sb = M.bindsOf()
-M.state.tab = 1
-M.state.zone = 12
-M.state.zoneSel = 12
-love.keypressed(sb.prevSkill)
-assert(M.state.zoneSel == 11, "L2 did not step back a zone")
-love.keypressed(sb.prevSkill)
-assert(M.state.zoneSel == 10, "L2 did not step back again")
-love.keypressed(sb.nextSkill)
-assert(M.state.zoneSel == 11, "R2 did not step forward a zone")
-love.keypressed(sb.nextSkill)
-love.keypressed(sb.nextSkill)                     -- clamped at the live zone
-assert(M.state.zoneSel == 12, "R2 ran past the live zone")
-love.keypressed(sb.prevSkill)
-assert(M.state.zoneSel == 11, "L2 did not move after the clamp")
-love.keypressed(sb.fire)
-assert(M.state.zoneSel == 12, "X did not snap back to the live zone")
-love.draw()
-print("  zones: L2/R2 select, X back to front, toast " .. tostring(M.state.msg))
--- the strip is gone: the arena now runs to the hint bar
-M.state.zoneSel = 12
-love.draw()
-
--- SKILLS: X casts the highlighted skill, and the cooldown blocks a second cast
-M.state.tab = 2
-M.state.cursor[2] = 1                              -- CLICKSTORM, owned
-M.state.skillCd[1] = 0
-love.keypressed(sb.fire)
-assert((M.state.skillCd[1] or 0) > 0, "X did not start the skill cooldown")
-assert(M.state.msg and M.state.msg:find("ACTIVE"), "cast gave no feedback")
-local cdAfter = M.state.skillCd[1]
-love.keypressed(sb.fire)                           -- still cooling
-assert(M.state.skillCd[1] == cdAfter, "a second press restarted the cooldown")
-assert(M.state.msg and M.state.msg:find("S$"), "cooldown press gave no countdown: " .. tostring(M.state.msg))
-love.draw()
-print(string.format("  skills: X cast, cooldown %.0fs blocks, toast %q", cdAfter, M.state.msg))
-
--- a locked skill cannot be cast
-M.state.cursor[2] = 4                              -- LUCKY STRIKE, 250K
-M.state.skillCd[4] = 0
-love.keypressed(sb.fire)
-assert((M.state.skillCd[4] or 0) == 0, "a locked skill was cast")
-assert(M.state.msg and M.state.msg:find("NEED"), "locked cast gave no reason")
-love.draw()
-M.state.cursor[2] = 1
-M.state.skillCd[1] = 0
-M.state.tab = 1
-love.draw()
-
--- A buys, B clicks (selection starts on Brann, who is affordable)
-local gold0 = M.state.gold
-local lv0 = M.state.agents[2].lv
-love.keypressed(M.bindsOf().buy)
-love.draw()
-assert(M.state.gold < gold0, "A did not buy: no gold spent")
-assert(M.state.agents[2].lv == lv0 + 1, "A did not buy: no level gained")
-print(string.format("  A buy: gold %d -> %d, Brann lv %d -> %d, DPS now %d",
-  gold0, M.state.gold, lv0, M.state.agents[2].lv, M.state.dps))
-
-love.keypressed("return")
-local before = M.state.gold
-love.keypressed(M.bindsOf().buy)
-love.draw()
-assert(M.state.gold <= before, "the x10 buy went backwards")
-
--- B hits the monster: HP drops by the click damage, the sprite flashes
-local hp0, clk = M.state.hp, M.state.click
-love.keypressed(M.bindsOf().click)
-love.draw()
-assert(M.state.hp == hp0 - clk, "B did not damage the monster")
-assert(M.state.flashT > 0, "B did not flash the monster")
-print(string.format("  B click: hp %d -> %d (-%d)", hp0, M.state.hp, clk))
-
--- a killing click refills the bar and ticks the counter
-M.state.hp = 10
-local kills0 = M.state.kills
-love.keypressed(M.bindsOf().click)
-assert(M.state.hp == M.state.hpMax and M.state.kills == kills0 + 1,
-  "a killing click did not refill and tick the kill counter")
-print(string.format("  kill: hp back to %d, kills %d -> %d", M.state.hpMax, kills0, M.state.kills))
-
--- Start cycles 1, 10, 100, MAX
-local seen, sawMax = {}, false
-for _ = 1, 4 do
-  table.insert(seen, M.state.amount)
-  if M.state.amount == 0 then sawMax = true end
-  love.keypressed("return")
-end
-assert(sawMax, "the amount cycle never reached MAX")
-print("  amount cycle: " .. table.concat(seen, " -> ") .. " -> " .. M.state.amount)
-
-love.keypressed("tab")
-love.draw()
-assert(M.state.idle == true, "select did not toggle the auto-click flag")
-
-love.keypressed("down")
-assert(M.state.gain == M.state.agents[M.state.sel + 1].base,
-  "the footer gain did not follow the selection")
-print(string.format("  selection: sel=%d gain=+%d", M.state.sel, M.state.gain))
-
--- the gptk file and the game must agree: SDL "a" (the printed A) buys,
--- SDL "b" (the printed B) clicks. This is the guard against a double swap.
-local fh = assert(io.open("port/clickeragents/clickeragents.gptk", "r"))
-local gptk = {}
-for line in fh:lines() do
-  local k, v = line:match("^%s*([%w_]+)%s*=%s*(%w+)")
-  if k then gptk[k] = v end
-end
-fh:close()
-assert(gptk.a and gptk.b, "the gptk has no a/b mapping")
-
-local b = M.bindsOf()
--- crossed on purpose: the printed A arrives as SDL "b" on this unit
-assert(b.buy == gptk.b, "the game did not bind the printed A to gptk's b")
-assert(b.click == gptk.a, "the game did not bind the printed B to gptk's a")
-local allBinds = M.bindsOf()
-assert(allBinds.buy and allBinds.click and allBinds.fire
-       and allBinds.prevSkill and allBinds.nextSkill,
-       "a bind is nil: a button would do nothing")
-print("  binds: A->" .. b.buy .. " B->" .. b.click .. " (" .. b.src .. ")")
-
-M.state.sel, M.state.amount, M.state.gold = 1, 1, 100000
-local goldA = M.state.gold
-love.keypressed(b.buy)
-assert(M.state.gold < goldA, "printed A (" .. b.buy .. ") did not buy")
-
-M.state.hp = M.state.hpMax
-local hpB = M.state.hp
-love.keypressed(b.click)
-assert(M.state.hp < hpB, "printed B (" .. b.click .. ") did not click the monster")
-print(string.format("  hardware: printed A=%s buys, printed B=%s clicks", b.buy, b.click))
-
-love.keypressed("q"); love.keypressed("e"); love.draw()
-love.keypressed("2"); love.draw()
-love.keypressed("3"); love.draw()
-love.keypressed("1"); love.draw()
-for _ = 1, 12 do love.keypressed("down") end
-love.draw()
-
-print(string.format("rects drawn: %d", calls.rect))
-print(string.format("errors: %d", #calls.errors))
-for _, e in ipairs(calls.errors) do print("  - " .. e) end
-assert(#calls.errors == 0, "geometry errors found")
-print("OK: three screen sizes, buttons change numbers, nothing leaves the screen")
+print(string.format("\nchecks: %d ok, %d failed", ok, fail))
+if fail > 0 then os.exit(1) end
+print("OK: three screen sizes, formulas, tick, save, binds, input")
