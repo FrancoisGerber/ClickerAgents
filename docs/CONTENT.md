@@ -11,18 +11,22 @@ milestone rule (`×4` every 25 levels) applies to every agent.
 
 | # | Agent | Base cost | Base DPS | Deploys at | Specialism |
 |---|---|---|---|---|---|
-| 1 | Spider | 5 | 0 | zone 1 | crawler: finds the surface, +1 probe damage per level |
-| 2 | Pick | 50 | 5 | zone 1 | credential spray, first real throughput |
-| 3 | Bait | 250 | 22 | zone 4 | social engineering, converts people into access |
-| 4 | Splice | 1,000 | 74 | zone 8 | injection: RCE, SQLi, deserialisation |
-| 5 | Relay | 4,000 | 245 | zone 13 | pivots; stronger the deeper you already are |
-| 6 | Grind | 20,000 | 1,000 | zone 19 | hash cracking, works while you are away |
-| 7 | Cicada | 100,000 | 4,300 | zone 26 | droppers and persistence on endpoints |
-| 8 | Mule | 400,000 | 17,000 | zone 34 | exfiltration and staging |
-| 9 | Taint | 2,000,000 | 75,000 | zone 43 | supply chain: one dependency, everything downstream |
-| 10 | Hush | 10,000,000 | 320,000 | zone 53 | wireless and implants, walks past a perimeter |
-| 11 | Badge | 50,000,000 | 1,400,000 | zone 64 | insider: buys a human instead of a hole |
-| 12 | Onyx | 250,000,000 | 6,000,000 | zone 76 | endgame framework, multiplies every other agent |
+| 1 | Spider | 12 | 12 | zone 1 | crawler: finds the surface |
+| 2 | Pick | 214 | 214 | zone 1 | credential spray, first real throughput |
+| 3 | Bait | 1,400 | 1,400 | zone 1 | social engineering, converts people into access |
+| 4 | Splice | 4,200 | 4,200 | zone 1 | injection: RCE, SQLi, deserialisation |
+| 5 | Relay | 9,800 | 9,800 | zone 1 | pivots; stronger the deeper you already are |
+| 6 | Grind | 41,000 | 41,000 | zone 1 | hash cracking, works while you are away |
+| 7 | Cicada | 190,000 | 190,000 | zone 26 | droppers and persistence on endpoints |
+| 8 | Mule | 400,000 | 400,000 | zone 34 | exfiltration and staging |
+| 9 | Taint | 2,000,000 | 2,000,000 | zone 43 | supply chain: one dependency, everything downstream |
+| 10 | Hush | 10,000,000 | 10,000,000 | zone 53 | wireless and implants, walks past a perimeter |
+| 11 | Badge | 50,000,000 | 50,000,000 | zone 64 | insider: buys a human instead of a hole |
+| 12 | Onyx | 250,000,000 | 250,000,000 | zone 76 | endgame framework, multiplies every other agent |
+
+Base throughput equals the base price: one DPS per credit at level 1. That ratio is
+what keeps the ladder in front of vuln HP, which grows 55% per zone early and
+14.5% past 140.
 
 Each agent costs roughly 4–6× the previous one and deals about 4× its throughput, so a new
 agent is always worth more than levelling the last one — that is the whole point of the

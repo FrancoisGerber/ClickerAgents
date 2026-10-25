@@ -169,6 +169,28 @@ check(off.credits > credits0, "offline credits accrue")
 print(string.format("  %.0fs replayed: zone %.0f -> %.0f, credits +%.0f",
   ran, zone0, off.zone, off.credits - credits0))
 
+-- ---------------------------------------------------------------- balance
+print("balance (M1 acceptance)")
+local run = SimState.new_run()
+Combat.new_run_spawn(run)
+local t, dt, zone10 = 0, 0.1, nil
+while t < 240 do
+  Combat.tick(run, dt)
+  t = t + dt
+  local best, bestCost = nil, math.huge
+  for i = 1, #run.agents do
+    if Economy.unlocked(run, i) then
+      local c = Economy.next_cost(run, i)
+      if c <= run.credits and c < bestCost then best, bestCost = i, c end
+    end
+  end
+  if best then Economy.buy(run, best) end
+  if not zone10 and run.zone >= 10 then zone10 = t end
+end
+check(zone10 ~= nil, "a greedy player reaches zone 10 inside four minutes")
+print(string.format("  zone 10 at %s, zone %d after 240s, dps %d",
+  zone10 and string.format("%.0fs", zone10) or "never", run.zone, run.dps))
+
 -- ---------------------------------------------------------------- binds
 print("binds")
 local B = Game.bindsOf()

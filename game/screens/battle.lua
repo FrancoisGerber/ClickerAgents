@@ -185,9 +185,10 @@ local function heroCol()
   drawText("BUY", 8, L.footY + 1, C.dim, 2)
   drawText(st.amount == 0 and "MAX" or ("×" .. tostring(st.amount)), 52, L.footY + 1, C.gold, 2)
   if L.showDps then
-    drawTextR("+" .. fmt(st.dps) .. " DPS", L.dpsX, L.footY + 1, C.gain, 2)
+    local own = Formulas.agent_dps(st.agents[st.sel])
+    drawTextR("+" .. fmt(own) .. " DPS", L.dpsX, L.footY + 1, C.gain, 2)
   else
-    drawTextR("+" .. fmt(st.dps), L.costX, L.footY + 1, C.gain, 2)
+    drawTextR("+" .. fmt(Formulas.agent_dps(st.agents[st.sel])), L.costX, L.footY + 1, C.gain, 2)
   end
 end
 
