@@ -117,44 +117,149 @@ local function fmt(n)
   else return tostring(math.floor(v + 0.5)) .. SUF[i + 1] end
 end
 
----------------------------------------------------------------- monsters
-local function drawCrawler(x, y, flash)
-  local body = flash and ART.monsterLt or ART.monster
-  local dk = flash and ART.monster or ART.monsterDk
-  local lt = flash and C.flashLt or ART.monsterLt
-  px(x + 40, y + 120, 48, 8, ART.shadow)
-  px(x + 16, y + 92, 20, 32, dk);   px(x + 92, y + 92, 20, 32, dk)
-  px(x + 32, y + 96, 20, 28, body); px(x + 76, y + 96, 20, 28, body)
-  px(x + 8, y + 72, 16, 12, dk)
-  px(x + 16, y + 124, 8, 4, lt); px(x + 104, y + 124, 8, 4, lt)
-  rrect(x + 24, y + 56, 80, 48, 10, body)
-  px(x + 32, y + 48, 24, 12, dk); px(x + 56, y + 44, 24, 12, dk); px(x + 80, y + 52, 16, 12, dk)
-  px(x + 36, y + 4, 10, 24, lt);  px(x + 82, y + 4, 10, 24, lt)
-  rrect(x + 44, y + 24, 40, 36, 8, body)
-  px(x + 44, y + 36, 40, 6, dk)
-  px(x + 52, y + 44, 8, 8, C.gold); px(x + 68, y + 44, 8, 8, C.gold)
-  px(x + 48, y + 56, 32, 6, dk)
-  if flash then
-    frame(x + 22, y + 54, 84, 52, 2, C.text)
-    frame(x + 42, y + 22, 44, 40, 2, C.text)
+---------------------------------------------------------------- the target
+-- A vuln is a vulnerable service: a chassis with pins into the host, an aperture
+-- where the flaw sits, and cracks that spread as its HP drains. No creature —
+-- the thing you are breaking is a socket, not a beast.
+
+local function seg(x1, y1, x2, y2, c, t)
+  local dx, dy = x2 - x1, y2 - y1
+  local n = math.max(math.abs(dx), math.abs(dy), 1)
+  local step = t or 2
+  local i = 0
+  while i <= n do
+    local k = i / n
+    px(math.floor(x1 + dx * k), math.floor(y1 + dy * k), step, step, c)
+    i = i + step
   end
 end
 
-local function drawBoss(x, y)
-  local body, dk, lt = ART.monsterDk, C.bossDk, ART.monster
-  px(x + 44, y + 132, 56, 8, ART.shadow)
-  rrect(x + 20, y + 58, 104, 62, 14, C.aura)
-  px(x + 16, y + 104, 24, 32, dk);  px(x + 104, y + 104, 24, 32, dk)
-  px(x + 40, y + 104, 24, 32, body); px(x + 80, y + 104, 24, 32, body)
-  rrect(x + 24, y + 64, 96, 52, 12, body)
-  px(x + 16, y + 56, 32, 20, lt); px(x + 96, y + 56, 32, 20, lt)
-  px(x + 40, y + 2, 12, 28, lt);  px(x + 92, y + 2, 12, 28, lt)
-  px(x + 26, y + 12, 10, 20, dk); px(x + 108, y + 12, 10, 20, dk)
-  rrect(x + 48, y + 24, 48, 44, 10, body)
-  px(x + 48, y + 38, 48, 6, dk)
-  px(x + 60, y + 46, 10, 10, C.warn); px(x + 74, y + 46, 10, 10, C.warn)
-  px(x + 60, y + 62, 24, 8, dk)
-  px(x + 64, y + 62, 4, 6, lt); px(x + 76, y + 62, 4, 6, lt)
+-- damage -> how far the cracks have spread; each entry appears at a threshold
+local CRACKS = {
+  { 0.12, { { 0, 0 }, { 10, 12 }, { 5, 26 }, { 14, 36 } } },
+  { 0.32, { { 96, 2 }, { 86, 16 }, { 92, 30 }, { 82, 42 } } },
+  { 0.52, { { 8, 44 }, { 20, 50 }, { 26, 64 }, { 16, 74 } } },
+  { 0.72, { { 88, 46 }, { 76, 56 }, { 82, 70 }, { 70, 80 } } },
+  { 0.88, { { 40, 8 }, { 52, 20 }, { 46, 34 } } },
+}
+
+local function ledColour(frac)
+  if frac > 0.6 then return C.gain end
+  if frac > 0.3 then return C.gold end
+  return C.warn
+end
+
+local function drawVuln(x, y, frac, flash, k)
+  frac = frac or 1
+  k = k or 1
+  local damage = 1 - math.max(0, math.min(1, frac))
+  local body = flash and C.text or C.panel
+  local edge = flash and C.text or C.rule
+  local dark = ART.monsterDk
+  local hot  = flash and C.flashLt or C.gold
+  local function R(ox, oy, w, h, c) px(x + ox * k, y + oy * k, w * k, h * k, c) end
+  local function F(ox, oy, w, h, t, c) frame(x + ox * k, y + oy * k, w * k, h * k, t * k, c) end
+  local function RR(ox, oy, w, h, r, c) rrect(x + ox * k, y + oy * k, w * k, h * k, r * k, c) end
+
+  R(28, 106, 96, 8, ART.shadow)                     -- contact shadow
+  R(16, 46, 8, 6, edge); R(16, 74, 8, 6, edge)      -- pins into the host
+  R(128, 46, 8, 6, edge); R(128, 74, 8, 6, edge)
+
+  RR(24, 34, 104, 64, 6, body)                      -- chassis
+  F(24, 34, 104, 64, 2, edge)
+
+  for i = 0, 2 do                                   -- vent slats
+    R(34, 48 + i * 12, 14, 4, dark)
+    R(104, 48 + i * 12, 14, 4, dark)
+  end
+
+  RR(56, 44, 40, 44, 4, ART.floor)                  -- aperture: the flaw itself
+  F(56, 44, 40, 44, 2, edge)
+  local glow = (damage > 0.5) and C.hp or hot
+  R(64, 56, 24, 20, glow)
+  R(68, 60, 16, 12, C.flashLt)
+
+  for _, c in ipairs(CRACKS) do                     -- cracks spread with damage
+    if damage >= c[1] then
+      local pts = c[2]
+      for i = 1, #pts - 1 do
+        seg(x + (24 + pts[i][1]) * k, y + (34 + pts[i][2]) * k,
+            x + (24 + pts[i + 1][1]) * k, y + (34 + pts[i + 1][2]) * k,
+            C.warn, math.max(2, math.floor(2 * k)))
+      end
+    end
+  end
+
+  R(70, 22, 12, 6, edge)                            -- status LED
+  R(72, 24, 8, 3, ledColour(frac))
+  if flash then F(22, 32, 108, 68, 2, C.text) end
+end
+
+local function drawBossVuln(x, y, frac, k)
+  frac = frac or 1
+  k = k or 1
+  local damage = 1 - math.max(0, math.min(1, frac))
+  local edge = C.rule
+  local function R(ox, oy, w, h, c) px(x + ox * k, y + oy * k, w * k, h * k, c) end
+  local function F(ox, oy, w, h, t, c) frame(x + ox * k, y + oy * k, w * k, h * k, t * k, c) end
+  local function RR(ox, oy, w, h, r, c) rrect(x + ox * k, y + oy * k, w * k, h * k, r * k, c) end
+
+  R(24, 118, 112, 8, ART.shadow)
+  RR(12, 30, 136, 82, 8, ART.floor)
+  F(12, 30, 136, 82, 2, C.warn)
+  F(16, 34, 128, 74, 2, edge)
+
+  for i = 0, 2 do
+    R(4, 44 + i * 24, 8, 8, edge)
+    R(148, 44 + i * 24, 8, 8, edge)
+  end
+
+  for i = 0, 2 do
+    local ax = 28 + i * 38
+    RR(ax, 48, 30, 40, 4, ART.sky)
+    F(ax, 48, 30, 40, 2, edge)
+    local lit = (damage < 0.35 + i * 0.3)
+    R(ax + 6, 56, 18, 24, lit and C.warn or ART.monsterDk)
+  end
+
+  R(28, 36, 104, 6, C.warn)
+
+  for _, c in ipairs(CRACKS) do
+    if damage >= c[1] then
+      local pts = c[2]
+      for i = 1, #pts - 1 do
+        seg(x + (12 + pts[i][1] * 1.3) * k, y + (30 + pts[i][2]) * k,
+            x + (12 + pts[i + 1][1] * 1.3) * k, y + (30 + pts[i + 1][2]) * k,
+            C.warn, math.max(2, math.floor(2 * k)))
+      end
+    end
+  end
+end
+
+---------------------------------------------------------------- the logo mark
+-- The same 16x16 grid tools/gen_logo.py draws the badge from, so the title
+-- screen shows the real mark rather than a picture of it.
+local MARK = {
+  "................", ".gg.............", ".gggg...........", ".gggggg.........",
+  ".gggggggg.......", ".gggggggggg.....", ".gggggggggggg...", ".ggggggggggg....",
+  ".gggggggggg.....", ".gggg.gggg......", ".ggg....ggg.....", ".gg......gg.....",
+  ".g........g.....", "................", "....mmmmmmmm....", "................",
+}
+
+local function drawMark(x, y, cell)
+  local size = 20 * cell
+  px(x, y, size, size, C.gold)
+  local inner = size - 4 * cell
+  px(x + 2 * cell, y + 2 * cell, inner, inner, C.ground)
+  for gy, row in ipairs(MARK) do
+    for gx = 1, #row do
+      local ch = row:sub(gx, gx)
+      if ch ~= "." then
+        px(x + (gx + 1) * cell, y + (gy + 1) * cell, cell, cell,
+           ch == "m" and C.rule or C.gold)
+      end
+    end
+  end
 end
 
 local prefs = { list = "auto" }     -- "auto" | "narrow" | "wide"
@@ -528,7 +633,12 @@ local function battleCol(o)
   end
 
   local mx = math.floor(bw / 2) - 76
-  if o.boss then drawBoss(mx, monY - 8) else drawCrawler(mx, monY, flash) end
+  local frac = st.hpMax > 0 and (st.hp / st.hpMax) or 1
+  if o.boss then
+    drawBossVuln(math.floor(bw / 2) - 86, monY - 12, frac, 1.1)
+  else
+    drawVuln(math.floor(bw / 2) - 88, monY - 4, frac, flash, 1.4)
+  end
 
   px(plateX, nameY - 4, plateW, 20, ART.floor)  -- nameplate hides the floor studs
   drawTextC(nm, math.floor(bw / 2), nameY, C.text, 2)
@@ -874,10 +984,15 @@ end
 local function splashScreen()
   px(0, 0, L.W, L.H, C.ground)
   local cx = math.floor(L.W / 2)
-  local ty = math.floor(L.H * 0.26)
-  drawTextC("CLICKER AGENTS", cx, ty, C.gold, 4)
-  drawTextC("AN UNLICENSED FRAMEWORK", cx, ty + 44, C.text, 2)
-  drawCrawler(cx - 64, math.floor(L.H * 0.46))
+  -- the badge is the real mark, drawn from the same grid as tools/gen_logo.py
+  local cell = math.max(4, math.floor(math.min(L.W / 720, L.H / 480) * 8))
+  local markSize = 20 * cell
+  local my = math.floor(L.H * 0.12)
+  drawMark(cx - math.floor(markSize / 2), my, cell)
+  local scale = 4
+  local ty = my + markSize + math.floor(L.H * 0.04)
+  drawTextC("CLICKER AGENTS", cx, ty, C.gold, scale)
+  drawTextC("AN UNLICENSED FRAMEWORK", cx, ty + 7 * scale + 12, C.text, 2)
   drawTextC("PRESS ANY BUTTON", cx, L.H - 72, C.dim, 2)
   px(0, L.H - 96, L.W, 2, C.rule)
   drawText("0.1", 16, L.H - 28, C.rule, 2)
