@@ -1,4 +1,5 @@
--- Generated from design/mockup.html by tools/gen_font.py — do not edit by hand.
+-- 5x7 bitmap font. This table is now the source of truth: hand-edited, and
+-- tools/gen_logo.py reads it to draw the wordmark so logo and game cannot drift.
 -- 5x7 bitmap font: 5 columns, 7 rows, advance 6 cells, drawn at 2x = 12 px per char.
 local GL = {
   [" "] = "00000/00000/00000/00000/00000/00000/00000",
