@@ -371,6 +371,15 @@ local function layerName(z)
   return "EDGE"
 end
 
+-- Daemons are the permanent boons bought with rootkits: code of yours that keeps
+-- running whether you are watching or not.
+local DAEMONS = {
+  { "CRON",     "5",  "+1 probe per second" },
+  { "WATCHDOG", "12", "+15% credits from vulns" },
+  { "BEACON",   "30", "+10% throughput" },
+  { "HONEYPOT", "75", "boss firewalls give 10s longer" },
+}
+
 local VULNS = {
   EDGE     = { "OPEN PORT", "DEFAULT CREDS", "EXPOSED API KEY", "STALE TLS" },
   IDENTITY = { "ORPHANED ACCOUNT", "WEAK MFA", "SHARED PASSWORD" },
@@ -953,15 +962,11 @@ local function prestigeScreen()
   drawTextR("LOCKED · ZONE 100", m + w - 12, ay + 12, C.poor, 2)
   local x2 = m + w + gap
   local wR = L.W - m - x2
-  -- Rootkits reinforce a system you have already consumed; the four earliest
-  -- targets stand in until the campaign hands us the real list.
-  local sysRows, sysState = {}, {}
-  for i = 1, 4 do
-    sysRows[i] = SYSTEMS[i]
-    sysState[i] = { "LOCKED", C.rule }
+  local names, costs = {}, {}
+  for i, d in ipairs(DAEMONS) do
+    names[i], costs[i] = d[1], d[2]
   end
-  rowsPanel(x2, y, wR, sysRows, "SYSTEMS · ROOTKIT SPEND",
-            (c <= 4) and c or nil, sysState)
+  rowsPanel(x2, y, wR, names, "DAEMONS · ROOTKIT SPEND", (c <= 4) and c or nil, costs)
 end
 
 local function menuScreen()
@@ -1087,7 +1092,7 @@ local function activate()
     say("NEED " .. UPGRADES[c][2] .. " CREDITS")
   elseif st.tab == 4 then
     if c == 5 then say("LOCKED · ZONE 100")
-    else say(SYSTEMS[c] .. " · ROOTKITS LOCKED") end
+    else say(string.upper(DAEMONS[c][1]) .. " · " .. DAEMONS[c][2] .. " ROOTKITS") end
   elseif st.tab == 5 then
     say(ACHIEVEMENTS[c][1])
   elseif st.tab == 7 then

@@ -137,7 +137,7 @@ print("  prestige: toast: " .. tostring(M.state.msg))
 
 M.state.cursor[4] = 1
 love.keypressed(M.bindsOf().buy)
-assert(M.state.msg and M.state.msg:find("LOCKED"), "ancient press gave no feedback")
+assert(M.state.msg and M.state.msg:find("ROOTKITS"), "daemon press gave no cost feedback")
 love.draw()
 
 M.state.tab = 5                                  -- ACHIEVEMENTS
