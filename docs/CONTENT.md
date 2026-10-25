@@ -12,7 +12,7 @@ milestone rule (`×4` every 25 levels) applies to every agent.
 | # | Agent | Base cost | Base DPS | Deploys at | Specialism |
 |---|---|---|---|---|---|
 | 1 | Spider | 5 | 0 | zone 1 | crawler: finds the surface, +1 probe damage per level |
-| 2 | Keyring | 50 | 5 | zone 1 | credential spray, first real throughput |
+| 2 | Pick | 50 | 5 | zone 1 | credential spray, first real throughput |
 | 3 | Bait | 250 | 22 | zone 4 | social engineering, converts people into access |
 | 4 | Splice | 1,000 | 74 | zone 8 | injection: RCE, SQLi, deserialisation |
 | 5 | Relay | 4,000 | 245 | zone 13 | pivots; stronger the deeper you already are |
@@ -108,7 +108,7 @@ while it runs the row shows the seconds left and X is refused.
 | Skill | Agent | Cost | Cooldown | Effect |
 |---|---|---|---|---|
 | Crawl | Spider | 2,000 | 30s | +10 probes/s for 30s |
-| Spray | Keyring | 25,000 | 45s | ×2 throughput for 30s |
+| Spray | Pick | 25,000 | 45s | ×2 throughput for 30s |
 | Phish | Bait | 250,000 | 60s | every hit crits, 30s |
 | Siphon | Mule | 2,000,000 | 90s | ×3 credits for 30s |
 | Flood | Relay | 25,000,000 | 120s | +100% probe damage, 30s |

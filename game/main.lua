@@ -213,7 +213,7 @@ local BINDS
 local SKILLS = {
   { name = "CRAWL",    agent = "SPIDER",   cost = "2K",   cd = 30,
     eff = "+10 probes/s for 30s",   owned = true },
-  { name = "SPRAY",    agent = "KEYRING",  cost = "25K",  cd = 45,
+  { name = "SPRAY",    agent = "PICK",  cost = "25K",  cd = 45,
     eff = "x2 throughput for 30s",  owned = true },
   { name = "PHISH",    agent = "BAIT",     cost = "250K", cd = 60,
     eff = "every hit crits, 30s",   owned = false },
@@ -284,7 +284,7 @@ end
 -- The agents you deploy. Cheapest first; each one is a specialist.
 local AGENTS = {
   { name = "Spider",   lv = 12, cost = 12,        base = 0 },
-  { name = "Keyring",  lv = 11, cost = 214,       base = 5 },
+  { name = "Pick",     lv = 11, cost = 214,       base = 5 },
   { name = "Bait",     lv = 6,  cost = 1400,      base = 16 },
   { name = "Splice",   lv = 0,  cost = 4200,      base = 74 },
   { name = "Relay",    lv = 0,  cost = 9800,      base = 245 },
@@ -402,7 +402,7 @@ local function topBar()
   x = slot(x, 176, "CREDITS", fmt(st.gold), C.gold)
   x = slot(x, 104, "DPS", fmt(st.dps), C.gain)
   x = slot(x, 160, "ROOTKITS", tostring(st.souls), C.gold)
-  x = slot(x, 84, "ZONE", tostring(st.zone), C.text)
+  x = slot(x, 96, "ZONE", tostring(st.zone), C.text)
   -- the boss timer earns its corner only while there is a boss to lose to
   local bossPreview = opts and opts.boss
   if st.timer > 0 or bossPreview then
@@ -516,12 +516,11 @@ local function battleCol(o)
   local plateW = math.max(nw + 16, 200)
   local plateX = math.floor((bw - plateW) / 2)
 
+  -- the header names the target and the layer you are inside; the zone itself
+  -- lives in the top bar. Gold means you are looking at an earlier zone.
   local looking = (zSel ~= st.zone)
-  if looking then
-    drawText("ZONE " .. zSel .. " · FARMING", 16, 40, C.gold, 2)
-  else
-    drawText(systemName() .. " · " .. layerName(zSel), 16, 40, C.dim, 2)
-  end
+  drawText(systemName() .. " · " .. layerName(zSel), 16, 40,
+           looking and C.gold or C.dim, 2)
   if o.boss then
     px(16, 62, bw - 48, 2, C.warn)
   else
@@ -940,7 +939,7 @@ local function moveZone(d)
   local nxt = math.max(1, math.min(max, cur + d))
   if nxt == cur then return end
   st.zoneSel = nxt
-  say(nxt == st.zone and "ZONE " .. nxt or "ZONE " .. nxt .. " · FARMING")
+  say("ZONE " .. nxt .. (nxt == st.zone and "" or " · EARLIER"))
 end
 
 -- switching screens clears any toast, so a message never follows you around
