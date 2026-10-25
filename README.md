@@ -41,8 +41,50 @@ Clicker Agents/
 ## Run it on a computer
 
 ```sh
-love game                    # LÖVE 11.5; x buys, z clicks, q/e tabs
+love game                    # LÖVE 11.5; x buys, z probes, q/e tabs
 ```
+
+## Controls
+
+The device mapping lives in the pak at `clickeragents/clickeragents.gptk`, and the game
+**reads that file at load** — every key the game listens for comes from the gptk, so
+editing the gptk changes the controls without touching code. The suite fails if the two
+disagree.
+
+`A` and `B` are crossed in the gptk on purpose: on this unit gptokeyb reports the printed
+**A** as SDL `b` and the printed **B** as SDL `a`. That is why the gptk line reads `b = x`
+(buy) and `a = z` (probe).
+
+| Button | Battle screen | List screens (skills, upgrades, prestige, achievements, stats, menu) |
+|---|---|---|
+| **D-pad up / down** | move the agent selection | move the row cursor |
+| **D-pad left / right** | buy amount −1 / +1 (1 → 100) | same — the amount is global |
+| **A** | buy `amount` levels of the selected agent | buy on SKILLS and UPGRADES, activate elsewhere (MENU: resume / save / quit) |
+| **B** | one manual probe into the vuln; a killing probe clears it | back to battle |
+| **X** | snap the zone cursor back to the live zone | cast the highlighted skill (SKILLS only); refused while it is cooling |
+| **Y** | unused — mapped in the gptk (`y = v`) and reserved | unused |
+| **L1 / R1** | previous / next tab | previous / next tab |
+| **L2 / R2** | step the zone cursor back / forward through cleared zones | unused |
+| **START** | cycle buy amount: ×1 → ×10 → ×100 → MAX | same |
+| **SELECT** | toggle auto-probe — the flag and the lit indicator work, the probing itself lands with the simulation | same |
+
+Also: the splash screen closes on **any** button, and **Welcome Back** closes on **A**
+only, so a stray press cannot skip the offline report.
+
+Keyboard equivalents when running on a desktop (the same keys the gptk sends):
+
+| Key | Acts as |
+|---|---|
+| `x` / `z` | A (buy) / B (probe) |
+| `c` / `v` | X (cast or snap zone) / Y |
+| `q` / `e` | L1 / R1 (previous / next tab) |
+| `f` / `g` | L2 / R2 (zone back / forward) |
+| arrows | D-pad |
+| `Enter` | START (buy amount) |
+| `Tab` | SELECT (auto-probe flag) |
+| `m` | cycle list width (auto / narrow / wide) — desktop only |
+| `1` / `2` / `3` | preview battle / boss / held-probe states — desktop only |
+| `Escape` | quit |
 
 ## The four commands
 
