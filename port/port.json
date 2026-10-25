@@ -1,0 +1,29 @@
+{
+    "version": 2,
+    "name": "clickeragents.zip",
+    "items": [
+        "ClickerAgents.sh",
+        "clickeragents/"
+    ],
+    "items_opt": null,
+    "attr": {
+        "title": "Clicker Agents",
+        "porter": [
+            "francois"
+        ],
+        "desc": "An idle intrusion clicker. Deploy agents, tear through vulns, break the boss firewall every fifth zone before its 30-second timer runs out. Ascend to consume the system and open a bigger one, keeping rootkits. No accounts, no network, no shop, no ads.",
+        "inst": "Ready to run.",
+        "genres": [
+            "incremental",
+            "rpg"
+        ],
+        "image": {},
+        "rtr": true,
+        "runtime": null,
+        "reqs": [],
+        "arch": [
+            "aarch64",
+            "x86_64"
+        ]
+    }
+}

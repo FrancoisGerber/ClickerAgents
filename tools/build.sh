@@ -1,0 +1,13 @@
+#!/bin/bash
+# Package the game: game/ -> clickeragents.love -> port/ -> ClickerAgents.zip
+set -eu
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+cd "$ROOT" || exit 1
+
+rm -f /tmp/clickeragents.love ClickerAgents.zip
+(cd game && zip -9 -q -r /tmp/clickeragents.love conf.lua main.lua layout.lua font.lua)
+cp /tmp/clickeragents.love port/clickeragents/clickeragents.love
+(cd port && zip -9 -q -r ../ClickerAgents.zip ClickerAgents.sh clickeragents/ port.json gameinfo.xml)
+
+echo "clickeragents.love  $(sha256sum port/clickeragents/clickeragents.love | cut -c1-16)  $(du -h port/clickeragents/clickeragents.love | cut -f1)"
+echo "ClickerAgents.zip   $(sha256sum ClickerAgents.zip | cut -c1-16)  $(du -h ClickerAgents.zip | cut -f1)"

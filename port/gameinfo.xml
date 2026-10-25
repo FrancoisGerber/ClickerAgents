@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<gameList>
+	<game>
+		<path>./ClickerAgents.sh</path>
+		<name>Clicker Agents</name>
+		<desc>An idle intrusion clicker: deploy agents, tear through vulns, break the boss firewall every fifth zone, ascend to consume the system and open a bigger one.</desc>
+		<image>./clickeragents/images/cover.png</image>
+		<genre>Incremental</genre>
+		<players>1</players>
+		<developer>francois</developer>
+		<publisher>francois</publisher>
+		<releasedate>20261101T000000</releasedate>
+	</game>
+</gameList>
