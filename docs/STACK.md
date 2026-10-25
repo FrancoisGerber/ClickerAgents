@@ -26,8 +26,9 @@ game/
 ├── main.lua            boot, scene switch
 ├── sim/                pure Lua: no love.* calls, fully testable
 │   ├── numbers.lua     formatting, fixed-point helpers
-│   ├── agents.lua      cost and milestone maths
-│   ├── world.lua       layers, vuln HP, credits
+│   ├── formulas.lua    vuln HP, costs, milestones, rootkits
+│   ├── combat.lua      probes, kills, zones, boss clock
+│   ├── save.lua        snapshot, serialise, offline replay
 │   ├── combat.lua      DPS ticks, clicks, boss timer
 │   └── save.lua        serialize / deserialize / versioned
 ├── ui/                 screens: battle, stats, prestige, menu

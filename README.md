@@ -12,7 +12,7 @@ survive the reset.
 - **Licence:** GPL-3.0-or-later (`LICENSE`)
 - **Runtime:** LÖVE 11.5, supplied by PortMaster — the port ships as a `.love` file, no compiled binary
 - **Target:** Anbernic RG34XXSP (Allwinner H700, 720×480), Knulli or muOS with PortMaster
-- **Status:** all seven screens and the full input/selection layer are in; no combat simulation yet.
+- **Status:** M1 done — real vuln HP, credits, agent levels, boss firewalls, saving and the offline report. The seven screens are all wired to live state.
 
 ## Design
 
@@ -28,7 +28,13 @@ survive the reset.
 
 ```
 Clicker Agents/
-├── game/       the LÖVE project: main.lua, layout.lua, font.lua, conf.lua
+├── game/       the LÖVE project, split by concern:
+│   ├── data/     agents, skills, tools, achievements, systems, daemons
+│   ├── sim/      state, formulas, economy, combat, save
+│   ├── ui/       draw primitives, widgets, sprites, chrome, toast
+│   ├��─ screens/  one file per screen
+│   ├── app/      actions a button press can fire
+│   └── main.lua  lifecycle and routing only
 ├── port/       PortMaster pak: ClickerAgents.sh, port.json, gameinfo.xml, clickeragents/
 ├── tests/      headless suite: three screen sizes, input, gptk agreement
 ├── tools/      build, test, capture and push scripts

@@ -2,11 +2,20 @@
 
 Five milestones. Each one is playable when it is done — that is the acceptance test. No milestone leaves the game in a state you cannot run for five minutes and learn something from.
 
-## M1 — One agent, one vuln
+## M0 — The shell (done)
+
+Seven screens, input driven entirely by the gptk, layout at 720×480, 640×480 and
+720×720, procedurally drawn sprites, logo, pak. Everything on them was fake
+until M1 landed.
+
+**Acceptance:** the headless suite draws every screen at three sizes with no rect
+outside the canvas, and the gptk agrees with the game on every binding.
+
+## M1 — One agent, one vuln (done)
 
 - `sim/world.lua`: vuln HP, credits per kill, zone progression, 10 kills per zone
 - `sim/combat.lua`: DPS tick, click damage, kill → next vuln
-- One agent (Brann the Axe) with 1.07 cost scaling and the ×4 milestones
+- The agent ladder with 1.07 cost scaling and the ×4 milestones
 - Battle screen with a vuln, HP bar, credits, DPS
 - Save/load on quit
 
@@ -14,9 +23,9 @@ Five milestones. Each one is playable when it is done — that is the acceptance
 
 ## M2 — The full agent ladder
 
-- All 12 agentes in `data/agentes.lua`, unlocked by zone
-- Buy amounts ×1 / ×10 / ×100 / MAX on X, Y, left/right
-- Ten global upgrades
+- All 12 agents in `game/data/agents.lua`, unlocked by zone
+- Buy amounts ×1 / ×10 / ×100 / MAX from the START button
+- Ten global tools
 - Agent list with scrolling, six visible rows, affordability colours
 
 **Acceptance:** a scripted player that only buys MAX on the newest affordable agent reaches **zone 100 in 15–25 minutes** of simulated time. That simulation is the balance test — if it lands outside the window, the content numbers change, not the code.
@@ -31,9 +40,9 @@ Five milestones. Each one is playable when it is done — that is the acceptance
 
 ## M4 — Ascension
 
-- Rootkits from primal bosses (zone ≥ 100) plus `totalAgentLevels / 2000`
+- Rootkits from boss firewalls (zone ≥ 100) plus `totalAgentLevels / 2000`
 - Unspent rootkits at +10% DPS each
-- Prestige tab with a live "rootkits if you ascend now" figure
+- Prestige tab with a live "rootkits if you ascend now" figure and the daemon shop
 - Wipes and keeps exactly as `DESIGN.md` says
 
 **Acceptance:** ascend at zone 140, and the next run reaches zone 140 faster than the first — measured in simulated seconds, not vibes. Best zone and rootkits survive a quit/relaunch.

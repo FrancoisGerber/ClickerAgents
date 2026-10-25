@@ -16,12 +16,17 @@ end
 function M.draw(ctx)
   local st, L = ctx.state, ctx.layout
   if not st.msg or (st.msgT or 0) <= 0 then return end
-  local w = textW(st.msg, 2) + 24
-  local x = math.floor((L.W - w) / 2)
+
+  -- The toast lives inside the battle column: full width would cover the buy
+  -- footer, and the arena's last band is empty once the bar is drawn.
+  local avail = L.battleW - 24
+  local label = Draw.fit(st.msg, avail - 24, 2)
+  local w = math.min(avail, textW(label, 2) + 24)
+  local x = L.battleX + math.floor((L.battleW - w) / 2)
   local y = L.H - L.hintH - 40
   px(x, y, w, 24, C.panel)
   frame(x, y, w, 24, 2, C.gold)
-  text(st.msg, x + 12, y + 6, C.text, 2)
+  text(label, x + 12, y + 6, C.text, 2)
 end
 
 return M
