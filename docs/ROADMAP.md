@@ -52,7 +52,8 @@ Five milestones. Each one is playable when it is done — that is the acceptance
 
 Ordered by what a player would miss first, not by what is easy:
 
-1. **Toolkit** — the rootkit-spending tree, and the idle/active split it creates
+1. **Rootkit spend** — buying back consumed systems as permanent perks, and the
+   idle/active split that creates
 2. **Crits and the skill layer** — six actives on the strip, cooldowns, crit rolls
 3. **Auto-clickers** — the reward loop that makes leaving it running feel earned
 4. **Gilds** — random agent buffs, one decision per 10 zones

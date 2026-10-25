@@ -953,9 +953,15 @@ local function prestigeScreen()
   drawTextR("LOCKED · ZONE 100", m + w - 12, ay + 12, C.poor, 2)
   local x2 = m + w + gap
   local wR = L.W - m - x2
-  rowsPanel(x2, y, wR,
-    { "PROXY CHAIN", "EDR BYPASS", "LOG SCRUB", "BLACK ARCHIVE" },
-    "TOOLKIT · ROOTKIT SPEND", (c <= 4) and c or nil)
+  -- Rootkits reinforce a system you have already consumed; the four earliest
+  -- targets stand in until the campaign hands us the real list.
+  local sysRows, sysState = {}, {}
+  for i = 1, 4 do
+    sysRows[i] = SYSTEMS[i]
+    sysState[i] = { "LOCKED", C.rule }
+  end
+  rowsPanel(x2, y, wR, sysRows, "SYSTEMS · ROOTKIT SPEND",
+            (c <= 4) and c or nil, sysState)
 end
 
 local function menuScreen()
@@ -976,7 +982,7 @@ local function menuScreen()
   local x2 = m + w + gap
   local pw = L.W - m - x2 - 24
   panel(x2, y, L.W - m - x2, 104, "ABOUT")
-  wire("DOWNSPIRE 0.1", x2 + 12, y + 40, C.text, pw)
+  wire("CLICKER AGENTS 0.1", x2 + 12, y + 40, C.text, pw)
   wire("GPL-3.0-OR-LATER", x2 + 12, y + 64, nil, pw)
   wire("LOVE 11.5 · PORTMASTER", x2 + 12, y + 88, nil, pw)
 end
@@ -1080,7 +1086,8 @@ local function activate()
   elseif st.tab == 3 then
     say("NEED " .. UPGRADES[c][2] .. " CREDITS")
   elseif st.tab == 4 then
-    if c == 5 then say("LOCKED · ZONE 100") else say("SOUL SPEND LOCKED") end
+    if c == 5 then say("LOCKED · ZONE 100")
+    else say(SYSTEMS[c] .. " · ROOTKITS LOCKED") end
   elseif st.tab == 5 then
     say(ACHIEVEMENTS[c][1])
   elseif st.tab == 7 then

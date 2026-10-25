@@ -126,8 +126,9 @@ decision in this game follows from that gap.
 
 - **Unspent rootkits are +10% throughput each.** Persistence is what a rootkit is: the
   part of you the next system inherits. Holding them is a real decision at every ascension.
-- **Rootkit spend:** the toolkit tree lands in v1.1. v1 ships ascension with the passive
-  bonus only, so the reset loop works before the tree exists.
+- **Rootkit spend:** rootkits reinforce a **system you have already consumed** — each
+  breached target can be bought back as a permanent perk. v1 shows the four earliest
+  systems, locked; v1.1 wires the spend, so the reset loop works first.
 
 ## 8. Numbers
 

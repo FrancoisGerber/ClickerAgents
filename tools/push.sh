@@ -35,6 +35,7 @@ put clickeragents.love
 put clickeragents.gptk
 smb "mkdir $REMOTE/images" >/dev/null 2>&1 || true
 smb "cd $REMOTE/images; lcd $LOCAL/images; put cover.png" | grep -E "putting|NT_STATUS" || true
+smb "cd $REMOTE/images; lcd $LOCAL/images; put logo.png" | grep -E "putting|NT_STATUS" || true
 putat "$PORTS" "$ROOT/port" ClickerAgents.sh
 # leftovers from the old pak name, if the device still has them
 smb "cd $PORTS; del Downspire.sh" >/dev/null 2>&1 || true

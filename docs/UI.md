@@ -109,8 +109,8 @@ selectable, with the chosen one spelled out beside it.
 **Stats** (tab 6) — eight stat rows left, `DPS BY ZONE` graph box right.
 
 **Prestige** (tab 4) — rootkits on offer / held / bonus-per-rootkit, a greyed
-`ASCEND · LOCKED · ZONE 100`, and an `TOOLKIT · ROOTKIT SPEND` panel for the v1.1
-rootkit sink.
+`ASCEND · LOCKED · ZONE 100`, and a `SYSTEMS · ROOTKIT SPEND` panel listing the four
+earliest systems for the v1.1 rootkit sink.
 
 **Menu** (tab 7) — `RESUME / SAVE / QUIT` rows and an `ABOUT` box.
 
@@ -119,7 +119,7 @@ prices), real values. Seven dots at the bottom-right track the tab; L/R cycles
 them and B returns to battle.
 
 **Interaction is wired end to end before any logic.** Each tab keeps its own
-cursor (battle: agent row; upgrades: 10 rows; prestige: 4 toolkit rows + `ASCEND`;
+cursor (battle: agent row; upgrades: 10 rows; prestige: 4 systems + `ASCEND`;
 menu: 3 rows). Up/down moves it and wraps. **A activates** — on a wireframe it
 raises a toast (`NEED 20K CREDITS`, `LOCKED · ZONE 100`, `SAVE UNAVAILABLE`) and
 changes nothing else; in the menu, `RESUME` really returns

@@ -132,5 +132,6 @@ something real to show, and to mark the milestones the design already tunes arou
 
 ## Out of scope for v1
 
-The toolkit tree, gilds, relics, mercenaries, clans, auto-probes as purchases, daily quests,
+Rootkit spend beyond the four starting systems, gilds, relics, mercenaries, clans,
+  auto-probes as purchases, daily quests,
 and a second framework. Each is a screen or a timer; none is needed for the loop to be good.
