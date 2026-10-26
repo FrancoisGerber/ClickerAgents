@@ -7,6 +7,7 @@ local Systems = require("data.systems")
 local Economy = require("sim.economy")
 local Combat = require("sim.combat")
 local Buffs = require("sim.buffs")
+local Prestige = require("sim.prestige")
 local Save = require("sim.save")
 local Toast = require("ui.toast")
 local fmt = require("core/numbers").fmt
@@ -31,6 +32,7 @@ end
 function M.move_cursor(st, d)
   local n = M.row_count(st, st.tab)
   st.cursor[st.tab] = ((st.cursor[st.tab] - 1 + d) % n) + 1
+  st.confirmAscend = false       -- the second press has to be deliberate
 end
 
 function M.say(st, msg) Toast.say(st, msg) end
@@ -111,10 +113,25 @@ function M.activate(st)
 
   elseif st.tab == 4 then
     if c == #Systems.daemons + 1 then
-      M.say(st, st.zone >= 100 and "ASCEND READY" or "LOCKED · ZONE 100")
+      if not Prestige.can_ascend(st) then
+        M.say(st, "LOCKED · ZONE " .. Prestige.UNLOCK_ZONE)
+      elseif not st.confirmAscend then
+        st.confirmAscend = true
+        M.say(st, "PRESS A AGAIN TO ASCEND")
+      else
+        local earned = Prestige.ascend(st)
+        st.confirmAscend = false
+        M.say(st, "ASCENDED · +" .. earned .. " ROOTKITS")
+      end
     else
       local d = Systems.daemons[c]
-      M.say(st, d[1] .. " · " .. d[2] .. " ROOTKITS")
+      if Prestige.daemon_owned(st, c) then
+        M.say(st, d[1] .. " ONLINE")
+      elseif Prestige.buy_daemon(st, c) then
+        M.say(st, d[1] .. " ONLINE")
+      else
+        M.say(st, d[1] .. " · " .. d[2] .. " ROOTKITS")
+      end
     end
 
   elseif st.tab == 5 then

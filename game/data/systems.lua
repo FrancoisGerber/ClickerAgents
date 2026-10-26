@@ -41,11 +41,12 @@ end
 
 -- Daemons are the permanent boons bought with rootkits: code of yours that keeps
 -- running whether you are watching or not.
+-- Rootkit spend. Buying one is permanent and it survives every ascension.
 local DAEMONS = {
-  { "CRON",     "5",  "+1 probe per second" },
-  { "WATCHDOG", "12", "+15% credits from vulns" },
-  { "BEACON",   "30", "+10% throughput" },
-  { "HONEYPOT", "75", "boss firewalls give 10s longer" },
+  { "CRON",     5,  "+1 probe per second",      "cron" },
+  { "WATCHDOG", 12, "+15% credits from vulns",  "watchdog" },
+  { "BEACON",   30, "+10% throughput",          "beacon" },
+  { "HONEYPOT", 75, "+10s on every firewall",   "honeypot" },
 }
 
 M.list, M.daemons, M.vulns = SYSTEMS, DAEMONS, VULNS

@@ -21,13 +21,14 @@ function M.new_run()
     -- economy
     credits = 0, creditsKill = 0, dps = 0, click = 1,
     -- the run
-    zone = 1, kills = 0, hp = 0, hpMax = 0, boss = false, timer = 0, cleared = false, killsRequired = 10, bossFails = 0,
+    zone = 1, kills = 0, hp = 0, hpMax = 0, boss = false, timer = 0, cleared = false, killsRequired = 10, bossFails = 0, bossKills = 0,
     -- meta, kept across ascensions
     rootkits = 0, systems = 0, bestZone = 1,
     -- ui
     agents = agents, sel = 1, amount = 1,
     owned = {}, upOwned = {}, achDone = {}, skillCd = {},
     buff = { 0, 0, 0, 0, 0, 0 },
+    daemons = { false, false, false, false },
     screen = "splash", tab = 1, cursor = { 1, 1, 1, 1, 1, 1, 1 },
     splashT = 0, welcome = true, msg = nil, msgT = 0, flashT = 0,
     zoneSel = 1, idle = false,

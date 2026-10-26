@@ -43,7 +43,7 @@ outside the canvas, and the gptk agrees with the game on every binding.
 
 **Known ceiling, not a boss problem:** zone 300 is roughly two simulated days at the current curve. Past zone ~140 the 1.145/zone HP tail outruns what the agent ladder can buy back (1.07^level costs against x4 damage every 25 levels), so each zone costs more time than the last. The boss rule is not the brake; the economy is. Options when it becomes a priority: cost growth 1.07 -> 1.05, milestones x6 instead of x4, or a gentler tail (1.08 gets zone 300 inside a simulated day).
 
-## M4 — Ascension
+## M4 — Ascension  ✅ shipped
 
 - Rootkits from boss firewalls (zone ≥ 100) plus `totalAgentLevels / 2000`
 - Unspent rootkits at +10% DPS each

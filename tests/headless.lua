@@ -44,7 +44,9 @@ local Combat = require("sim.combat")
 local Economy = require("sim.economy")
 local Upgrades = require("data.upgrades")
 local Buffs = require("sim.buffs")
+local Prestige = require("sim.prestige")
 local Skills = require("data.skills")
+local Systems = require("data.systems")
 local Actions = require("app.actions")
 local Save = require("sim.save")
 local SimState = require("sim.state")
@@ -403,7 +405,7 @@ print(string.format("  zone 100 at %s, final zone %d", zone100 and string.format
 print("balance (M3 acceptance)")
 local run3 = SimState.new_run()
 Combat.new_run_spawn(run3)
-local dt3, t3, lastBest, monotone = 1, 0, 1, true
+local dt3, t3, lastBest, monotone = 0.1, 0, 1, true
 local function shop3()
   local best, bestCost = nil, math.huge
   for i = 1, #run3.agents do
@@ -436,6 +438,122 @@ check(monotone, "the run never goes backwards")
 check(math.floor(run3.zone / 5) >= 30, "thirty firewalls broken on the way")
 print(string.format("  zone %d after 8h, %d firewalls broken, %d failed, dps %.2e",
   run3.zone, math.floor(run3.zone / 5), run3.bossFails or 0, run3.dps))
+
+-- ---------------------------------------------------------------- prestige
+print("prestige")
+local P = SimState.new_run()
+P.zone = 99
+check(not Prestige.can_ascend(P), "ascension is locked below zone 100")
+P.zone = 100
+check(Prestige.can_ascend(P), "and opens at zone 100")
+
+local Q = SimState.new_run()
+Q.zone = 140
+Q.agents[1].lv = 4000
+Q.bossKills = 27
+check(Prestige.rootkits_on_offer(Q) == 2 + 27, "an ascension offers levels/2000 plus firewalls broken")
+
+Q.credits = 1e9
+Q.upOwned[1] = true
+Q.owned[3] = true
+Q.cleared = true
+local earned = Prestige.ascend(Q)
+check(earned == 29, "the ascension pays what was on offer")
+check(Q.zone == 1 and Q.credits == 0, "the run is wiped back to zone 1")
+check(Q.agents[1].lv == 1 and Q.agents[2].lv == 0, "agent levels are gone")
+check(not Q.upOwned[1], "tools are gone")
+check(not Q.owned[3], "skills you bought are gone")
+check(Q.rootkits == 29 and Q.systems == 1, "rootkits and systems breached are kept")
+check(not Q.cleared, "the next run starts on a live vuln")
+check(Q.dps > 0, "and the framework still runs")
+
+-- held rootkits are throughput: +10% each
+local R = SimState.new_run()
+R.agents[1].lv = 10
+Economy.recalc(R)
+local plain = R.dps
+R.rootkits = 10
+Economy.recalc(R)
+check(R.dps == math.floor(plain * 2), "ten held rootkits double throughput")
+
+-- daemons: bought with rootkits, permanent, and they change the maths
+local D = SimState.new_run()
+D.agents[1].lv = 10
+D.rootkits = 30
+Economy.recalc(D)
+check(Prestige.buy_daemon(D, 3), "BEACON can be bought for 30 rootkits")       -- +10% throughput
+check(Prestige.daemon_owned(D, 3), "the daemon is online")
+check(D.rootkits == 0, "the rootkits are spent")
+check(not Prestige.buy_daemon(D, 3), "a daemon cannot be bought twice")
+
+local beforeBeacon = D.dps
+D.daemons[3] = false
+Economy.recalc(D)
+check(math.abs(D.dps - (beforeBeacon / 1.10)) < 2, "BEACON is worth exactly +10% throughput")
+
+local W = SimState.new_run()
+W.zone = 4
+Economy.recalc(W)
+local pay0 = W.creditsKill
+W.daemons[2] = true
+Economy.recalc(W)
+check(W.creditsKill == math.floor(pay0 * 1.15), "WATCHDOG lifts the payout 15%")
+
+local H = SimState.new_run()
+H.zone = 5
+Combat.new_run_spawn(H)
+check(H.timer == Combat.BOSS_SECONDS, "a firewall clock is 30 s by default")
+H.daemons[4] = true
+Combat.spawn(H)
+check(H.timer == Combat.BOSS_SECONDS + 10, "HONEYPOT buys ten more seconds")
+
+-- ---------------------------------------------------------------- M4 acceptance
+print("balance (M4 acceptance)")
+local function play_to(st, target, cap)
+  local dt, t, hit100 = 0.1, 0, nil
+  local function shop()
+    local best, bestCost = nil, math.huge
+    for i = 1, #st.agents do
+      if Economy.unlocked(st, i) then
+        local c = Economy.next_cost(st, i)
+        if c <= st.credits and c < bestCost then best, bestCost = i, c end
+      end
+    end
+    if best then Economy.buy(st, best) return end
+    for i = 1, #Upgrades.list do
+      if not Economy.tool_owned(st, i) and Economy.buy_tool(st, i) then return end
+    end
+  end
+  while t < (cap or 20 * 3600) and st.zone < target do
+    if st.cleared then
+      local nxt = st.zone + 1
+      local need = F.is_boss_zone(nxt) and (F.boss_hp(nxt) / Combat.BOSS_SECONDS) * 1.05 or 0
+      if st.dps >= need then Combat.advance_zone(st) end
+    end
+    Combat.tick(st, dt)
+    t = t + dt
+    shop()
+    if not hit100 and st.zone >= 100 then hit100 = t end
+  end
+  return hit100, t, st.zone
+end
+
+local R4 = SimState.new_run()
+Combat.new_run_spawn(R4)
+local first100, firstTime, firstZone = play_to(R4, 140)
+check(first100 ~= nil, "the first run reaches zone 100")
+check(firstZone >= 140, "and can be taken to the ascend line at zone 140")
+local offered = Prestige.rootkits_on_offer(R4)
+check(offered > 0, "the run has rootkits to offer")
+
+Prestige.ascend(R4)
+check(R4.zone == 1 and R4.rootkits == offered, "ascension banks them and restarts the run")
+
+local second100 = play_to(R4, 100)
+check(second100 ~= nil, "the second run reaches zone 100 too")
+check(second100 < first100, "and beats the first run's pace")
+print(string.format("  first run: zone 100 at %.0fs (zone %d at %.0fs, +%d rootkits) | second run: zone 100 at %.0fs",
+  first100, firstZone, firstTime, offered, second100))
 
 -- ---------------------------------------------------------------- binds
 print("binds")

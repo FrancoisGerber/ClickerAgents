@@ -13,9 +13,12 @@ function M.recalc(st)
   for _, a in ipairs(st.agents) do dps = dps + F.agent_dps(a) end
   local t = F.upgrade_totals(st.upOwned)
   local b = Buffs.multipliers(st)
-  st.dps = math.floor(dps * (1 + t.dps_add) * b.dps)
+  local dm = st.daemons or {}
+  local beacon = dm[3] and 1.10 or 1
+  local watchdog = dm[2] and 1.15 or 1
+  st.dps = math.floor(dps * (1 + t.dps_add) * b.dps * beacon * (1 + 0.10 * (st.rootkits or 0)))
   local payout = F.credits_per_vuln(st.zone) * (st.boss and 3 or 1)
-  st.creditsKill = math.max(1, math.floor(payout * (1 + t.credits_add) * b.credits))
+  st.creditsKill = math.max(1, math.floor(payout * (1 + t.credits_add) * b.credits * watchdog))
   st.click = math.max(1, math.floor((1 + 0.005 * st.dps) * t.click_mul * (1 + t.click_add) * b.click))
 end
 

@@ -12,6 +12,11 @@ local BOSS_SECONDS = 30
 M.KILLS_PER_ZONE = KILLS_PER_ZONE
 M.BOSS_SECONDS = BOSS_SECONDS
 
+-- HONEYPOT buys the firewall ten more seconds
+function M.boss_seconds(st)
+  return BOSS_SECONDS + ((st.daemons and st.daemons[4]) and 10 or 0)
+end
+
 -- put a fresh target in front of the player for the current zone
 function M.spawn(st)
   st.boss = F.is_boss_zone(st.zone)
@@ -19,7 +24,7 @@ function M.spawn(st)
   local base = st.boss and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
   st.hpMax = math.floor(base * Buffs.multipliers(st).vulnHp)
   st.hp = st.hpMax
-  st.timer = st.boss and BOSS_SECONDS or 0
+  st.timer = st.boss and M.boss_seconds(st) or 0
   Economy.recalc(st)
 end
 
@@ -37,6 +42,7 @@ local function advance(st)
   if st.kills >= target then
     st.kills = target
     st.cleared = true
+    if st.boss then st.bossKills = (st.bossKills or 0) + 1 end
     st.boss = false            -- a beaten firewall leaves plain vulns to farm
     st.timer = 0
   end
@@ -94,6 +100,10 @@ function M.tick(st, dt)
   -- Crawl sends its own probes; they hit as hard as a manual one
   if Buffs.active(st, Buffs.CRAWL) and st.click > 0 then
     M.damage(st, Buffs.CRAWL_PROBES * st.click * dt)
+  end
+  -- CRON runs one extra probe a second, forever
+  if st.daemons and st.daemons[1] and st.click > 0 then
+    M.damage(st, st.click * dt)
   end
 
   if st.boss and st.timer > 0 then

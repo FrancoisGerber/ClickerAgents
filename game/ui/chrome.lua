@@ -27,7 +27,7 @@ local function topBar()
   x = slot(x, 176, "CREDITS", fmt(st.credits), C.gold)
   x = slot(x, 128, "DPS", fmt(st.dps), C.gain)
   x = slot(x, 160, "ROOTKITS", tostring(st.rootkits), C.gold)
-  x = slot(x, 96, "ZONE", tostring(st.zone), C.text)
+  x = slot(x, 116, "ZONE", tostring(st.zone), C.text)
   -- the boss timer earns its corner only while there is a boss to lose to
   local bossPreview = opts and opts.boss
   if st.timer > 0 or bossPreview then

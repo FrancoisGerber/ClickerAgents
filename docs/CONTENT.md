@@ -162,3 +162,14 @@ credits, and the effect is applied the moment the purchase lands.
 
 Skills are bought the same way on the SKILLS tab (A buys, X casts); their prices are
 2K, 25K, 250K, 2M, 25M and 500M in roster order.
+
+## Daemons
+
+Rootkit spend on the PRESTIGE tab. Permanent, survive every ascension.
+
+| Daemon | Rootkits | Effect |
+|---|---|---|
+| CRON | 5 | +1 probe per second, forever |
+| WATCHDOG | 12 | +15% credits from vulns |
+| BEACON | 30 | +10% throughput |
+| HONEYPOT | 75 | +10s on every firewall clock |

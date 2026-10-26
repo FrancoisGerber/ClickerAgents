@@ -118,18 +118,20 @@ decision in this game follows from that gap.
 - **Rootkits earned:**
 
   ```
-  rootkits = floor(totalAgentLevels / 2000)
-           + sum over boss firewalls defeated
+  rootkits = floor(totalAgentLevels / 2000) + firewalls defeated this run
   ```
 
-  A boss firewall on a zone divisible by 5 and ≥ 100 pays `floor(((n + 4) / 5) ^ 1.3)`
-  with `n = (L − 100) / 5` — zone 100 pays 1, zone 150 pays 20, zone 250 pays 137.
+  Both halves are counted, not estimated: `Prestige.rootkits_on_offer` sums the agent
+  levels you paid for and the firewalls you actually broke. (An earlier draft quoted a
+  per-boss curve, `((n + 4) / 5) ^ 1.3`, whose examples — 1 at zone 100, 20 at 150, 137 at
+  250 — did not follow from the formula itself. Counting is what the game does.)
 
 - **Unspent rootkits are +10% throughput each.** Persistence is what a rootkit is: the
   part of you the next system inherits. Holding them is a real decision at every ascension.
-- **Rootkit spend:** rootkits reinforce a **system you have already consumed** — each
-  breached target can be bought back as a permanent perk. v1 shows the four earliest
-  systems, locked; v1.1 wires the spend, so the reset loop works first.
+- **Rootkit spend:** four daemons, permanent, bought with rootkits on the PRESTIGE tab —
+  CRON 5 (+1 probe/s), WATCHDOG 12 (+15% credits), BEACON 30 (+10% throughput), HONEYPOT 75
+  (+10 s on every firewall). Holding is +10% each; spending trades that for a flat effect,
+  so the mix is the decision at every ascension.
 
 ## 8. Numbers
 

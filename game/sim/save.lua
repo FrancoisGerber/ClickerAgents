@@ -31,12 +31,14 @@ function M.snapshot(st)
     cleared = st.cleared or false,
     killsRequired = st.killsRequired or 10,
     rootkits = st.rootkits,
+    bossKills = st.bossKills or 0,
     systems = st.systems,
     bestZone = st.bestZone,
     agents = agents,
     owned = copy(st.owned),
     upOwned = copy(st.upOwned),
     achDone = copy(st.achDone),
+    daemons = copy(st.daemons or {}),
   }
 end
 
@@ -75,6 +77,7 @@ function M.apply(st, data)
   st.cleared = data.cleared or false
   st.killsRequired = data.killsRequired or 10
   st.rootkits = data.rootkits or 0
+  st.bossKills = data.bossKills or 0
   st.systems = data.systems or 0
   st.bestZone = data.bestZone or st.zone
   for i, lv in ipairs(data.agents or {}) do
@@ -83,6 +86,7 @@ function M.apply(st, data)
   for i, v in ipairs(data.owned or {}) do st.owned[i] = v end
   for i, v in ipairs(data.upOwned or {}) do st.upOwned[i] = v end
   for i, v in ipairs(data.achDone or {}) do st.achDone[i] = v end
+  for i, v in ipairs(data.daemons or {}) do st.daemons[i] = v end
   st.zoneSel = st.zone
   Economy.recalc(st)
   Combat.spawn(st)
