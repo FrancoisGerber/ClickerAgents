@@ -272,10 +272,10 @@ local w = fresh_with_level(10); w.upOwned[2] = true; Economy.recalc(w)      -- W
 check(w.dps == math.floor(bDps * 1.10), "+10% throughput tools lift DPS")
 
 local s2 = fresh_with_level(10); s2.upOwned[1] = true; Economy.recalc(s2)    -- SCANNER +25% probe
-check(s2.click == math.floor((1 + 0.005 * s2.dps) * 1.25), "+25% probe tools lift click damage")
+check(s2.click == math.floor(F.probe_damage(s2.dps) * 1.25), "+25% probe tools lift click damage")
 
 local e = fresh_with_level(10); e.upOwned[4] = true; Economy.recalc(e)       -- EXPLOIT KIT x2 probe
-check(e.click == math.floor((1 + 0.005 * e.dps) * 2), "x2 probe tools double click damage")
+check(e.click == math.floor(F.probe_damage(e.dps) * 2), "x2 probe tools double click damage")
 
 local m = fresh_with_level(10); m.upOwned[9] = true; Economy.recalc(m)       -- MIXER +100% credits
 check(m.creditsKill == bCredits * 2, "+100% credit tools double the payout")
@@ -341,11 +341,11 @@ Buffs.tick(K, 31); Economy.recalc(K)
 check(K.creditsKill == g0, "and the payout comes back")
 
 Actions.cast_skill(K, Buffs.FLOOD)
-check(K.click == math.floor((1 + 0.005 * K.dps) * 2), "FLOOD doubles probe damage")
+check(K.click == math.floor(F.probe_damage(K.dps) * 2), "FLOOD doubles probe damage")
 Buffs.tick(K, 31); Economy.recalc(K)
 
 Actions.cast_skill(K, Buffs.PHISH)
-check(K.click == math.floor((1 + 0.005 * K.dps) * Buffs.CRIT_MUL), "PHISH makes every probe crit for x10")
+check(K.click == math.floor(F.probe_damage(K.dps) * Buffs.CRIT_MUL), "PHISH makes every probe crit for x10")
 Buffs.tick(K, 31); Economy.recalc(K)
 check(K.click == c0, "probe damage returns to normal")
 
@@ -377,6 +377,38 @@ Combat.tick(C, 1.0)
 local crawlDmg = hpBefore - C.hp
 check(math.abs(crawlDmg - Buffs.CRAWL_PROBES * C.click) < 1e-6,
       string.format("CRAWL lands ten probes a second (%.0f damage, click %.0f)", crawlDmg, C.click))
+
+-- ---------------------------------------------------------------- click beats idle
+print("click vs idle")
+local n = 0
+for _, lv in ipairs({ 1, 25, 100, 400 }) do
+  for _, zone in ipairs({ 1, 50, 140, 300 }) do
+    local C1 = SimState.new_run()
+    C1.agents[1].lv = lv
+    C1.zone = zone
+    Economy.recalc(C1)
+    if C1.dps > 0 and C1.click > C1.dps then n = n + 1 end
+  end
+end
+check(n == 16, "one probe is worth more than one second of idling at every level and zone")
+
+local D = SimState.new_run()
+D.agents[1].lv = 60
+D.agents[2].lv = 30
+D.zone = 80
+Economy.recalc(D)
+local dpsNow, clickNow = D.dps, D.click
+-- killing a full-health vuln: idle needs this long, one probe per second is this much better
+local hp = F.vuln_hp(80)
+local idleSeconds = hp / dpsNow
+local tapSeconds = hp / (clickNow + dpsNow)
+check(tapSeconds < idleSeconds, "tapping kills the same vuln faster than waiting")
+check(D.creditsKill > 0, "and both still pay")
+
+-- with no agents at all the press still works, at the floor of 1
+local F0 = SimState.new_run()
+Economy.recalc(F0)
+check(F0.dps == 0 and F0.click == 1, "a fresh save probes for 1 with no agents deployed")
 
 -- ---------------------------------------------------------------- balance
 print("balance (M1 acceptance)")

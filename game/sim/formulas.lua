@@ -7,6 +7,12 @@ local MILESTONE_EVERY = 25
 local DAMAGE_STEP = 4          -- x4 damage at every milestone
 local COST_GROWTH = 1.07
 
+-- One press is worth this many seconds of the agents' output. It has to be over
+-- 1.0, or a single tap per second would only match idling; at 1.5 one tap a second
+-- beats waiting by half, and holding the button is worth 15 probes a second. The
+-- rule: clicking is never the slower way to kill something, at any zone or level.
+M.PROBE_SHARE = 1.5
+
 function M.vuln_hp(zone)
   if zone <= 140 then
     return math.floor(10 * (1.55 ^ (zone - 1)) + 10 * (zone - 1))
@@ -42,6 +48,10 @@ end
 function M.agent_dps(agent)
   if agent.lv <= 0 then return 0 end
   return agent.base * agent.lv * (DAMAGE_STEP ^ M.milestones(agent.lv))
+end
+
+function M.probe_damage(dps)
+  return math.max(1, math.floor((dps or 0) * M.PROBE_SHARE))
 end
 
 function M.is_boss_zone(zone)

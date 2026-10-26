@@ -97,8 +97,12 @@ local function battleCol(o)
 
   local frac = st.hpMax > 0 and (st.hp / st.hpMax) or 0
   hpBar(L.hpX, hpY, L.hpW, 32, frac, isBoss)
-  drawText(fmt(st.hp) .. " / " .. fmt(st.hpMax), L.hpX + 8, hpY + 8, C.text, 2)
-  drawTextR(math.floor(frac * 100 + 0.5) .. "%", L.labelR, hpY + 8, isBoss and C.warn or C.dim, 2)
+  local pct = math.floor(frac * 100 + 0.5) .. "%"
+  -- the percentage is white and owns the right edge: in warn red it vanished into
+  -- a full boss bar, and the numbers can grow into it if they are not clipped
+  local room = (L.labelR - textW(pct, 2) - 8) - (L.hpX + 8)
+  drawText(fit(fmt(st.hp) .. " / " .. fmt(st.hpMax), room), L.hpX + 8, hpY + 8, C.text, 2)
+  drawTextR(pct, L.labelR, hpY + 8, C.text, 2)
 
   drawText("vulns " .. st.kills .. " / " .. (st.killsRequired or 10), 32, killsY, cleared and C.gold or C.dim, 2)
   drawTextR("+" .. fmt(st.creditsKill) .. " credits", L.labelR, killsY, C.gold, 2)

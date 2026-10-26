@@ -4,6 +4,7 @@
 local Combat = require("sim.combat")
 local Economy = require("sim.economy")
 local Log = require("core.log")
+local F = require("sim.formulas")
 
 local M = {}
 
@@ -98,6 +99,8 @@ function M.apply(st, data)
   for i, v in ipairs(data.daemons or {}) do st.daemons[i] = v end
   st.zoneSel = st.zone
   Economy.recalc(st)
+  -- a firewall never resumes half-fought: the clock restarts with the attempt
+  if F.is_boss_zone(st.zone) then st.kills = 0 end
   Combat.spawn(st)
   if st.cleared then st.boss, st.timer = false, 0 end
   return true

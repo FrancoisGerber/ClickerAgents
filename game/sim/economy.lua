@@ -19,7 +19,7 @@ function M.recalc(st)
   st.dps = math.floor(dps * (1 + t.dps_add) * b.dps * beacon * (1 + 0.10 * (st.rootkits or 0)))
   local payout = F.credits_per_vuln(st.zone) * (st.boss and 3 or 1)
   st.creditsKill = math.max(1, math.floor(payout * (1 + t.credits_add) * b.credits * watchdog))
-  st.click = math.max(1, math.floor((1 + 0.005 * st.dps) * t.click_mul * (1 + t.click_add) * b.click))
+  st.click = math.max(1, math.floor(F.probe_damage(st.dps) * t.click_mul * (1 + t.click_add) * b.click))
 end
 
 function M.next_cost(st, i)

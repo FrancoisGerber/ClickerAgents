@@ -60,12 +60,15 @@ are endpoint-heavy, utilities keep the CORE behind an air gap.
 | Channel | Source | Scales with |
 |---|---|---|
 | Throughput (DPS) | every deployed agent, summed, then multiplied | agent levels and multipliers |
-| Probe | `1 + 0.5% × total DPS` per press | your throughput, so probing never falls behind |
+| Probe | `1.5 × total DPS` per press | your throughput, so a tap always outruns waiting |
 
-- **Probe base:** `probeDamage = probeUpgrades × (1 + 0.005 × totalDPS)`. The DPS term is
-  what keeps a button press meaningful at zone 400; without it, probing dies at zone 40.
-- **Probe rate:** holding A fires a probe **10 times per second** — the cap the genre has
-  settled on. You never need to mash, and mashing cannot beat the cap.
+- **Probe base:** `probeDamage = probeUpgrades × 1.5 × totalDPS`, with a floor of 1 so a
+  fresh save can still open. **Clicking is never the slower way to kill something**: one
+  press is worth a second and a half of the agents' output at every zone and every level,
+  so a steady tap beats idling and holding the button beats it by an order of magnitude.
+  `Formulas.PROBE_SHARE` is the single number that sets this ratio.
+- **Probe rate:** one press, one probe. There is no artificial cap yet; the 10-per-second
+  figure this line used to promise is unimplemented, and the button has no auto-repeat.
 - **Crits (v1.1):** 0% chance, ×10 damage, bought through tooling. Off in v1.
 - **Skills:** six actives, one per agent, 30 seconds each on a 30–180 s cooldown. Bought
   and cast on the SKILLS tab: **A** buys, **X** fires, and a running cooldown refuses the
