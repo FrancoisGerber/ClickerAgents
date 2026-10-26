@@ -31,7 +31,7 @@ local function welcomeScreen(report)
 
   local y = L.topH + 56
   local w = math.floor((L.W - m * 2 - gap) / 2)
-  local h = rowsPanel(m, y, w, { "LAYERS GAINED", "CREDITS EARNED", "STOPPED AT" }, nil, nil,
+  local h = rowsPanel(m, y, w, { "ZONES GAINED", "CREDITS EARNED", "STOPPED AT" }, nil, nil,
     { { fmt(r.zones), C.text }, { fmt(r.credits), C.gold }, { "ZONE " .. fmt(r.stopped_at), C.text } })
 
   local x2 = m + w + gap

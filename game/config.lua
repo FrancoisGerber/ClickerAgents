@@ -28,4 +28,8 @@ local ART = {
 M.C = C
 M.ART = ART
 M.prefs = { list = "auto" }     -- "auto" | "narrow" | "wide"
+M.VERSION = "0.9"
+M.TITLE = "CLICKER AGENTS"
 return M
+
+

@@ -21,11 +21,15 @@ local function statsScreen()
   drawText("STATS", m, bodyY, C.text, 2)
   local y = bodyY + 40
   local w = math.floor((L.W - m * 2 - gap) / 2)
-  local hours = math.floor((st.playtime or 0) / 3600)
-  local mins = math.floor(((st.playtime or 0) % 3600) / 60)
+  local secs = math.floor(st.playtime or 0)
+  local hours = math.floor(secs / 3600)
+  local mins = math.floor((secs % 3600) / 60)
+  local played = hours > 0 and string.format("%dH %02dM", hours, mins)
+                 or (mins > 0 and string.format("%dM %02dS", mins, secs % 60)
+                 or string.format("%dS", secs))
   local h = rowsPanel(m, y, w, {
     "THROUGHPUT", "PROBE DAMAGE", "CREDITS PER VULN", "VULNS KILLED",
-    "BEST LAYER", "SYSTEMS BREACHED", "ROOTKITS HELD", "PLAYTIME",
+    "BEST ZONE", "SYSTEMS BREACHED", "ROOTKITS HELD", "PLAYTIME",
   }, nil, nil, {
     { fmt(st.dps), C.gain },
     { fmt(st.click), C.gold },
@@ -34,7 +38,7 @@ local function statsScreen()
     { "ZONE " .. tostring(st.bestZone or 1), C.text },
     { tostring(st.systems or 0), C.text },
     { tostring(st.rootkits or 0), C.gold },
-    { string.format("%dH %02dM", hours, mins), C.dim },
+    { played, C.dim },
   })
 
   local x2 = m + w + gap

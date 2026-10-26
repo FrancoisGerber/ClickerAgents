@@ -2,7 +2,7 @@
 
 **Clicker Agents** is an idle (incremental) RPG about a rogue intrusion framework that
 eats computer systems. You are the framework. Your **agents** break into a target, their
-throughput tears through **vulns**, and when the last layer falls the system is consumed
+throughput tears through **vulns**, and when the last zone falls the system is consumed
 and a bigger one opens.
 
 ## 1. The fiction
@@ -27,19 +27,22 @@ That premise is what makes the loop make sense:
    adds a manual probe.
 2. Clearing a vuln pays **credits**.
 3. Credits deploy more **agents** — each is a flat throughput number that scales with level.
-4. Clearing the layer's vulns moves you one zone deeper. Every **5th zone** is a
+4. Clearing the zone's vulns moves you one zone deeper. Every **5th zone** is a
    **boss firewall** with a **30-second timer**.
 5. Ascend at zone 100: the system is consumed, you keep **rootkits**, and the next
    system starts harder.
 
-Four time scales, deliberately: seconds (probes and skills), minutes (a layer), hours
+Four time scales, deliberately: seconds (probes and skills), minutes (a zone), hours
 (a system), days (a campaign across systems).
 
-## 3. Targets — one system, six layers
+## 3. Targets — one system, one zone at a time
 
-A run walks the same six security layers of whatever you are eating:
+A run walks the same six bands of security in whatever you are eating. **Zone** is the
+word for all of it: the counter, the best-zone record, the achievement text and what a
+failed firewall pushes you back to. The six names below are zone names, not a second
+unit.
 
-| Band | Layer | What lives there |
+| Zones | Name | What lives there |
 |---|---|---|
 | 1–20 | **EDGE** | open ports, default creds, exposed API keys, stale TLS |
 | 21–40 | **IDENTITY** | orphaned accounts, weak MFA, shared passwords |
@@ -49,7 +52,7 @@ A run walks the same six security layers of whatever you are eating:
 | 100+ | **CORE** | domain trust, ROOT CA misuse, kernel modules |
 
 The system ladder is fictional but deliberately plausible — a mid-market SaaS company
-first, a ministry last. Each system skews its layers: banks are identity-heavy, hospitals
+first, a ministry last. Each system skews its zones: banks are identity-heavy, hospitals
 are endpoint-heavy, utilities keep the CORE behind an air gap.
 
 ## 4. Damage — two channels
@@ -114,7 +117,7 @@ decision in this game follows from that gap.
 - **Unlocks:** at zone 100, when CORE is in reach. A visible confirm screen, not a hidden
   purchase — a handheld player should not have to discover a 1.9e19 purchase.
 - **Wipes:** credits, agent levels, tooling, zone (back to 1), skill unlocks.
-- **Keeps:** rootkits, systems breached, best layer, total playtime.
+- **Keeps:** rootkits, systems breached, best zone, total playtime.
 - **Rootkits earned:**
 
   ```
@@ -152,10 +155,10 @@ The handheld has a real clock, so offline progress works properly.
 - **On quit:** save a timestamp.
 - **On launch:** `elapsed = now − saved`, capped at **8 hours** (beyond that, farming
   stops being interesting and the numbers get silly).
-- **Simulation:** advance zones while your throughput beats the layer's HP inside a
+- **Simulation:** advance zones while your throughput beats the zone's HP inside a
   5-second budget per vuln, then **stop at the first boss firewall you cannot break in
   30 seconds** — you always return to a decision, never to a wall you slept through.
-- **Report:** a Welcome Back screen listing layers gained, credits earned, and where the
+- **Report:** a Welcome Back screen listing zones gained, credits earned, and where the
   framework stalled.
 
 ## 10. What is deliberately not in this game

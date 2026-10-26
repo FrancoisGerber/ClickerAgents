@@ -24,10 +24,16 @@ local function topBar()
     return x + w
   end
   local x = 16
-  x = slot(x, 176, "CREDITS", fmt(st.credits), C.gold)
+  -- the label owns a fixed column and the value has its own right-aligned box, so a
+  -- long credit figure cannot run into the word CREDITS
+  local amountTag = st.amount == 0 and "MAX" or tostring(st.amount)
+  drawText("CREDITS", x, 8, C.dim, 2)
+  drawTextR(fmt(st.credits), x + 176 - 16, 8, C.gold, 2)
+  x = x + 176
   x = slot(x, 128, "DPS", fmt(st.dps), C.gain)
-  x = slot(x, 160, "ROOTKITS", tostring(st.rootkits), C.gold)
-  x = slot(x, 116, "ZONE", tostring(st.zone), C.text)
+  x = slot(x, 76, "BUY", amountTag, C.text)
+  x = slot(x, 148, "ROOTKITS", tostring(st.rootkits), C.gold)
+  x = slot(x, 100, "ZONE", tostring(st.zone), C.text)
   -- the boss timer earns its corner only while there is a boss to lose to
   local bossPreview = opts and opts.boss
   if st.timer > 0 or bossPreview then

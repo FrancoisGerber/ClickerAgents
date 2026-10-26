@@ -44,7 +44,10 @@ local function menuScreen()
     ry = ry + rowH + 8
   end
 
-  textC("START OR B TO RESUME", math.floor(L.W / 2), y + h - 26, C.dim, 2)
+  -- hint on the left, version on the right: centred text cannot share a line with a
+  -- right-aligned stamp without colliding at narrow widths
+  text("START OR B TO RESUME", x + pad, y + h - 26, C.dim, 2)
+  textR(Config.VERSION, x + w - pad, y + h - 26, C.rule, 2)
 end
 
 function M.draw(ctx)

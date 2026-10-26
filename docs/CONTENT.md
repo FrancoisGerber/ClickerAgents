@@ -1,6 +1,6 @@
 # Content — v1
 
-Small on purpose. Twelve agents, six security layers, ten tools. Every number here is data,
+Small on purpose. Twelve agents, six security zones, ten tools. Every number here is data,
 not code: the game loads these from tables so content can be tuned without touching the loop.
 
 ## Agents
@@ -32,7 +32,7 @@ Each agent costs roughly 4–6× the previous one and deals about 4× its throug
 agent is always worth more than levelling the last one — that is the whole point of the
 7%-cost / 5.7%-damage gap.
 
-## Systems and layers
+## Systems and zones
 
 Each run is one **system**. Ascending consumes it and opens the next, harder target.
 
@@ -41,7 +41,7 @@ Each run is one **system**. Ascending consumes it and opens the next, harder tar
 | 1 | Vantel Systems | mid-market SaaS, sloppy, the tutorial target |
 | 2 | Brindle & Roe | boutique law firm: secrets, small attack surface |
 | 3 | Meridian Freight | logistics: OT networks and tracking telemetry |
-| 4 | Corvid Analytics | data broker; the DATA layer is the whole point |
+| 4 | Corvid Analytics | data broker; the DATA zone is the whole point |
 | 5 | Halcyon Diagnostics | hospital group: legacy endpoints, patient records |
 | 6 | Kestrel Mutual | insurer: identity fortress, weak suppliers |
 | 7 | Vehicle Registry | government, ancient CORE, huge volume |
@@ -51,9 +51,9 @@ Each run is one **system**. Ascending consumes it and opens the next, harder tar
 
 Beyond ten, the ladder repeats with a lap number (`VANTEL SYSTEMS 2`).
 
-Within a system every run walks the same six layers:
+Within a system every run walks the same six zones:
 
-| Zones | Layer | Vulns |
+| Zones | Name | Vulns |
 |---|---|---|
 | 1–20 | **EDGE** | open port, default creds, exposed API key, stale TLS |
 | 21–40 | **IDENTITY** | orphaned account, weak MFA, shared password |
@@ -70,7 +70,7 @@ for hospitals, air-gapped CORE for utilities and ministries.
 Every fifth zone. One target, **30 seconds**, `10 × H(L)` HP. Failing closes the perimeter:
 you lose the attempt, not your credits.
 
-Names cycle per layer: `WAF RULESET`, `MFA GATE`, `SOC TRIAGE`, `EDR FLEET`, `AIR GAP`,
+Names cycle per zone: `WAF RULESET`, `MFA GATE`, `SOC TRIAGE`, `EDR FLEET`, `AIR GAP`,
 `FORENSICS SWEEP`.
 
 ## Tooling
@@ -127,14 +127,14 @@ something real to show, and to mark the milestones the design already tunes arou
 
 | Achievement | Requirement |
 |---|---|
-| First Breach | clear layer 1 |
+| First Breach | clear zone 1 |
 | Firewall Down | beat 10 boss firewalls |
 | Ten Rootkits | hold 10 rootkits at once |
 | New Target | ascend for the first time |
-| Core Access | reach layer 100 |
+| Core Access | reach zone 100 |
 | Full Roster | deploy all 12 agents |
 | Silent Run | clear 100 vulns |
-| Root | reach layer 250 |
+| Root | reach zone 250 |
 
 ## Out of scope for v1
 
