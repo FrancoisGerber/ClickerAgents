@@ -113,7 +113,7 @@ selectable, with the chosen one spelled out beside it.
 `ASCEND · LOCKED · ZONE 100`, and a `SYSTEMS · ROOTKIT SPEND` panel listing the four
 earliest systems for the v1.1 rootkit sink.
 
-**Menu** (overlay) — opened with START from any screen. It pauses the ticker, writes a save, and shows `PAUSED`, `SAVED` or `SAVE FAILED`, and `RESUME / QUIT`. There is no save button: every purchase, zone change, ascension, focus loss and quit already saves, plus one beat a minute.
+**Menu** (overlay) — opened with START from any screen. It pauses the ticker, writes a save, and shows `PAUSED`, `SAVED` or `SAVE FAILED`, and `RESUME / QUIT`. No hint line: the rows are the instruction. There is no save button: every purchase, zone change, ascension, focus loss and quit already saves, plus one beat a minute.
 
 Tabs 2–7 show their real labels and, where the content exists (upgrade names and
 prices), real values. Seven dots at the bottom-right track the tab; L/R cycles
@@ -166,3 +166,9 @@ stubbed `love.graphics` that applies `push/pop/translate`, then asserts that
 every rectangle is inside the window, that the columns tile the width and the
 bands tile the height, and that pressing A actually spends credits and raises a
 level. Current: 54,832 rects, 0 errors.
+
+## Panels
+
+Every tab paints its panels at one height, `L.panelH = 40 + (L.rows - 3) * 32` — 328 px at 720×480. A list longer than the window scrolls with a `n/N` position counter on the header line, so the panels line up tab to tab and nothing is hidden without a number.
+
+The top bar carries credits, throughput, rootkits and zone only. A firewall's clock lives on its own bar in the arena; there is no second copy in the corner.

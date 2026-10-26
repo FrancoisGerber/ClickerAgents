@@ -22,7 +22,7 @@ end
 
 -- visible: how many rows fit. A longer list scrolls, keeping the selection in view;
 -- the title line then carries the position, so nothing is hidden without a number.
-local function rowsPanel(x, y, w, labels, title, sel, values, visible)
+local function rowsPanel(x, y, w, labels, title, sel, values, visible, height)
   local rowH = 32
   local n = #labels
   local shown = (visible and visible < n) and visible or n
@@ -34,7 +34,8 @@ local function rowsPanel(x, y, w, labels, title, sel, values, visible)
     top = math.max(1, math.min((sel or 1) - math.floor(shown / 2), n - shown + 1))
   end
   local h = pad + shown * rowH
-  frame(x, y, w, h, 2, C.rule)
+  local boxH = math.max(h, height or h)
+  frame(x, y, w, boxH, 2, C.rule)
   if title then
     -- keep the title clear of the position counter instead of drawing through it
     local maxChars = math.floor((w - 24 - (shown < n and 64 or 0)) / 12)
@@ -59,7 +60,7 @@ local function rowsPanel(x, y, w, labels, title, sel, values, visible)
     end
     if j < shown - 1 then px(x + 12, ly + 26, w - 24, 2, C.rowsplit) end
   end
-  return h
+  return boxH
 end
 
 -- Greedy word wrap: returns the lines that fit maxw, so long text never

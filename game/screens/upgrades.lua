@@ -36,7 +36,7 @@ local function upgradesScreen()
     states[i] = st.upOwned[i] and { "OWNED", C.gold } or { fmt(UPGRADES[i][2]), C.dim }
   end
   local sel = st.cursor[3]
-  local h = rowsPanel(m, y, w, names, nil, sel, states, L.rows - 3)
+  local h = rowsPanel(m, y, w, names, nil, sel, states, L.panelRows, L.panelH)
   local x2 = m + w + gap
   local pw = L.W - m - x2 - 24
   panel(x2, y, L.W - m - x2, h)

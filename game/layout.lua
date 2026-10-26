@@ -54,12 +54,16 @@ function Layout.compute(W, H, pref)
 
   local bodyH = H - TOP_H - HINT_H
   local rows = math.max(6, math.floor((bodyH - HDR_H - FOOT_H) / ROW_H))
+  -- what a tab panel holds: a header line plus the rows that fit under it. Every
+  -- screen uses this, so the panels line up from tab to tab.
+  local panelRows = math.max(4, rows - 3)
+  local panelH = 40 + panelRows * ROW_H
 
   return {
     W = W, H = H, ratio = ratio, profile = profile, pref = pref or "auto",
     topH = TOP_H, hintH = HINT_H, hdrH = HDR_H, footH = FOOT_H, rowH = ROW_H,
     heroW = heroW, battleX = heroW, battleW = battleW,
-    rows = rows, rowY = TOP_H + HDR_H,
+    rows = rows, rowY = TOP_H + HDR_H, panelRows = panelRows, panelH = panelH,
     footY = H - HINT_H - FOOT_H,
     showDps = showDps,
     nameX = a.name, nameW = a.nameW, lvX = a.lv, costX = a.cost, dpsX = a.dps,

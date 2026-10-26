@@ -27,19 +27,21 @@ local function statsScreen()
   local played = hours > 0 and string.format("%dH %02dM", hours, mins)
                  or (mins > 0 and string.format("%dM %02dS", mins, secs % 60)
                  or string.format("%dS", secs))
-  local h = rowsPanel(m, y, w, {
+  rowsPanel(m, y, w, {
     "THROUGHPUT", "PROBE DAMAGE", "CREDITS PER VULN", "VULNS KILLED",
-    "BEST ZONE", "SYSTEMS BREACHED", "ROOTKITS HELD", "PLAYTIME",
-  }, nil, nil, {
+    "FIREWALLS BROKEN", "BEST ZONE", "SYSTEMS BREACHED", "ROOTKITS HELD",
+    "PLAYTIME",
+  }, "THIS RUN", nil, {
     { fmt(st.dps), C.gain },
     { fmt(st.click), C.gold },
     { fmt(st.creditsKill), C.gold },
     { fmt(st.totalKills or 0), C.text },
+    { fmt(st.totalBosses or 0), C.text },
     { "ZONE " .. tostring(st.bestZone or 1), C.text },
     { tostring(st.systems or 0), C.text },
     { tostring(st.rootkits or 0), C.gold },
     { played, C.dim },
-  })
+  }, L.panelRows, L.panelH)
 
   local x2 = m + w + gap
   local wR = L.W - m - x2
@@ -49,17 +51,14 @@ local function statsScreen()
     if a.lv > 0 then deployed[#deployed + 1] = a end
   end
   local names, values = {}, {}
-  local room = math.max(1, math.floor((L.H - L.hintH - y - 32) / L.rowH) - 1)
-  for i = 1, math.min(#deployed, room) do
-    local a = deployed[i]
+  for i, a in ipairs(deployed) do
     names[i] = a.name
     values[i] = { fmt(Formulas.agent_dps(a)), C.gain }
   end
-  if #deployed > room then
-    names[room] = string.format("+%d MORE", #deployed - room + 1)
-    values[room] = { "", C.rule }
+  if #deployed == 0 then
+    names[1], values[1] = "NO AGENTS YET", { "", C.rule }
   end
-  rowsPanel(x2, y, wR, names, "AGENT THROUGHPUT · DPS", nil, values)
+  rowsPanel(x2, y, wR, names, "AGENT THROUGHPUT · DPS", nil, values, L.panelRows, L.panelH)
 end
 
 -- SKILLS: the actives roster. Buying is not wired; owning is what puts a slot

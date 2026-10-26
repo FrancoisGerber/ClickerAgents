@@ -32,14 +32,7 @@ local function topBar()
   x = slot(x, 128, "DPS", fmt(st.dps), C.gain)
   x = slot(x, 148, "ROOTKITS", tostring(st.rootkits), C.gold)
   x = slot(x, 100, "ZONE", tostring(st.zone), C.text)
-  -- the boss timer earns its corner only while there is a boss to lose to
-  local bossPreview = opts and opts.boss
-  if st.timer > 0 or bossPreview then
-    if W - x >= 120 then drawText("BOSS", W - 128, 8, C.dim, 2) end
-    local secs = st.timer > 0 and st.timer or 14
-    local t = string.format("%d:%02d", math.floor(secs / 60), secs % 60)
-    drawTextR(t, W - 16, 8, secs <= 15 and C.warn or C.text, 2)
-  end
+  -- no clock up here: the firewall's own bar on the arena carries the time
   px(0, L.topH - 2, W, 2, C.rule)
 end
 

@@ -822,6 +822,33 @@ local row = M2.cursor.menu
 check(row == 1, "the menu opens on RESUME")
 check(not M2.idle, "opening the menu stops the clock")
 
+-- ---------------------------------------------------------------- panels
+print("panels")
+local function fileHas(path, needle)
+  local f = io.open(path, "r")
+  if not f then return false end
+  local body = f:read("*a")
+  f:close()
+  return body:find(needle, 1, true) ~= nil
+end
+SW, SH = 720, 480
+love.load()
+local PL = Game.layoutOf()
+check(PL.panelRows == PL.rows - 3, "a panel holds the rows that fit, minus its header")
+check(PL.panelH == 40 + PL.panelRows * PL.rowH, "and one height is derived from them")
+check(PL.panelH == 328, "at 720x480 that is 328 px, the achievements height")
+
+check(not fileHas("game/ui/chrome.lua", "BOSS"), "the top bar draws no boss clock")
+check(not fileHas("game/screens/menu.lua", "START OR B"), "the pause menu has no resume hint")
+
+-- every tab paints its panels at that height: two per tab, left and right
+for tab = 2, 6 do
+  local s3 = st()
+  s3.screen, s3.tab = "game", tab
+  love.draw()
+end
+check(#calls.errors == 0, "no tab spills at the shared panel height")
+
 -- ---------------------------------------------------------------- tuning
 print("tuning")
 local TUNE = require("tuning")

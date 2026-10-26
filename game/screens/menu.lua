@@ -43,7 +43,6 @@ local function menuScreen()
 
   -- hint on the left, version on the right: centred text cannot share a line with a
   -- right-aligned stamp without colliding at narrow widths
-  text("START OR B TO RESUME", x + pad, y + h - 26, C.dim, 2)
   textR(Config.VERSION, x + w - pad, y + h - 26, C.rule, 2)
 end
 

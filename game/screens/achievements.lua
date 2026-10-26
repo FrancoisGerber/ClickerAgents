@@ -28,7 +28,7 @@ local function achievementsScreen()
     states[i] = st.achDone[i] and { "UNLOCKED", C.gold } or { "LOCKED", C.rule }
   end
   local sel = st.cursor[5]
-  local h = rowsPanel(m, y, w, names, nil, sel, states, L.rows - 3)
+  local h = rowsPanel(m, y, w, names, nil, sel, states, L.panelRows, L.panelH)
   local x2 = m + w + gap
   local pw = L.W - m - x2 - 24
   panel(x2, y, L.W - m - x2, h)
