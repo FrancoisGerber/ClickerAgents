@@ -22,6 +22,11 @@ profile. There is no "force 4:3" mode; pillar bars are never drawn.
 
 ## Bands
 
+Profiles are chosen by aspect ratio alone: wide (≥1.45), classic (1.15–1.45), square
+(<1.15). The suite draws every screen at 720×480, 640×480, 720×720, 1280×720, 800×600 and
+960×544; 720×480 is the device the game is built for. No sprite is scaled and the font is
+fixed at 12 px, so a bigger window means more rows, not bigger type.
+
 `layout.lua` returns: `topH 32`, `hintH 32`, `hdrH 16`, `rowH 32`, `footH 16`,
 then `heroW / battleX / battleW`, `rows / rowY / footY`.
 

@@ -14,7 +14,31 @@ survive the reset.
 - **Licence:** GPL-3.0-or-later (`LICENSE`)
 - **Runtime:** LÖVE 11.5, supplied by PortMaster — the port ships as a `.love` file, no compiled binary
 - **Target:** Anbernic RG34XXSP (Allwinner H700, 720×480), Knulli or muOS with PortMaster
-- **Version:** 1.0 — the full loop is playable end to end: twelve agents, twelve skills, ten tools, ten daemons, ten achievements, boss firewalls, ascension, offline replay. Every screen is wired to live state and the suite (390 checks) covers the maths, the save and the layout at three screen sizes.
+- **Version:** 1 — the full loop is playable end to end: twelve agents, twelve skills, ten tools, ten daemons, ten achievements, boss firewalls, ascension, offline replay. Every screen is wired to live state and the suite (392 checks) covers the maths, the save and the layout at six screen sizes.
+
+## Where it runs
+
+Screens are chosen by **aspect ratio**, not by device, and everything derives from the
+window size: no sprite is scaled and the font stays 12 px, so text is crisp at every size.
+
+| Ratio | Profile | Tested at | How |
+|---|---|---|---|
+| ≥ 1.45 | wide | **720×480** (target), 960×544, 1280×720 | played on the handheld; suite draws every screen at all three |
+| 1.15 – 1.45 | classic | 640×480, 800×600 | suite |
+| < 1.15 | square | 720×720 | suite |
+
+Any resolution inside those bands works — the agent column clamps to 240–384 px, the list
+shows as many rows as fit (12 at 720×480, 19 at 720×720), and the DPS column is dropped
+when the agent column gets under ~264 px rather than squeezing three numbers together.
+`tools/shots.sh` captures 720×480, 640×480 and 720×720 for side-by-side checks.
+
+**Tested on:**
+
+| Device | SoC / screen | Firmware | State |
+|---|---|---|---|
+| Anbernic RG34XXSP | Allwinner H700, 720×480 3:2 | Knulli with PortMaster | played end to end, v1 installed and verified |
+| Anbernic RG34XX | same SoC, same 720×480 3:2 panel | Knulli with PortMaster | v1 installed and verified by hash; not yet played through |
+| Desktop (Arch) | any | LÖVE 11.5 | development target; the suite and the captures run here |
 
 ## Design
 

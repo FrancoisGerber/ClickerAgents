@@ -61,7 +61,7 @@ local function st() return Game.state() end
 
 -- ---------------------------------------------------------------- geometry
 print("geometry")
-for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 720, 720 } }) do
+for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 720, 720 }, { 1280, 720 }, { 800, 600 }, { 960, 544 } }) do
   SW, SH = size[1], size[2]
   love.load()
   local s = st()
@@ -77,7 +77,7 @@ for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 720, 720 } }) do
     SW, SH, L.profile or "?", L.heroW, L.battleW, L.rows))
 end
 -- the bottom of every list, where a window that does not scroll would spill
-for _, size in ipairs({ { 720, 480 }, { 640, 480 } }) do
+for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 1280, 720 }, { 800, 600 }, { 960, 544 } }) do
   SW, SH = size[1], size[2]
   love.load()
   local s2 = st()
