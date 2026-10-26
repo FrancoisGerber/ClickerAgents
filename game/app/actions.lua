@@ -6,6 +6,7 @@ local Achievements = require("data.achievements")
 local Systems = require("data.systems")
 local Economy = require("sim.economy")
 local Combat = require("sim.combat")
+local Buffs = require("sim.buffs")
 local Save = require("sim.save")
 local Toast = require("ui.toast")
 local fmt = require("core/numbers").fmt
@@ -43,6 +44,14 @@ function M.cast_skill(st, i)
   if cd > 0 then return M.say(st, sk.name .. " · " .. math.ceil(cd) .. "S") end
   st.skillCd[i] = sk.cd
   st.flashT = 0.4
+  Buffs.start(st, i)
+  Economy.recalc(st)
+  if i == Buffs.BLACKOUT then
+    -- the mirror opens now: the vuln in front of you loses the same 15%
+    local cut = math.floor(st.hp * Buffs.BLACKOUT_CUT)
+    st.hp = math.max(1, st.hp - cut)
+    st.hpMax = math.max(1, st.hpMax - math.floor(st.hpMax * Buffs.BLACKOUT_CUT))
+  end
   M.say(st, sk.name .. " ACTIVE")
 end
 

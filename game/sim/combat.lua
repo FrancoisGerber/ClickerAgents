@@ -2,6 +2,7 @@
 -- Everything here mutates the run state and nothing else.
 local F = require("sim.formulas")
 local Economy = require("sim.economy")
+local Buffs = require("sim.buffs")
 
 local M = {}
 
@@ -15,7 +16,8 @@ M.BOSS_SECONDS = BOSS_SECONDS
 function M.spawn(st)
   st.boss = F.is_boss_zone(st.zone)
   st.killsRequired = st.boss and 1 or KILLS_PER_ZONE
-  st.hpMax = st.boss and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
+  local base = st.boss and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
+  st.hpMax = math.floor(base * Buffs.multipliers(st).vulnHp)
   st.hp = st.hpMax
   st.timer = st.boss and BOSS_SECONDS or 0
   Economy.recalc(st)
@@ -59,7 +61,7 @@ end
 local function kill(st)
   st.credits = st.credits + st.creditsKill
   if st.cleared then
-    st.hpMax = F.vuln_hp(st.zone)
+    st.hpMax = math.floor(F.vuln_hp(st.zone) * Buffs.multipliers(st).vulnHp)
     st.hp = st.hpMax
     return
   end
@@ -86,8 +88,13 @@ end
 
 -- passive damage plus the boss clock; dt is seconds
 function M.tick(st, dt)
+  if Buffs.tick(st, dt) then Economy.recalc(st) end    -- a buff ended: stats revert
   if st.hp <= 0 then M.spawn(st) end
   if st.dps > 0 then M.damage(st, st.dps * dt) end
+  -- Crawl sends its own probes; they hit as hard as a manual one
+  if Buffs.active(st, Buffs.CRAWL) and st.click > 0 then
+    M.damage(st, Buffs.CRAWL_PROBES * st.click * dt)
+  end
 
   if st.boss and st.timer > 0 then
     st.timer = st.timer - dt

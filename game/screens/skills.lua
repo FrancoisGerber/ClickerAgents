@@ -10,6 +10,7 @@ local drawText, drawTextR, drawTextC = Draw.text, Draw.textR, Draw.textC
 local panel, rowSel, rowsPanel = W.panel, W.rowSel, W.rowsPanel
 local C = Config.C
 local fmt = Numbers.fmt
+local Buffs = require("sim.buffs")
 
 local M = {}
 local st, L, opts
@@ -26,7 +27,10 @@ local function skillsScreen()
   for i, sk in ipairs(SKILLS) do
     names[i] = sk.name
     local cd = st.skillCd[i] or 0
-    if cd > 0 then
+    local live = Buffs.left(st, i)
+    if live > 0 then
+      states[i] = { "ACTIVE " .. math.ceil(live) .. "S", C.gain }
+    elseif cd > 0 then
       states[i] = { math.ceil(cd) .. "S", C.poor }
     elseif st.owned[i] then
       states[i] = { "OWNED", C.gold }
@@ -45,8 +49,11 @@ local function skillsScreen()
   wire("AGENT", x2 + 12, y + 42, C.dim, pw)
   drawTextR(sk.agent, x2 + wR2 - 12, y + 42, C.text, 2)
   local cdLeft = st.skillCd[sel] or 0
-  wire("COOLDOWN", x2 + 12, y + 68, C.dim, pw)
-  if cdLeft > 0 then
+  local live = Buffs.left(st, sel)
+  wire(live > 0 and "RUNNING" or "COOLDOWN", x2 + 12, y + 68, C.dim, pw)
+  if live > 0 then
+    drawTextR(math.ceil(live) .. "S LEFT", x2 + wR2 - 12, y + 68, C.gain, 2)
+  elseif cdLeft > 0 then
     drawTextR(math.ceil(cdLeft) .. "S LEFT", x2 + wR2 - 12, y + 68, C.poor, 2)
   else
     drawTextR(sk.cd .. "S", x2 + wR2 - 12, y + 68, C.text, 2)

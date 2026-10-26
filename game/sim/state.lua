@@ -27,6 +27,7 @@ function M.new_run()
     -- ui
     agents = agents, sel = 1, amount = 1,
     owned = {}, upOwned = {}, achDone = {}, skillCd = {},
+    buff = { 0, 0, 0, 0, 0, 0 },
     screen = "splash", tab = 1, cursor = { 1, 1, 1, 1, 1, 1, 1 },
     splashT = 0, welcome = true, msg = nil, msgT = 0, flashT = 0,
     zoneSel = 1, idle = false,

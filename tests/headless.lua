@@ -43,6 +43,9 @@ local Chrome = require("ui.chrome")
 local Combat = require("sim.combat")
 local Economy = require("sim.economy")
 local Upgrades = require("data.upgrades")
+local Buffs = require("sim.buffs")
+local Skills = require("data.skills")
+local Actions = require("app.actions")
 local Save = require("sim.save")
 local SimState = require("sim.state")
 
@@ -273,6 +276,73 @@ check(Economy.buy_skill(shop, 3), "PHISH can be bought for 250K")              -
 check(Economy.skill_owned(shop, 3), "the skill is owned after buying")
 check(shop.credits == 3e5 - 250e3, "the skill price is deducted")
 check(not Economy.buy_skill(shop, 3), "a skill cannot be bought twice")
+
+-- ---------------------------------------------------------------- skills
+print("skills")
+local K = SimState.new_run()
+K.agents[1].lv = 10
+K.zone = 3
+Economy.recalc(K)
+K.credits = 1e12
+for i = 1, #Skills do
+  if Economy.skill_owned(K, i) then
+    check(true, Skills[i].name .. " starts owned")
+  else
+    check(Economy.buy_skill(K, i), "skill " .. Skills[i].name .. " can be bought")
+  end
+end
+local d0, c0, g0 = K.dps, K.click, K.creditsKill
+
+Actions.cast_skill(K, Buffs.SPRAY)
+check(Buffs.active(K, Buffs.SPRAY), "a cast starts a 30 second buff")
+check(K.dps == d0 * 2, "SPRAY doubles throughput")
+check(K.skillCd[Buffs.SPRAY] == Skills[Buffs.SPRAY].cd, "and starts its own cooldown")
+Buffs.tick(K, 31)
+Economy.recalc(K)
+check(not Buffs.active(K, Buffs.SPRAY) and K.dps == d0, "when it expires throughput returns")
+
+Actions.cast_skill(K, Buffs.SIPHON)
+check(K.creditsKill == g0 * 3, "SIPHON triples the payout")
+Buffs.tick(K, 31); Economy.recalc(K)
+check(K.creditsKill == g0, "and the payout comes back")
+
+Actions.cast_skill(K, Buffs.FLOOD)
+check(K.click == math.floor((1 + 0.005 * K.dps) * 2), "FLOOD doubles probe damage")
+Buffs.tick(K, 31); Economy.recalc(K)
+
+Actions.cast_skill(K, Buffs.PHISH)
+check(K.click == math.floor((1 + 0.005 * K.dps) * Buffs.CRIT_MUL), "PHISH makes every probe crit for x10")
+Buffs.tick(K, 31); Economy.recalc(K)
+check(K.click == c0, "probe damage returns to normal")
+
+Actions.cast_skill(K, Buffs.BLACKOUT)
+local beforeMax = K.hpMax
+local expectedMax = math.max(1, beforeMax - math.floor(beforeMax * Buffs.BLACKOUT_CUT))
+check(K.hpMax == expectedMax, "BLACKOUT cuts 15% off the vuln in front of you")
+local spawnMax = F.vuln_hp(K.zone) * (1 - Buffs.BLACKOUT_CUT)
+K.cleared = false
+Combat.spawn(K)
+check(K.hpMax == math.floor(spawnMax), "and the next vuln spawns weakened too")
+Buffs.tick(K, 31); Economy.recalc(K)
+Combat.spawn(K)
+check(K.hpMax == F.vuln_hp(K.zone), "full HP is back when the buff ends")
+
+-- CRAWL adds ten probes a second on top of the agents
+local C = SimState.new_run()
+C.agents[1].lv = 10
+C.zone = 3
+Economy.recalc(C)
+C.credits = 1e12
+if not Economy.skill_owned(C, Buffs.CRAWL) then Economy.buy_skill(C, Buffs.CRAWL) end
+C.dps = 0
+C.hp, C.hpMax = 1e6, 1e6
+Actions.cast_skill(C, Buffs.CRAWL)
+C.dps = 0                       -- isolate the probes from the agents' throughput
+local hpBefore = C.hp
+Combat.tick(C, 1.0)
+local crawlDmg = hpBefore - C.hp
+check(math.abs(crawlDmg - Buffs.CRAWL_PROBES * C.click) < 1e-6,
+      string.format("CRAWL lands ten probes a second (%.0f damage, click %.0f)", crawlDmg, C.click))
 
 -- ---------------------------------------------------------------- balance
 print("balance (M1 acceptance)")

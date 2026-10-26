@@ -106,14 +106,16 @@ than trivial.
 ## Skills
 
 Six actives, one per agent, each free once its agent is deployed, on a fixed cooldown.
-Bought and cast on the SKILLS tab: **A** buys, **X** fires. A cast starts the cooldown;
-while it runs the row shows the seconds left and X is refused.
+Bought and cast on the SKILLS tab: **A** buys, **X** fires. A cast starts a 30 second
+buff and its own cooldown; the row shows `ACTIVE nS` while the buff runs and the
+cooldown seconds afterwards, and X is refused until it clears. A crit is x10, per the
+design; Phish is what turns every probe into one.
 
 | Skill | Agent | Cost | Cooldown | Effect |
 |---|---|---|---|---|
 | Crawl | Spider | 2,000 | 30s | +10 probes/s for 30s |
 | Spray | Pick | 25,000 | 45s | ×2 throughput for 30s |
-| Phish | Bait | 250,000 | 60s | every hit crits, 30s |
+| Phish | Bait | 250,000 | 60s | every probe crits (x10), 30s |
 | Siphon | Mule | 2,000,000 | 90s | ×3 credits for 30s |
 | Flood | Relay | 25,000,000 | 120s | +100% probe damage, 30s |
 | Blackout | Onyx | 500,000,000 | 180s | −15% vuln HP, 30s |
