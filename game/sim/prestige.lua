@@ -59,10 +59,13 @@ function M.ascend(st)
   st.bossFails = 0
   st.bossKills = 0
   st.boss = false
+  st.bossFarm = nil        -- a new system has no firewall stats to inherit
   st.timer = 0
 
+  -- nothing is deployed for free: an ascension puts the roster back exactly where a
+  -- new save starts, so the first Spider is the player's purchase again
   for i, a in ipairs(st.agents) do
-    a.lv = (i == 1) and 1 or 0
+    a.lv = 0
     a.cost = Agents.list[i].cost
   end
 

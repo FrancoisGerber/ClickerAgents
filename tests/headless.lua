@@ -559,12 +559,12 @@ Q.cleared = true
 local earned = Prestige.ascend(Q)
 check(earned == 29, "the ascension pays what was on offer")
 check(Q.zone == 1 and Q.credits == 0, "the run is wiped back to zone 1")
-check(Q.agents[1].lv == 1 and Q.agents[2].lv == 0, "agent levels are gone")
+check(Q.agents[1].lv == 0 and Q.agents[2].lv == 0, "agent levels are gone, Spider included")
 check(not Q.upOwned[1], "tools are gone")
 check(not Q.owned[3], "skills you bought are gone")
 check(Q.rootkits == 29 and Q.systems == 1, "rootkits and systems breached are kept")
 check(not Q.cleared, "the next run starts on a live vuln")
-check(Q.dps > 0, "and the framework still runs")
+check(Q.dps == 0 and Q.click == 1, "and nothing is deployed until the player buys it")
 
 -- held rootkits are throughput: +10% each
 local R = SimState.new_run()
@@ -654,6 +654,10 @@ check(offered > 0, "the run has rootkits to offer")
 Prestige.ascend(R4)
 check(R4.zone == 1 and R4.rootkits == offered, "ascension banks them and restarts the run")
 
+-- no free Spider: the player's first purchase of the second run is the same 12 credits
+R4.credits = F.agent_cost(require("data.agents").list[1].cost, 1)
+check(Economy.buy(R4, 1), "the second run buys its first Spider like a new save")
+
 local second100 = play_to(R4, 100)
 check(second100 ~= nil, "the second run reaches zone 100 too")
 check(second100 < first100, "and beats the first run's pace")
@@ -742,6 +746,28 @@ check(L2.totalKills == 1, "a kill counts toward the lifetime total")
 local before = L2.playtime
 Combat.tick(L2, 1)
 check(L2.playtime > before, "playtime accumulates with the tick")
+
+-- ---------------------------------------------------------------- ascension reset
+print("ascension reset")
+local AR = SimState.new_run()
+AR.zone, AR.bestZone = 100, 100
+AR.credits = 1e12
+for i = 1, 6 do AR.agents[i].lv = 400 end
+Economy.recalc(AR)
+check(AR.agents[1].lv == 400, "agents are levelled before ascending")
+local earned = Prestige.ascend(AR)
+check(earned > 0, "ascending pays rootkits")
+local free = 0
+for i, a in ipairs(AR.agents) do
+  if a.lv ~= 0 then free = free + 1 end
+end
+check(free == 0, "no agent is deployed for free after an ascension")
+check(AR.dps == 0 and AR.click == 1, "a fresh system starts with no throughput")
+check(AR.credits == 0 and AR.zone == 1, "and no credits, back on zone 1")
+check(AR.bossFarm == nil and not AR.boss, "and no firewall stats carried into the new run")
+check(not Economy.buy(AR, 1), "the first Spider is not affordable at zero credits")
+AR.credits = 12
+check(Economy.buy(AR, 1), "and costs its printed 12 credits like a new save")
 
 -- ---------------------------------------------------------------- boss farm state
 print("beaten firewall")

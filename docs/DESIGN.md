@@ -119,7 +119,9 @@ decision in this game follows from that gap.
 
 - **Unlocks:** at zone 100, when CORE is in reach. A visible confirm screen, not a hidden
   purchase — a handheld player should not have to discover a 1.9e19 purchase.
-- **Wipes:** credits, agent levels, tooling, zone (back to 1), skill unlocks.
+- **Wipes:** credits, agent levels, tooling, zone (back to 1), skill unlocks. Nothing is
+  handed back for free: a new system has an empty roster, so the first Spider is bought
+  again with the same 12 credits a brand-new save needs.
 - **Keeps:** rootkits, systems breached, best zone, total playtime.
 - **Rootkits earned:**
 
