@@ -14,7 +14,7 @@ survive the reset.
 - **Licence:** GPL-3.0-or-later (`LICENSE`)
 - **Runtime:** LÖVE 11.5, supplied by PortMaster — the port ships as a `.love` file, no compiled binary
 - **Target:** Anbernic RG34XXSP (Allwinner H700, 720×480), Knulli or muOS with PortMaster
-- **Status:** 0.9 — the full loop is playable end to end: twelve agents, twelve skills, ten tools, ten daemons, ten achievements, boss firewalls, ascension, offline replay. Every screen is wired to live state and the suite (390 checks) covers the maths, the save and the layout at three screen sizes.
+- **Version:** 1.0 — the full loop is playable end to end: twelve agents, twelve skills, ten tools, ten daemons, ten achievements, boss firewalls, ascension, offline replay. Every screen is wired to live state and the suite (390 checks) covers the maths, the save and the layout at three screen sizes.
 
 ## Design
 

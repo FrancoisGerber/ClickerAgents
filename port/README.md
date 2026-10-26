@@ -1,5 +1,3 @@
-![Clicker Agents](screenshot.png)
-
 ## Notes
 
 Clicker Agents is an idle (incremental) RPG about a rogue intrusion framework. Deploy
