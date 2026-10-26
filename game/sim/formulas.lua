@@ -1,61 +1,56 @@
 -- Every number in the game, in one place, with the formula from docs/DESIGN.md.
 -- Pure functions: no state, no love.*, trivially testable on the host.
+local T = require("tuning")
+
 local M = {}
 
-local MILESTONE_FIRST = 25
-local MILESTONE_EVERY = 25
-local DAMAGE_STEP = 4          -- x4 damage at every milestone
-local COST_GROWTH = 1.07
-
--- One press is worth this many seconds of the agents' output. It has to be over
--- 1.0, or a single tap per second would only match idling; at 1.5 one tap a second
--- beats waiting by half, and holding the button is worth 15 probes a second. The
--- rule: clicking is never the slower way to kill something, at any zone or level.
-M.PROBE_SHARE = 1.5
+-- kept as a field for callers that ask the formula what it is using
+M.PROBE_SHARE = T.probe.share
 
 function M.vuln_hp(zone)
-  if zone <= 140 then
-    return math.floor(10 * (1.55 ^ (zone - 1)) + 10 * (zone - 1))
+  local v = T.vuln
+  if zone <= v.soft_cap then
+    return math.floor(v.base * (v.growth ^ (zone - 1)) + v.linear * (zone - 1))
   end
-  local base = math.floor(10 * (1.55 ^ 139) + 10 * 139)
-  return math.floor(base * (1.145 ^ (zone - 140)))
+  local base = math.floor(v.base * (v.growth ^ (v.soft_cap - 1)) + v.linear * (v.soft_cap - 1))
+  return math.floor(base * (v.tail_growth ^ (zone - v.soft_cap)))
 end
 
 function M.boss_hp(zone)
-  return M.vuln_hp(zone) * 10
+  return M.vuln_hp(zone) * T.boss.hp_multiplier
 end
 
 function M.credits_per_vuln(zone)
-  return math.max(1, math.floor(0.05 * M.vuln_hp(zone)))
+  return math.max(1, math.floor(T.payout.share * M.vuln_hp(zone)))
 end
 
 -- next level price for an agent whose level-1 price is `base`
 function M.agent_cost(base, level)
-  return math.max(1, math.floor(base * (COST_GROWTH ^ (level - 1))))
+  return math.max(1, math.floor(base * (T.agent.cost_growth ^ (level - 1))))
 end
 
 -- how many times an agent has crossed a damage milestone
 function M.milestones(level)
   local n = 0
-  local at = MILESTONE_FIRST
+  local at = T.agent.milestone_first
   while level >= at do
     n = n + 1
-    at = at + MILESTONE_EVERY
+    at = at + T.agent.milestone_every
   end
   return n
 end
 
 function M.agent_dps(agent)
   if agent.lv <= 0 then return 0 end
-  return agent.base * agent.lv * (DAMAGE_STEP ^ M.milestones(agent.lv))
+  return agent.base * agent.lv * (T.agent.milestone_step ^ M.milestones(agent.lv))
 end
 
 function M.probe_damage(dps)
-  return math.max(1, math.floor((dps or 0) * M.PROBE_SHARE))
+  return math.max(T.probe.min, math.floor((dps or 0) * T.probe.share))
 end
 
 function M.is_boss_zone(zone)
-  return zone % 5 == 0
+  return zone % T.zone.boss_every == 0
 end
 
 -- zones walk through six layers of the target (see data/systems.lua)
@@ -87,7 +82,7 @@ function M.upgrade_totals(upOwned)
 end
 
 function M.rootkits_for_run(total_agent_levels, boss_kills, bonus)
-  return math.floor(total_agent_levels / 2000) + boss_kills + (bonus or 0)
+  return math.floor(total_agent_levels / T.prestige.levels_per_rootkit) + boss_kills + (bonus or 0)
 end
 
 return M

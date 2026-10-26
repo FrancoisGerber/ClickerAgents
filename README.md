@@ -28,7 +28,7 @@ survive the reset.
 
 ```
 Clicker Agents/
-├── game/       the LÖVE project, split by concern:
+├── game/       the LÖVE project (tuning.lua holds every balance value), split by concern:
 │   ├── data/     agents, skills, tools, achievements, systems, daemons
 │   ├── sim/      state, formulas, economy, combat, save
 │   ├── ui/       draw primitives, widgets, sprites, chrome, toast

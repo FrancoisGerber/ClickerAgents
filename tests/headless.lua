@@ -706,6 +706,55 @@ local before = L2.playtime
 Combat.tick(L2, 1)
 check(L2.playtime > before, "playtime accumulates with the tick")
 
+-- ---------------------------------------------------------------- tuning
+print("tuning")
+local TUNE = require("tuning")
+
+-- the file is actually consulted: move a value, watch the system follow, put it back
+local before = F.probe_damage(1000)
+TUNE.probe.share = 3.0
+check(F.probe_damage(1000) == 3000, "probe share comes from tuning")
+TUNE.probe.share = before / 1000
+
+local hpAt = F.vuln_hp(10)
+TUNE.vuln.linear = 0
+check(F.vuln_hp(10) ~= hpAt, "the vuln curve comes from tuning")
+TUNE.vuln.linear = 10
+check(F.vuln_hp(10) == hpAt, "and restores exactly")
+
+local costAt = F.agent_cost(100, 5)
+TUNE.agent.cost_growth = 2.0
+check(F.agent_cost(100, 5) ~= costAt, "agent cost growth comes from tuning")
+TUNE.agent.cost_growth = 1.07
+check(F.agent_cost(100, 5) == costAt, "and restores exactly")
+
+check(Combat.KILLS_PER_ZONE == TUNE.zone.kills_per_zone, "kills per zone comes from tuning")
+check(Combat.BOSS_SECONDS == TUNE.boss.seconds, "the firewall clock comes from tuning")
+check(Buffs.DURATION == TUNE.buff.duration, "skill duration comes from tuning")
+check(Prestige.UNLOCK_ZONE == TUNE.prestige.unlock_zone, "the ascension gate comes from tuning")
+check(Save.INTERVAL == TUNE.save.interval, "the autosave beat comes from tuning")
+check(Save.OFFLINE_CAP == TUNE.save.offline_cap, "the offline cap comes from tuning")
+
+-- and no module is hiding a copy of them
+local files = { "sim/formulas.lua", "sim/economy.lua", "sim/combat.lua", "sim/buffs.lua",
+                "sim/prestige.lua", "sim/save.lua" }
+local banned = { "1.55", "1.145", "1.07", "0.05", "2000" }
+local leaks = 0
+for _, rel in ipairs(files) do
+  local f = io.open("game/" .. rel, "r")
+  if f then
+    for line in f:lines() do
+      if not line:match("^%s*%-%-") then
+        for _, lit in ipairs(banned) do
+          if line:find(lit, 1, true) then leaks = leaks + 1 end
+        end
+      end
+    end
+    f:close()
+  end
+end
+check(leaks == 0, "no module keeps its own copy of a tuned constant (" .. leaks .. " found)")
+
 -- ---------------------------------------------------------------- binds
 print("binds")
 local B = Game.bindsOf()

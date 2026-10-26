@@ -7,15 +7,17 @@ local Achievements = require("sim.achievements")
 
 local M = {}
 
-local KILLS_PER_ZONE = 10
-local BOSS_SECONDS = 30
+local T = require("tuning")
+
+local KILLS_PER_ZONE = T.zone.kills_per_zone
+local BOSS_SECONDS = T.boss.seconds
 
 M.KILLS_PER_ZONE = KILLS_PER_ZONE
 M.BOSS_SECONDS = BOSS_SECONDS
 
--- HONEYPOT buys the firewall ten more seconds
+-- HONEYPOT buys the firewall extra seconds
 function M.boss_seconds(st)
-  return BOSS_SECONDS + ((st.daemons and st.daemons[4]) and 10 or 0)
+  return BOSS_SECONDS + ((st.daemons and st.daemons[4]) and T.boss.honeypot_seconds or 0)
 end
 
 -- put a fresh target in front of the player for the current zone

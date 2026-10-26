@@ -4,6 +4,7 @@ local F = require("sim.formulas")
 local Upgrades = require("data.upgrades")
 local Skills = require("data.skills")
 local Buffs = require("sim.buffs")
+local T = require("tuning")
 
 local M = {}
 
@@ -16,8 +17,8 @@ function M.recalc(st)
   local dm = st.daemons or {}
   local beacon = dm[3] and 1.10 or 1
   local watchdog = dm[2] and 1.15 or 1
-  st.dps = math.floor(dps * (1 + t.dps_add) * b.dps * beacon * (1 + 0.10 * (st.rootkits or 0)))
-  local payout = F.credits_per_vuln(st.zone) * (st.boss and 3 or 1)
+  st.dps = math.floor(dps * (1 + t.dps_add) * b.dps * beacon * (1 + T.prestige.hold_bonus * (st.rootkits or 0)))
+  local payout = F.credits_per_vuln(st.zone) * (st.boss and T.payout.boss_multiplier or 1)
   st.creditsKill = math.max(1, math.floor(payout * (1 + t.credits_add) * b.credits * watchdog))
   st.click = math.max(1, math.floor(F.probe_damage(st.dps) * t.click_mul * (1 + t.click_add) * b.click))
 end

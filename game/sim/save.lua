@@ -9,8 +9,10 @@ local F = require("sim.formulas")
 local M = {}
 
 M.FILE = "save.lua"
-M.OFFLINE_CAP = 8 * 3600      -- beyond eight hours farming stops being interesting
-M.INTERVAL = 60               -- a save every minute, no matter what
+local T = require("tuning")
+
+M.OFFLINE_CAP = T.save.offline_cap   -- beyond this, farming stops being interesting
+M.INTERVAL = T.save.interval         -- a save this often even when nothing changes
 M.reason = nil                -- why the last write happened, for the tests
 
 local function quote(s)
@@ -144,7 +146,7 @@ function M.replay_offline(st, data)
   local saved = data and data.saved_at or nil
   if not saved then return nil end
   local elapsed = math.max(0, math.floor(os.time() - saved))
-  if elapsed < 30 then return nil end
+  if elapsed < T.save.offline_min then return nil end
   local capped = math.min(elapsed, M.OFFLINE_CAP)
 
   local zones0 = st.zone

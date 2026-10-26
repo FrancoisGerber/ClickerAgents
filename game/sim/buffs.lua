@@ -1,16 +1,17 @@
 -- Active skill effects. A buff is a countdown in seconds; the multipliers are read
 -- by sim/economy on every recalculation, so casting a skill changes the numbers and
 -- the numbers change back when it expires. Pure data, no love.* calls.
+local T = require("tuning")
 local M = {}
 
-M.DURATION = 30
+M.DURATION = T.buff.duration
 
 -- roster order matches data/skills.lua
 M.CRAWL, M.SPRAY, M.PHISH, M.SIPHON, M.FLOOD, M.BLACKOUT = 1, 2, 3, 4, 5, 6
 
-M.CRIT_MUL = 10        -- a crit is x10, per DESIGN.md; Phish makes every probe crit
-M.CRAWL_PROBES = 10    -- extra probes per second
-M.BLACKOUT_CUT = 0.15  -- vuln HP removed
+M.CRIT_MUL = T.buff.crit_multiplier   -- Phish makes every probe crit
+M.CRAWL_PROBES = T.buff.crawl_probes  -- extra probes per second
+M.BLACKOUT_CUT = T.buff.blackout_cut  -- share of the vuln HP removed
 
 function M.start(st, i)
   st.buff = st.buff or {}

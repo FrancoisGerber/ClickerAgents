@@ -21,6 +21,7 @@ local lg = { push = Draw.push, pop = Draw.pop, translate = Draw.translate }
 local systemName, layerName, vulnName = Systems.name, Systems.layer, Systems.vuln
 local Economy = require("sim.economy")
 local Formulas = require("sim.formulas")
+local Combat = require("sim.combat")
 
 local function hpBar(x, y, w, h, frac, warn)
   px(x, y, w, h, C.hpEmpty)
@@ -133,7 +134,8 @@ local function battleCol(o)
     drawTextR(string.format("%d:%02d", math.floor(t / 60), math.floor(t % 60)), L.labelR, nextY,
               pulse and C.text or (late and C.warn or C.text), 2)
     px(32, barY, L.hpW, 8, C.hpEmpty)
-    px(32, barY, math.floor(L.hpW * math.min(1, t / 30) / 4) * 4, 8, pulse and C.text or C.warn)
+    local full = Combat.boss_seconds(st)
+    px(32, barY, math.floor(L.hpW * math.min(1, t / full) / 4) * 4, 8, pulse and C.text or C.warn)
   else
     drawText("NEXT SYSTEM", 32, nextY, C.dim, 2)
     drawTextR("ZONE 100", L.labelR, nextY, C.dim, 2)

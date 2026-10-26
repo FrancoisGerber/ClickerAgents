@@ -190,3 +190,19 @@ agents still killing whatever spawns, until they press **X** to advance. That pa
 the upgrade window — bank credits, level agents, then move on. Autobuy and auto-zone
 are forbidden during play; the only automation is the agents' own throughput, and the
 only place zones advance unattended is the offline replay on launch.
+
+## 11. Where the numbers live
+
+Every value that changes how the game plays is in **`game/tuning.lua`** and nowhere else:
+zone and firewall counts, the vuln HP curve and where it changes shape, the credit share,
+agent cost growth and damage milestones, probe share, skill duration and magnitudes, the
+ascension gate and rootkit rate, and the save cadence.
+
+The file holds *balance*, not content. What an individual agent costs, what a tool does and
+what a skill is called stay with their rows in `data/`, because those are edited item by
+item. Nothing in `sim/` is allowed to keep a private copy of a tuned constant: if two
+modules need a number, it lives in `tuning.lua` and both read it.
+
+The suite proves it rather than trusting it — it moves `probe.share`, `vuln.linear` and
+`agent.cost_growth` at runtime and watches the formulas follow, then greps the sim modules
+for the old literals.

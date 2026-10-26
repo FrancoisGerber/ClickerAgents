@@ -7,9 +7,10 @@ local Formulas = require("sim.formulas")
 local Skills = require("data.skills")
 local Agents = require("data.agents")
 
+local T = require("tuning")
 local M = {}
 
-M.UNLOCK_ZONE = 100
+M.UNLOCK_ZONE = T.prestige.unlock_zone
 
 function M.can_ascend(st)
   return st.zone >= M.UNLOCK_ZONE
@@ -23,7 +24,7 @@ function M.rootkits_on_offer(st)
 end
 
 function M.bonus_from_held(st)
-  return 1 + 0.10 * (st.rootkits or 0)
+  return 1 + T.prestige.hold_bonus * (st.rootkits or 0)
 end
 
 -- ROOTKIT SPEND: a daemon is permanent and costs rootkits you could have held.
