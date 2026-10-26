@@ -125,6 +125,11 @@ Keyboard equivalents when running on a desktop (the same keys the gptk sends):
 | `m` | cycle list width (auto / narrow / wide) — desktop only |
 | `Escape` | quit |
 
+## Contributing
+
+`main` is protected: changes land through pull requests only, including from the owner.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) has the flow and what a pull request has to pass.
+
 ## The four commands
 
 ```sh
