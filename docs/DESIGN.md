@@ -74,8 +74,9 @@ Total DPS is recomputed only when something is bought, never per frame:
 ## 5. Zones and vulns
 
 - **Vulns per zone:** 10. (Depth scaling and the "fewer vulns" upgrade are v1.1.)
-- **Boss zones:** every 5th zone — one boss firewall, **30 seconds**. Fail and the
-  perimeter closes: you lose the attempt, not your credits.
+- **Boss zones:** every 5th zone — one boss firewall, **30 seconds**, paying triple.
+  Fail and the perimeter closes: you lose the attempt, not your credits, and you are
+  pushed back one zone with the gate still open so you can farm the dps you lack.
 - **Vuln HP:**
 
   ```

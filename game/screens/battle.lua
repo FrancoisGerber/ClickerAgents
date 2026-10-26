@@ -35,6 +35,9 @@ end
 local function battleCol(o)
   o = o or {}
   local bw = L.battleW
+  -- the arena reads the boss from the run unless a preview explicitly overrides it
+  local isBoss = o.boss
+  if isBoss == nil then isBoss = st.boss end
   local flash = o.flash or st.flashT > 0
   -- vertical rhythm from the body height, so a 720-tall panel spreads its
   -- content instead of leaving the bottom half empty
@@ -65,7 +68,7 @@ local function battleCol(o)
   pillar(0.87, 128, 32, 96, true)
   local zSel = st.zoneSel or st.zone
   local cleared = st.cleared and not o.preview
-  local nm = o.boss and "BOSS FIREWALL" or vulnName(zSel)
+  local nm = isBoss and "BOSS FIREWALL" or vulnName(zSel)
   local nw = textW(nm, 2)
   local plateW = math.max(nw + 16, 200)
   local plateX = math.floor((bw - plateW) / 2)
@@ -75,7 +78,7 @@ local function battleCol(o)
   local looking = (zSel ~= st.zone)
   drawText(systemName() .. " · " .. layerName(zSel), 16, 40,
            looking and C.gold or C.dim, 2)
-  if o.boss then
+  if isBoss then
     px(16, 62, bw - 48, 2, C.warn)
   else
     for i = 0, 9 do px(16 + i * 16, 60, 8, 8, i < st.kills and C.gold or C.rule) end
@@ -83,7 +86,7 @@ local function battleCol(o)
 
   local mx = math.floor(bw / 2) - 76
   local frac = st.hpMax > 0 and (st.hp / st.hpMax) or 1
-  if o.boss then
+  if isBoss then
     drawBossVuln(math.floor(bw / 2) - 86, monY - 12, frac, 1.1)
   else
     drawVuln(math.floor(bw / 2) - 88, monY - 4, frac, flash, 1.4)
@@ -93,9 +96,9 @@ local function battleCol(o)
   drawTextC(nm, math.floor(bw / 2), nameY, C.text, 2)
 
   local frac = st.hpMax > 0 and (st.hp / st.hpMax) or 0
-  hpBar(L.hpX, hpY, L.hpW, 32, frac, o.boss)
+  hpBar(L.hpX, hpY, L.hpW, 32, frac, isBoss)
   drawText(fmt(st.hp) .. " / " .. fmt(st.hpMax), L.hpX + 8, hpY + 8, C.text, 2)
-  drawTextR(math.floor(frac * 100 + 0.5) .. "%", L.labelR, hpY + 8, o.boss and C.warn or C.dim, 2)
+  drawTextR(math.floor(frac * 100 + 0.5) .. "%", L.labelR, hpY + 8, isBoss and C.warn or C.dim, 2)
 
   drawText("vulns " .. st.kills .. " / " .. (st.killsRequired or 10), 32, killsY, cleared and C.gold or C.dim, 2)
   drawTextR("+" .. fmt(st.creditsKill) .. " credits", L.labelR, killsY, C.gold, 2)
@@ -118,11 +121,15 @@ local function battleCol(o)
     drawText("NEXT ZONE READY", 32, nextY, C.gold, 2)
     drawTextR("X TO ADVANCE", L.labelR, nextY, C.gold, 2)
     px(32, barY, L.hpW, 8, C.gold)
-  elseif o.boss then
-    drawText("BOSS TIMER", 32, nextY, C.dim, 2)
-    drawTextR("0:14", L.labelR, nextY, C.warn, 2)
+  elseif isBoss then
+    local t = math.max(0, st.timer)
+    local late = t <= 10
+    local pulse = late and (math.floor(os.clock() * 4) % 2 == 1)
+    drawText("BOSS TIMER", 32, nextY, late and C.warn or C.dim, 2)
+    drawTextR(string.format("%d:%02d", math.floor(t / 60), math.floor(t % 60)), L.labelR, nextY,
+              pulse and C.text or (late and C.warn or C.text), 2)
     px(32, barY, L.hpW, 8, C.hpEmpty)
-    px(32, barY, math.floor(L.hpW * (st.timer / 30) / 4) * 4, 8, C.warn)
+    px(32, barY, math.floor(L.hpW * math.min(1, t / 30) / 4) * 4, 8, pulse and C.text or C.warn)
   else
     drawText("NEXT SYSTEM", 32, nextY, C.dim, 2)
     drawTextR("ZONE 100", L.labelR, nextY, C.dim, 2)

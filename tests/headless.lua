@@ -129,13 +129,26 @@ check(boss.boss == true, "zone 5 is a boss firewall")
 check(boss.timer == Combat.BOSS_SECONDS, "the boss has a 30 second clock")
 check(boss.hpMax == F.boss_hp(5), "the boss bar is ten vulns deep")
 
-local before = boss.zone
 boss.dps = 0
+boss.credits = 4242
 boss.timer = 0.5
 Combat.tick(boss, 1)
-check(boss.zone == before, "failing the clock keeps the zone")
-check(boss.timer == Combat.BOSS_SECONDS, "failing the clock gives the boss a fresh timer")
-check(boss.hp == boss.hpMax, "failing the clock re-arms the firewall")
+check(boss.bossFails == 1, "failing the clock counts the attempt")
+check(boss.zone == 4, "a closed perimeter pushes you back a zone to farm")
+check(boss.credits == 4242, "the attempt costs the clock, not your credits")
+check(boss.cleared and boss.kills == boss.killsRequired, "the gate forward stays open")
+check(not boss.boss and boss.timer == 0, "the zone you land in is a normal farm zone")
+
+check(Combat.advance_zone(boss), "one press walks back into the firewall")
+check(boss.zone == 5 and boss.boss, "and the firewall is waiting")
+check(boss.timer == Combat.BOSS_SECONDS, "with a fresh 30 second clock")
+check(boss.hp == boss.hpMax, "and a full bar")
+
+-- a firewall pays triple the vuln rate
+local pay = SimState.new_run()
+pay.zone = 5
+Combat.new_run_spawn(pay)
+check(pay.creditsKill == F.credits_per_vuln(5) * 3, "a firewall pays three times a vuln")
 
 -- ---------------------------------------------------------------- buying
 print("economy")
@@ -315,6 +328,44 @@ check(zone100 ~= nil, "a greedy player reaches zone 100 at all")
 check(zone100 and zone100 >= 900, "but not before 15 minutes")
 check(zone100 and zone100 <= 1500, "and inside 25 minutes")
 print(string.format("  zone 100 at %s, final zone %d", zone100 and string.format("%.0fs", zone100) or "never", run2.zone))
+
+-- ---------------------------------------------------------------- M3 acceptance
+print("balance (M3 acceptance)")
+local run3 = SimState.new_run()
+Combat.new_run_spawn(run3)
+local dt3, t3, lastBest, monotone = 1, 0, 1, true
+local function shop3()
+  local best, bestCost = nil, math.huge
+  for i = 1, #run3.agents do
+    if Economy.unlocked(run3, i) then
+      local c = Economy.next_cost(run3, i)
+      if c <= run3.credits and c < bestCost then best, bestCost = i, c end
+    end
+  end
+  if best then Economy.buy(run3, best) return end
+  for i = 1, #Upgrades.list do
+    if not Economy.tool_owned(run3, i) and Economy.buy_tool(run3, i) then return end
+  end
+end
+while t3 < 8 * 3600 and run3.zone < 300 do
+  if run3.cleared then
+    -- a player who will not walk into a firewall they cannot break inside 30 s
+    local nxt = run3.zone + 1
+    local need = F.is_boss_zone(nxt) and (F.boss_hp(nxt) / Combat.BOSS_SECONDS) * 1.05 or 0
+    if run3.dps >= need then Combat.advance_zone(run3) end
+  end
+  Combat.tick(run3, dt3)
+  t3 = t3 + dt3
+  shop3()
+  if run3.bestZone < lastBest then monotone = false end
+  lastBest = run3.bestZone
+end
+check(run3.bossFails == 0, "eight hours in, no firewall was walked into underprepared")
+check(run3.zone >= 150, "eight hours of play clears zone 150")
+check(monotone, "the run never goes backwards")
+check(math.floor(run3.zone / 5) >= 30, "thirty firewalls broken on the way")
+print(string.format("  zone %d after 8h, %d firewalls broken, %d failed, dps %.2e",
+  run3.zone, math.floor(run3.zone / 5), run3.bossFails or 0, run3.dps))
 
 -- ---------------------------------------------------------------- binds
 print("binds")

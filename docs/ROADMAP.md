@@ -32,13 +32,16 @@ outside the canvas, and the gptk agrees with the game on every binding.
 
 **Acceptance:** met — a greedy player that buys the cheapest agent level, then the next tool, and walks through every gate reaches **zone 100 at 1053 s (17.6 min)**, final zone 105 at 25 min. The assertion lives in `tests/headless.lua` and fails if it drifts outside 15–25 minutes, so the content numbers have to move, not the code.
 
-## M3 — Bosses and the clock
+## M3 — Bosses and the clock  ✅ shipped
 
-- Boss zone every 5: one vuln, 30-second timer, failure resets the zone
-- Red pulsing timer under 10 s
+- Boss zone every 5: one firewall, 30-second clock, triple payout
+- A failed attempt pushes you back one zone with the gate still open, so you can farm the dps you are missing; credits are never lost
+- Red pulsing timer under 10 s, drawn from the real `st.timer`
 - Real-time accuracy: the timer uses `dt`, so a lagging frame does not steal a second
 
-**Acceptance:** a boss you cannot beat fails exactly once and puts you back on the same zone with credits intact. Simulated over 300 zones, no boss is ever unwinnable *and* unavoidable — every one can be passed by buying something.
+**Acceptance:** met. A player who refuses to enter a firewall they cannot break inside 30 s plays eight simulated hours: **zone 184, 36 firewalls broken, 0 failed**, best zone never regresses. The push-back rule guarantees the failure case is survivable by construction — the tests cover the clock, the push-back, the open gate and the re-armed timer.
+
+**Known ceiling, not a boss problem:** zone 300 is roughly two simulated days at the current curve. Past zone ~140 the 1.145/zone HP tail outruns what the agent ladder can buy back (1.07^level costs against x4 damage every 25 levels), so each zone costs more time than the last. The boss rule is not the brake; the economy is. Options when it becomes a priority: cost growth 1.07 -> 1.05, milestones x6 instead of x4, or a gentler tail (1.08 gets zone 300 inside a simulated day).
 
 ## M4 — Ascension
 

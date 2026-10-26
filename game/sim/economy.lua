@@ -12,7 +12,8 @@ function M.recalc(st)
   for _, a in ipairs(st.agents) do dps = dps + F.agent_dps(a) end
   local t = F.upgrade_totals(st.upOwned)
   st.dps = math.floor(dps * (1 + t.dps_add))
-  st.creditsKill = math.max(1, math.floor(F.credits_per_vuln(st.zone) * (1 + t.credits_add)))
+  local payout = F.credits_per_vuln(st.zone) * (st.boss and 3 or 1)
+  st.creditsKill = math.max(1, math.floor(payout * (1 + t.credits_add)))
   st.click = math.max(1, math.floor((1 + 0.005 * st.dps) * t.click_mul * (1 + t.click_add)))
 end
 

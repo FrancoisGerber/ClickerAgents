@@ -92,11 +92,16 @@ function M.tick(st, dt)
   if st.boss and st.timer > 0 then
     st.timer = st.timer - dt
     if st.timer <= 0 then
-      -- the perimeter closed: lose the attempt, keep the credits
+      -- the perimeter closed: you lose the attempt and get pushed back a zone to
+      -- farm the dps you are missing. Credits stay, and the gate forward stays open
+      -- so walking back in is one press.
       st.timer = 0
-      st.kills = 0
-      st.boss = false
+      st.bossFails = (st.bossFails or 0) + 1
+      st.zone = math.max(1, st.zone - 1)
       M.spawn(st)
+      st.cleared = true
+      st.kills = st.killsRequired
+      st.msg, st.msgT = "PERIMETER CLOSED · BACK ONE ZONE", 2.5
     end
   end
 end
