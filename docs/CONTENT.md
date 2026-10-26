@@ -7,23 +7,23 @@ not code: the game loads these from tables so content can be tuned without touch
 ## Agents
 
 You are the framework; agents are what it deploys. Cost is the level-1 price; the next
-level is `floor(cost × 1.07^level)`. Damage is throughput at level 1, and the level-200
-milestone rule (`×4` every 25 levels) applies to every agent.
+level is `floor(cost × 1.07^level)`. Damage is throughput at level 1, and the milestone
+rule (`×4` at level 25 and every 25 levels after) applies to every agent.
 
 | # | Agent | Base cost | Base DPS | Deploys at | Specialism |
 |---|---|---|---|---|---|
-| 1 | Spider | 12 | 12 | zone 1 | crawler: finds the surface |
-| 2 | Pick | 214 | 214 | zone 1 | credential spray, first real throughput |
-| 3 | Bait | 1,400 | 1,400 | zone 1 | social engineering, converts people into access |
-| 4 | Splice | 4,200 | 4,200 | zone 1 | injection: RCE, SQLi, deserialisation |
-| 5 | Relay | 9,800 | 9,800 | zone 1 | pivots; stronger the deeper you already are |
-| 6 | Grind | 41,000 | 41,000 | zone 1 | hash cracking, works while you are away |
-| 7 | Cicada | 190,000 | 190,000 | zone 26 | droppers and persistence on endpoints |
-| 8 | Mule | 400,000 | 400,000 | zone 34 | exfiltration and staging |
-| 9 | Taint | 2,000,000 | 2,000,000 | zone 43 | supply chain: one dependency, everything downstream |
-| 10 | Hush | 10,000,000 | 10,000,000 | zone 53 | wireless and implants, walks past a perimeter |
-| 11 | Badge | 50,000,000 | 50,000,000 | zone 64 | insider: buys a human instead of a hole |
-| 12 | Onyx | 250,000,000 | 250,000,000 | zone 76 | endgame framework, multiplies every other agent |
+| 1 | Spider | 6 | 6 | zone 1 | crawler: finds the surface |
+| 2 | Pick | 107 | 107 | zone 1 | credential spray, first real throughput |
+| 3 | Bait | 700 | 700 | zone 1 | social engineering, converts people into access |
+| 4 | Splice | 2,100 | 2,100 | zone 1 | injection: RCE, SQLi, deserialisation |
+| 5 | Relay | 4,900 | 4,900 | zone 1 | pivots; stronger the deeper you already are |
+| 6 | Grind | 20,500 | 20,500 | zone 1 | hash cracking, works while you are away |
+| 7 | Cicada | 95,000 | 95,000 | zone 26 | droppers and persistence on endpoints |
+| 8 | Mule | 200,000 | 200,000 | zone 34 | exfiltration and staging |
+| 9 | Taint | 1M | 1M | zone 43 | supply chain: one dependency, everything downstream |
+| 10 | Hush | 5M | 5M | zone 53 | wireless and implants, walks past a perimeter |
+| 11 | Badge | 25M | 25M | zone 64 | insider: buys a human instead of a hole |
+| 12 | Onyx | 125M | 125M | zone 76 | endgame framework, multiplies every other agent |
 
 Base throughput equals the base price: one DPS per credit at level 1. That ratio is
 what keeps the ladder in front of vuln HP, which grows 55% per zone early and
@@ -81,16 +81,16 @@ levelling the best agent is no longer efficient.
 
 | Tool | Cost | Effect |
 |---|---|---|
-| Scanner | 1,000 | +25% probe damage |
-| Wordlist | 5,000 | +10% all throughput |
-| Skimmer | 20,000 | +25% credits from vulns |
-| Exploit Kit | 100,000 | ×2 probe damage |
-| Botnet | 500,000 | +15% all throughput |
-| Launderer | 2,000,000 | +50% credits from vulns |
-| 0-Day | 10,000,000 | ×3 probe damage |
-| Backdoor | 50,000,000 | +20% all throughput |
-| Mixer | 250,000,000 | +100% credits from vulns |
-| Persistence | 2,000,000,000 | +25% throughput, and +1 rootkit per ascension |
+| Scanner | 500 | +25% probe damage |
+| Wordlist | 2,500 | +10% all throughput |
+| Skimmer | 10,000 | +25% credits from vulns |
+| Exploit Kit | 50,000 | ×2 probe damage |
+| Botnet | 250,000 | +15% all throughput |
+| Launderer | 1M | +50% credits from vulns |
+| 0-Day | 5M | ×3 probe damage |
+| Backdoor | 25M | +20% all throughput |
+| Mixer | 125M | +100% credits from vulns |
+| Persistence | 1B | +25% throughput, and +1 rootkit per ascension |
 
 ## Rootkits
 
@@ -115,18 +115,18 @@ design; Phish is what turns every probe into one.
 
 | Skill | Agent | Cost | Cooldown | Effect |
 |---|---|---|---|---|
-| Crawl | Spider | 2,000 | 30s | +10 probes/s for 30s |
-| Spray | Pick | 25,000 | 45s | ×2 throughput for 30s |
-| Phish | Bait | 250,000 | 60s | every probe crits (×10), 30s |
-| Splice | Splice | 750,000 | 60s | ×3 probe damage for 30s |
-| Flood | Relay | 2,000,000 | 90s | ×1.5 throughput for 30s |
-| Grind | Grind | 10,000,000 | 90s | ×1.5 credits for 30s |
-| Cicada | Cicada | 25,000,000 | 120s | +25 probes/s for 30s |
-| Siphon | Mule | 50,000,000 | 120s | ×3 credits for 30s |
-| Taint | Taint | 150,000,000 | 150s | −20% vuln HP for 30s |
-| Hush | Hush | 400,000,000 | 180s | ×2 probe damage for 30s |
-| Badge | Badge | 1,000,000,000 | 180s | ×3 throughput for 30s |
-| Blackout | Onyx | 2,000,000,000 | 240s | −30% vuln HP for 30s |
+| Crawl | Spider | 1,000 | 30s | +10 probes/s for 30s |
+| Spray | Pick | 12,500 | 45s | ×2 throughput for 30s |
+| Phish | Bait | 125,000 | 60s | every probe crits (×10), 30s |
+| Splice | Splice | 375,000 | 60s | ×3 probe damage for 30s |
+| Flood | Relay | 1M | 90s | ×1.5 throughput for 30s |
+| Grind | Grind | 5M | 90s | ×1.5 credits for 30s |
+| Cicada | Cicada | 12.5M | 120s | +25 probes/s for 30s |
+| Siphon | Mule | 25M | 120s | ×3 credits for 30s |
+| Taint | Taint | 75M | 150s | −20% vuln HP for 30s |
+| Hush | Hush | 200M | 180s | ×2 probe damage for 30s |
+| Badge | Badge | 500M | 180s | ×3 throughput for 30s |
+| Blackout | Onyx | 1B | 240s | −30% vuln HP for 30s |
 
 ## Achievements
 
@@ -159,19 +159,19 @@ credits, and the effect is applied the moment the purchase lands.
 
 | Tool | Price | Effect |
 |---|---|---|
-| SCANNER | 1K | +25% probe damage |
-| WORDLIST | 5K | +10% throughput |
-| SKIMMER | 20K | +25% credits from vulns |
-| EXPLOIT KIT | 100K | x2 probe damage |
-| BOTNET | 500K | +15% throughput |
-| LAUNDERER | 2M | +50% credits from vulns |
-| 0-DAY | 10M | x3 probe damage |
-| BACKDOOR | 50M | +20% throughput |
-| MIXER | 250M | +100% credits from vulns |
-| PERSISTENCE | 2B | +25% throughput, +1 rootkit per ascension |
+| SCANNER | 500 | +25% probe damage |
+| WORDLIST | 2.5K | +10% throughput |
+| SKIMMER | 10K | +25% credits from vulns |
+| EXPLOIT KIT | 50K | x2 probe damage |
+| BOTNET | 250K | +15% throughput |
+| LAUNDERER | 1M | +50% credits from vulns |
+| 0-DAY | 5M | x3 probe damage |
+| BACKDOOR | 25M | +20% throughput |
+| MIXER | 125M | +100% credits from vulns |
+| PERSISTENCE | 1B | +25% throughput, +1 rootkit per ascension |
 
 Skills are bought the same way on the SKILLS tab (A buys, X casts); their prices are
-2K, 25K, 250K, 750K, 2M, 10M, 25M, 50M, 150M, 400M, 1B and 2B in roster order.
+1K, 12.5K, 125K, 375K, 1M, 5M, 12.5M, 25M, 75M, 200M, 500M and 1B in roster order.
 
 ## Daemons
 

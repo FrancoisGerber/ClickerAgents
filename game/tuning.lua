@@ -18,9 +18,9 @@ T.zone = {
 }
 
 T.vuln = {
-  base = 10,                  -- HP of the zone-1 vuln
+  base = 5,                   -- HP of the zone-1 vuln
   growth = 1.55,              -- per-zone HP growth while the curves still fit doubles
-  linear = 10,                -- flat HP added per zone, keeps the first ten zones honest
+  linear = 5,                 -- flat HP added per zone, keeps the first ten zones honest
   soft_cap = 140,             -- zone where the growth curve switches to the tail
   tail_growth = 1.145,        -- per-zone growth past the soft cap
 }

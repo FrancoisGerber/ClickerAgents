@@ -7,18 +7,18 @@
 local M = {}
 
 local AGENTS = {
-  { name = "Spider", lv = 0, cost = 12,        base = 12 },
-  { name = "Pick",   lv = 0, cost = 214,       base = 214 },
-  { name = "Bait",   lv = 0, cost = 1400,      base = 1400 },
-  { name = "Splice", lv = 0, cost = 4200,      base = 4200 },
-  { name = "Relay",  lv = 0, cost = 9800,      base = 9800 },
-  { name = "Grind",  lv = 0, cost = 41000,     base = 41000 },
-  { name = "Cicada", lv = 0, cost = 190000,    base = 190000,    lock = 26 },
-  { name = "Mule",   lv = 0, cost = 400000,    base = 400000,    lock = 34 },
-  { name = "Taint",  lv = 0, cost = 2000000,   base = 2000000,   lock = 43 },
-  { name = "Hush",   lv = 0, cost = 10000000,  base = 10000000,  lock = 53 },
-  { name = "Badge",  lv = 0, cost = 50000000,  base = 50000000,  lock = 64 },
-  { name = "Onyx",   lv = 0, cost = 250000000, base = 250000000, lock = 76 },
+  { name = "Spider", lv = 0, cost = 6,        base = 6 },
+  { name = "Pick",   lv = 0, cost = 107,       base = 107 },
+  { name = "Bait",   lv = 0, cost = 700,      base = 700 },
+  { name = "Splice", lv = 0, cost = 2100,      base = 2100 },
+  { name = "Relay",  lv = 0, cost = 4900,      base = 4900 },
+  { name = "Grind",  lv = 0, cost = 20500,     base = 20500 },
+  { name = "Cicada", lv = 0, cost = 95000,    base = 95000,    lock = 26 },
+  { name = "Mule",   lv = 0, cost = 200000,    base = 200000,    lock = 34 },
+  { name = "Taint",  lv = 0, cost = 1000000,   base = 1000000,   lock = 43 },
+  { name = "Hush",   lv = 0, cost = 5000000,  base = 5000000,  lock = 53 },
+  { name = "Badge",  lv = 0, cost = 25000000,  base = 25000000,  lock = 64 },
+  { name = "Onyx",   lv = 0, cost = 125000000, base = 125000000, lock = 76 },
 }
 
 M.list = AGENTS

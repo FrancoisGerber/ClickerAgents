@@ -86,7 +86,7 @@ Total DPS is recomputed only when something is bought, never per frame:
 - **Vuln HP:**
 
   ```
-  L ≤ 140:        H(L) = 10 × 1.55^(L−1) + 10 × (L−1)
+  L ≤ 140:        H(L) = 5 × 1.55^(L−1) + 5 × (L−1)
   L > 140:        H(L) = H(140) × 1.145^(L−140)
   ```
 

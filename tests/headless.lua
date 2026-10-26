@@ -96,7 +96,7 @@ print("  rects drawn: " .. calls.rect)
 
 -- ---------------------------------------------------------------- formulas
 print("formulas")
-check(F.vuln_hp(1) >= 10, "vuln hp at zone 1")
+check(F.vuln_hp(1) == require("tuning").vuln.base, "vuln hp at zone 1")
 check(F.vuln_hp(2) > F.vuln_hp(1), "vuln hp grows with zone")
 check(F.vuln_hp(141) > F.vuln_hp(140), "vuln hp grows past the linear stretch")
 check(F.boss_hp(5) == F.vuln_hp(5) * 10, "boss is ten vulns in one bar")
@@ -248,12 +248,13 @@ Combat.new_run_spawn(Z)
 check(Z.credits == 0, "credits start at zero")
 check(Z.dps == 0, "and no agent is deployed for free")
 check(Z.agents[1].lv == 0, "not even the first Spider")
-check(Economy.next_cost(Z, 1) == 12, "which costs 12 credits when you buy it")
+check(Economy.next_cost(Z, 1) == require("data.agents").list[1].cost,
+      "which costs its printed price when you buy it")
 
 -- probing is the only income before that
 Z.click = 1
-for _ = 1, 10 do Combat.probe(Z) end
-check(Z.credits == 1, "ten probes into a zone-1 vuln pays one credit")
+for _ = 1, F.vuln_hp(1) do Combat.probe(Z) end
+check(Z.credits == 1, "a zone-1 vuln, tapped to death, pays one credit")
 check(Z.dps == 0, "and no throughput has appeared on its own")
 
 -- ---------------------------------------------------------------- skills
@@ -324,7 +325,7 @@ shop.credits = 1e4
 local dpsBeforeTool = shop.dps
 check(Economy.buy_tool(shop, 2), "WORDLIST can be bought once affordable")     -- +10% throughput, 5K
 check(Economy.tool_owned(shop, 2), "the purchase marks it owned")
-check(shop.credits == 1e4 - 5e3, "the price is deducted")
+check(shop.credits == 1e4 - Upgrades.list[2][2], "the price is deducted")
 check(shop.dps == math.floor(dpsBeforeTool * 1.10), "and the effect lands immediately")
 check(not Economy.buy_tool(shop, 2), "a tool cannot be bought twice")
 
@@ -332,7 +333,7 @@ check(not Economy.buy_skill(shop, 3), "a skill cannot be bought without credits"
 shop.credits = 3e5
 check(Economy.buy_skill(shop, 3), "PHISH can be bought for 250K")              -- cost 250e3
 check(Economy.skill_owned(shop, 3), "the skill is owned after buying")
-check(shop.credits == 3e5 - 250e3, "the skill price is deducted")
+check(shop.credits == 3e5 - Skills[3].cost, "the skill price is deducted")
 check(not Economy.buy_skill(shop, 3), "a skill cannot be bought twice")
 
 -- ---------------------------------------------------------------- skills
@@ -987,7 +988,7 @@ TUNE.probe.share = before / 1000
 local hpAt = F.vuln_hp(10)
 TUNE.vuln.linear = 0
 check(F.vuln_hp(10) ~= hpAt, "the vuln curve comes from tuning")
-TUNE.vuln.linear = 10
+TUNE.vuln.linear = 5
 check(F.vuln_hp(10) == hpAt, "and restores exactly")
 
 local costAt = F.agent_cost(100, 5)
