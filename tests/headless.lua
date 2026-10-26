@@ -721,6 +721,8 @@ if f then
   f:close()
   check(B.buy == gptk.b, "printed A matches the gptk")
   check(B.click == gptk.a, "printed B matches the gptk")
+  check(gptk.y == "c" and B.fire == "c", "printed X (SDL y) is advance and cast")
+  check(gptk.x == "v", "printed Y (SDL x) stays unmapped")
   print(string.format("  gptk: A=%s (buy) B=%s (probe)", gptk.b, gptk.a))
 end
 

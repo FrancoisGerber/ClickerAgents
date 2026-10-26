@@ -57,9 +57,10 @@ The device mapping lives in the pak at `clickeragents/clickeragents.gptk`, and t
 editing the gptk changes the controls without touching code. The suite fails if the two
 disagree.
 
-`A` and `B` are crossed in the gptk on purpose: on this unit gptokeyb reports the printed
-**A** as SDL `b` and the printed **B** as SDL `a`. That is why the gptk line reads `b = x`
-(buy) and `a = z` (probe).
+Both face-button pairs are crossed in the gptk on purpose: gptokeyb names buttons by
+position, and these units report the printed **A** as SDL `b`, the printed **B** as SDL `a`,
+the printed **X** as SDL `y` and the printed **Y** as SDL `x`. That is why the file reads
+`b = x` (buy), `a = z` (probe), `y = c` (advance / cast) and `x = v` (nothing).
 
 | Button | Battle screen | List screens (skills, upgrades, prestige, achievements, stats, menu) |
 |---|---|---|

@@ -1,13 +1,15 @@
 # gptokeyb mapping — the buttons become keys, so the LÖVE game only reads a keyboard.
-# gptokeyb names buttons by position, so the pair is crossed on purpose:
-# SDL "b" is the printed A (buy), SDL "a" is the printed B (click),
-# SDL "x" is the printed X (snap to the live zone), L2/R2 select zones.
+# gptokeyb names buttons by POSITION, and these units report the face buttons
+# mirrored: SDL "b" is the printed A, SDL "a" the printed B, SDL "y" the printed X
+# and SDL "x" the printed Y. So the pairs are crossed on purpose:
+#   b = x  printed A -> buy      a = z  printed B -> click
+#   y = c  printed X -> advance/cast      x = v  printed Y -> nothing
 back = tab
 start = enter
 a = z          # printed B -> click
 b = x          # printed A -> buy
-x = c
-y = v
+x = v          # printed Y -> unused
+y = c          # printed X -> advance / cast
 l1 = q
 r1 = e
 l2 = f          # zone select, back

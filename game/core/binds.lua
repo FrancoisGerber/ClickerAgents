@@ -33,10 +33,12 @@ local function readBinds()
         -- gptokeyb names buttons by POSITION. On this unit the printed A reports
         -- as SDL "b" (proved from the device log: pressing A emitted the key
         -- bound to "b"), so the pair is crossed on purpose.
-        dbg("[binds] A=" .. map.b .. " B=" .. map.a .. " X=" .. (map.x or "c") .. " from " .. p)
+        -- printed X reports as SDL "y" on these units, so fire follows the y line
+        local fire = map.y or map.x or "c"
+        dbg("[binds] A=" .. map.b .. " B=" .. map.a .. " X=" .. fire .. " from " .. p)
         return {
           buy = map.b, click = map.a,
-          fire = map.x or "c",
+          fire = fire,
           prevSkill = map.l2 or "f", nextSkill = map.r2 or "g",
           src = p,
         }
