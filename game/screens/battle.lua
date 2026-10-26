@@ -151,7 +151,7 @@ local function heroCol()
     local h = st.agents[i + 1]
     if not h then break end
     local y = L.rowY + i * L.rowH
-    local sel = (i == st.sel)
+    local sel = M.row_is_selected(st, i)
     local locked = not Economy.unlocked(st, i + 1)
     local cost = Economy.next_cost(st, i + 1)
     local rowDps = Formulas.agent_dps(h)
@@ -190,6 +190,13 @@ local function heroCol()
   else
     drawTextR("+" .. fmt(Formulas.agent_dps(st.agents[st.sel])), L.costX, L.footY + 1, C.gain, 2)
   end
+end
+
+-- Rows are drawn 0-based and the selection is 1-based. Keeping the mapping in
+-- one place is what stops "the highlight is on the second agent but A buys the
+-- first" from happening again.
+function M.row_is_selected(st, row)
+  return (row + 1) == st.sel
 end
 
 function M.draw(ctx)

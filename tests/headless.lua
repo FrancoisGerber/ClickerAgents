@@ -169,6 +169,22 @@ check(off.credits > credits0, "offline credits accrue")
 print(string.format("  %.0fs replayed: zone %.0f -> %.0f, credits +%.0f",
   ran, zone0, off.zone, off.credits - credits0))
 
+-- ---------------------------------------------------------------- selection
+print("selection")
+local BattleScreen = require("screens.battle")
+local pick = SimState.new_run()
+pick.sel = 1
+check(BattleScreen.row_is_selected(pick, 0), "the first agent is the highlighted row")
+check(not BattleScreen.row_is_selected(pick, 1), "the second row is not highlighted")
+pick.sel = 2
+check(BattleScreen.row_is_selected(pick, 1), "moving down highlights the second row")
+check(not BattleScreen.row_is_selected(pick, 0), "and clears the first")
+Economy.select(pick, 0)
+check(pick.sel == 1, "selection clamps at the first agent")
+Economy.select(pick, 99)
+check(pick.sel == #pick.agents, "selection clamps at the last agent")
+print("  row 0 <-> agent 1, clamped at both ends")
+
 -- ---------------------------------------------------------------- balance
 print("balance (M1 acceptance)")
 local run = SimState.new_run()
@@ -217,6 +233,11 @@ local g = st()
 g.screen = "game"
 
 g.tab = 1
+g.sel = 1
+love.keypressed("down")
+check(g.sel == 2, "D-pad down moves the selection to agent 2")
+love.keypressed("up")
+check(g.sel == 1, "D-pad up returns to agent 1")
 local lv0 = g.agents[1].lv
 g.credits = 100000
 love.keypressed(B.buy)
