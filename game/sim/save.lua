@@ -3,11 +3,14 @@
 -- decision rather than to a wall.
 local Combat = require("sim.combat")
 local Economy = require("sim.economy")
+local Log = require("core.log")
 
 local M = {}
 
 M.FILE = "save.lua"
 M.OFFLINE_CAP = 8 * 3600      -- beyond eight hours farming stops being interesting
+M.INTERVAL = 60               -- a save every minute, no matter what
+M.reason = nil                -- why the last write happened, for the tests
 
 local function quote(s)
   return string.format("%q", tostring(s))
@@ -34,6 +37,9 @@ function M.snapshot(st)
     bossKills = st.bossKills or 0,
     systems = st.systems,
     bestZone = st.bestZone,
+    playtime = st.playtime or 0,
+    totalKills = st.totalKills or 0,
+    totalBosses = st.totalBosses or 0,
     agents = agents,
     owned = copy(st.owned),
     upOwned = copy(st.upOwned),
@@ -80,6 +86,9 @@ function M.apply(st, data)
   st.bossKills = data.bossKills or 0
   st.systems = data.systems or 0
   st.bestZone = data.bestZone or st.zone
+  st.playtime = data.playtime or 0
+  st.totalKills = data.totalKills or 0
+  st.totalBosses = data.totalBosses or 0
   for i, lv in ipairs(data.agents or {}) do
     if st.agents[i] then st.agents[i].lv = lv end
   end
@@ -94,9 +103,29 @@ function M.apply(st, data)
   return true
 end
 
+-- Buying something, walking into a new zone or ascending all mark the run dirty;
+-- the beat below turns that into a write at the end of the frame.
+function M.request(st)
+  st.saveRequest = true
+end
+
+function M.sync(st, dt)
+  st.saveClock = (st.saveClock or 0) + (dt or 0)
+  local due = st.saveRequest or st.saveClock >= M.INTERVAL
+  if not due then return false end
+  M.reason = st.saveRequest and "change" or "beat"
+  st.saveRequest = false
+  st.saveClock = 0
+  st.saves = (st.saves or 0) + 1
+  M.write(st)
+  return true
+end
+
 function M.write(st)
   if not (love and love.filesystem) then return false end
-  return love.filesystem.write(M.FILE, M.serialise(M.snapshot(st)))
+  local ok = love.filesystem.write(M.FILE, M.serialise(M.snapshot(st)))
+  if ok then Log.dbg(string.format("[save] zone %d · %s", st.zone, M.reason or "manual")) end
+  return ok
 end
 
 function M.read()

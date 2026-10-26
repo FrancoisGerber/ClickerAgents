@@ -45,6 +45,7 @@ local Economy = require("sim.economy")
 local Upgrades = require("data.upgrades")
 local Buffs = require("sim.buffs")
 local Prestige = require("sim.prestige")
+local Achievements = require("sim.achievements")
 local Skills = require("data.skills")
 local Systems = require("data.systems")
 local Actions = require("app.actions")
@@ -554,6 +555,89 @@ check(second100 ~= nil, "the second run reaches zone 100 too")
 check(second100 < first100, "and beats the first run's pace")
 print(string.format("  first run: zone 100 at %.0fs (zone %d at %.0fs, +%d rootkits) | second run: zone 100 at %.0fs",
   first100, firstZone, firstTime, offered, second100))
+
+-- ---------------------------------------------------------------- M5 port shape
+print("port shape")
+
+-- the save beat: a change is written at once, otherwise once a minute
+local SV = SimState.new_run()
+Combat.new_run_spawn(SV)
+SV.credits = 1e6
+local saves0 = SV.saves
+SV.saveRequest = false
+Save.sync(SV, 10)
+check(SV.saves == saves0, "ten quiet seconds do not write a save")
+Save.sync(SV, 50)
+check(SV.saves == saves0 + 1, "a minute on the clock does")
+check(SV.saveClock == 0, "and the clock resets")
+check(Save.reason == "beat", "the beat is the reason")
+
+Economy.buy(SV, 1)
+check(SV.saveRequest == true, "buying marks the run dirty")
+Save.sync(SV, 0.1)
+check(SV.saves == saves0 + 2, "and it is written on the next frame")
+check(Save.reason == "change", "as a change, not a beat")
+
+SV.saveRequest = false
+SV.cleared = true
+Combat.advance_zone(SV)
+check(SV.saveRequest == true, "walking into a zone marks the run dirty")
+
+-- save round-trip keeps the newer fields
+local snap = Save.deserialise(Save.serialise(Save.snapshot(SV)))
+check(snap.killsRequired ~= nil, "the gate requirement is saved")
+check(snap.daemons ~= nil, "daemons are saved")
+check(snap.bossKills ~= nil, "the firewall tally is saved")
+
+-- offline replay: capped at eight hours, and it walks zones by itself
+local OFF = SimState.new_run()
+Combat.new_run_spawn(OFF)
+OFF.agents[1].lv = 40
+Economy.recalc(OFF)
+local report = Save.replay_offline(OFF, { saved_at = os.time() - 20 * 3600 })
+check(report and report.seconds == Save.OFFLINE_CAP, "an overnight absence is capped at eight hours")
+check(report and report.zones > 0, "offline time still clears zones")
+local quiet = Save.replay_offline(SimState.new_run(), { saved_at = os.time() - 10 })
+check(quiet == nil, "a ten second gap does not earn a report")
+
+-- ---------------------------------------------------------------- achievements
+print("achievements")
+local A = SimState.new_run()
+check(Achievements.earned(A) == 0, "a fresh run has unlocked nothing")
+A.zone = 2
+Achievements.check(A)
+check(A.achDone[1], "clearing the first zone unlocks FIRST BREACH")
+check(A.msg and A.msg:find("FIRST BREACH"), "and it says so on screen")
+
+A.totalBosses = 10
+A.rootkits = 10
+A.systems = 1
+A.zone = 100
+Achievements.check(A)
+check(A.achDone[2], "ten firewalls unlocks FIREWALL DOWN")
+check(A.achDone[3], "ten rootkits unlocks TEN ROOTKITS")
+check(A.achDone[4], "the first ascension unlocks NEW TARGET")
+check(A.achDone[5], "zone 100 unlocks CORE ACCESS")
+
+for i = 1, #A.agents do A.agents[i].lv = 1 end
+A.totalKills = 100
+A.bestZone = 250
+Achievements.check(A)
+check(A.achDone[6], "a full roster unlocks FULL ROSTER")
+check(A.achDone[7], "a hundred kills unlocks SILENT RUN")
+check(A.achDone[8], "best zone 250 unlocks ROOT")
+check(Achievements.earned(A) == 8, "all eight can be earned")
+check(Achievements.check(A) == 0, "and re-checking does not re-announce them")
+
+-- lifetime counters
+local L2 = SimState.new_run()
+Combat.new_run_spawn(L2)
+L2.click = 1e9
+Combat.probe(L2)
+check(L2.totalKills == 1, "a kill counts toward the lifetime total")
+local before = L2.playtime
+Combat.tick(L2, 1)
+check(L2.playtime > before, "playtime accumulates with the tick")
 
 -- ---------------------------------------------------------------- binds
 print("binds")

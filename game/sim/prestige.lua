@@ -73,6 +73,7 @@ function M.ascend(st)
   for i = 1, #(st.buff or {}) do st.buff[i] = 0 end
 
   st.zoneSel = 1
+  st.saveRequest = true   -- the save beat picks this up
   Economy.recalc(st)
   Combat.new_run_spawn(st)
   return earned

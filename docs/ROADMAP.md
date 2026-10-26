@@ -52,15 +52,20 @@ outside the canvas, and the gptk agrees with the game on every binding.
 
 **Acceptance:** ascend at zone 140, and the next run reaches zone 140 faster than the first — measured in simulated seconds, not vibes. Best zone and rootkits survive a quit/relaunch.
 
-## M5 — Port shape
+## M5 — Port shape  (code done, device acceptance pending)
 
 - PortMaster pak: launcher, `port.json`, `gameinfo.xml`, `pm_finish`
-- 720×480 verified on the device with no letterboxing and no OS cursor
-- Offline progress with the 8-hour cap and a Welcome Back screen
-- Autosave on purchase, zone change and every 60 s
-- `log.txt` in the port folder for bug reports
+- 720×480 verified on the desktop at the device's exact resolution; the card test is pending
+- Offline progress with the 8-hour cap and a Welcome Back screen; the window is banked on
+  load so the same hours cannot be paid twice
+- Autosave on purchase, on walking into a zone, on ascension, every 60 s, on focus loss and
+  on quit — `Save.sync` is the only beat
+- `log.txt` in the port folder: the launcher tees stdout, and the game logs load, saves and
+  binds into it
+- STATS and ACHIEVEMENTS are live: lifetime kills, firewalls, playtime, per-agent DPS, and
+  the eight achievements evaluate from run state
 
-**Acceptance:** installed on the RG34XXSP, played for 30 minutes, powered off mid-run, relaunched — the run continues, the offline report is accurate, and the save is intact after three of those cycles.
+**Acceptance:** installed on the RG34XXSP, played for 30 minutes, powered off mid-run, relaunched — the run continues, the offline report is accurate, and the save is intact after three of those cycles. **Not yet verified: the device is off.**
 
 ## After v1
 

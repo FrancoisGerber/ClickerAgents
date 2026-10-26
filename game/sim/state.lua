@@ -29,6 +29,8 @@ function M.new_run()
     owned = {}, upOwned = {}, achDone = {}, skillCd = {},
     buff = { 0, 0, 0, 0, 0, 0 },
     daemons = { false, false, false, false },
+    saveClock = 0, saveRequest = false, saves = 0,
+    playtime = 0, totalKills = 0, totalBosses = 0,
     screen = "splash", tab = 1, cursor = { 1, 1, 1, 1, 1, 1, 1 },
     splashT = 0, welcome = true, msg = nil, msgT = 0, flashT = 0,
     zoneSel = 1, idle = false,

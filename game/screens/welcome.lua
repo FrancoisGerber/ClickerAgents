@@ -17,7 +17,7 @@ local st, L, opts
 local function hm(sec)
   local h = math.floor(sec / 3600)
   local m = math.floor((sec % 3600) / 60)
-  if h > 0 then return h .. "H " .. m .. "M" end
+  if h > 0 then return m > 0 and (h .. "H " .. m .. "M") or (h .. "H") end
   return m .. "M"
 end
 

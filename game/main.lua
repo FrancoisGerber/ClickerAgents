@@ -37,8 +37,6 @@ local ctx = {
   binds = nil, opts = {}, report = nil,
 }
 
-local autosave = 0
-
 local function rebuild()
   local w, h = love.graphics.getDimensions()
   ctx.layout = Layout.compute(w, h, ctx.prefs.list)
@@ -67,6 +65,11 @@ function love.load()
     Save.apply(st, saved)
     ctx.report = Save.replay_offline(st, saved)
     st.welcome = ctx.report ~= nil
+    -- bank the replay straight away, or the same hours would be paid again next launch
+    if ctx.report then
+      Save.reason = "offline"
+      Save.write(st)
+    end
   else
     Combat.new_run_spawn(st)
     st.welcome = false
@@ -105,11 +108,7 @@ function love.update(dt)
   if st.screen ~= "game" then return end
 
   Combat.tick(st, dt)
-  autosave = autosave + dt
-  if autosave > 30 then
-    autosave = 0
-    Save.write(st)
-  end
+  Save.sync(st, dt)          -- on change, and otherwise once a minute
 end
 
 local function toggle_list_width()
@@ -170,6 +169,11 @@ function love.keypressed(key)
   elseif key == "m" then toggle_list_width()
   elseif key == "escape" then love.event.quit()
   end
+end
+
+-- handhelds sleep without warning: losing focus is a save point
+function love.focus(f)
+  if not f and ctx.state and ctx.state.screen == "game" then Save.write(ctx.state) end
 end
 
 function love.quit()

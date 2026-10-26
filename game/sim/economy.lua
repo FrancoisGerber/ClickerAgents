@@ -40,6 +40,7 @@ function M.buy(st, i)
   st.credits = st.credits - cost
   a.lv = a.lv + 1
   M.recalc(st)
+  st.saveRequest = true   -- the save beat picks this up
   return true
 end
 
@@ -71,6 +72,7 @@ function M.buy_tool(st, i)
   st.credits = st.credits - cost
   st.upOwned[i] = true
   M.recalc(st)
+  st.saveRequest = true   -- the save beat picks this up
   return true
 end
 
@@ -84,6 +86,7 @@ function M.buy_skill(st, i)
   if st.credits < cost then return false end
   st.credits = st.credits - cost
   st.owned[i] = true
+  st.saveRequest = true   -- the save beat picks this up
   return true
 end
 

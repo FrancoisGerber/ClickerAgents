@@ -3,6 +3,7 @@
 local F = require("sim.formulas")
 local Economy = require("sim.economy")
 local Buffs = require("sim.buffs")
+local Achievements = require("sim.achievements")
 
 local M = {}
 
@@ -42,7 +43,10 @@ local function advance(st)
   if st.kills >= target then
     st.kills = target
     st.cleared = true
-    if st.boss then st.bossKills = (st.bossKills or 0) + 1 end
+    if st.boss then
+      st.bossKills = (st.bossKills or 0) + 1
+      st.totalBosses = (st.totalBosses or 0) + 1
+    end
     st.boss = false            -- a beaten firewall leaves plain vulns to farm
     st.timer = 0
   end
@@ -60,12 +64,14 @@ function M.advance_zone(st)
   if st.zone > st.bestZone then st.bestZone = st.zone end
   st.zoneSel = st.zone
   M.spawn(st)
+  st.saveRequest = true   -- the save beat picks this up
   return true
 end
 
 -- a kill pays, then the next vuln takes its place; past the gate it just pays
 local function kill(st)
   st.credits = st.credits + st.creditsKill
+  st.totalKills = (st.totalKills or 0) + 1
   if st.cleared then
     st.hpMax = math.floor(F.vuln_hp(st.zone) * Buffs.multipliers(st).vulnHp)
     st.hp = st.hpMax
@@ -94,6 +100,7 @@ end
 
 -- passive damage plus the boss clock; dt is seconds
 function M.tick(st, dt)
+  st.playtime = (st.playtime or 0) + dt
   if Buffs.tick(st, dt) then Economy.recalc(st) end    -- a buff ended: stats revert
   if st.hp <= 0 then M.spawn(st) end
   if st.dps > 0 then M.damage(st, st.dps * dt) end
@@ -105,6 +112,7 @@ function M.tick(st, dt)
   if st.daemons and st.daemons[1] and st.click > 0 then
     M.damage(st, st.click * dt)
   end
+  Achievements.check(st)
 
   if st.boss and st.timer > 0 then
     st.timer = st.timer - dt
