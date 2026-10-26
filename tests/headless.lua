@@ -743,6 +743,53 @@ local before = L2.playtime
 Combat.tick(L2, 1)
 check(L2.playtime > before, "playtime accumulates with the tick")
 
+-- ---------------------------------------------------------------- boss farm state
+print("beaten firewall")
+local BF = SimState.new_run()
+BF.zone = 5
+BF.bestZone = 5
+BF.agents[1].lv = 60
+Combat.spawn(BF)
+check(BF.boss and BF.timer > 0, "zone 5 opens on a live firewall")
+local bossHp = F.boss_hp(5)
+check(BF.hpMax == bossHp, "with the firewall's HP")
+Economy.recalc(BF)
+local bossPay = BF.creditsKill
+
+BF.hp = 1
+Combat.damage(BF, 10)
+check(not BF.boss and BF.cleared, "beating it opens the gate")
+check(BF.bossFarm == true, "and the replacement keeps the boss's numbers")
+check(BF.hpMax == bossHp, "same HP on the vuln that replaces it")
+Economy.recalc(BF)
+check(BF.creditsKill == bossPay, "same payout too")
+check(BF.timer == 0, "no clock left running")
+
+-- kills after the gate opens still respawn at boss scale
+local seen = {}
+for _ = 1, 3 do
+  BF.hp = 1
+  Combat.damage(BF, 10)
+  seen[#seen + 1] = BF.hpMax
+end
+check(seen[1] == bossHp and seen[3] == bossHp, "every respawn keeps the boss's HP")
+check(BF.zone == 5 and BF.cleared, "and the gate stays open while you farm")
+
+-- advancing clears it; the next zone is a plain one
+Combat.advance_zone(BF)
+check(BF.zone == 6 and BF.bossFarm == nil and not BF.boss, "advancing drops the boss stats")
+
+-- walking back to a beaten firewall zone brings them back
+BF.bestZone = 10
+Combat.travel_to(BF, 5)
+check(BF.cleared and BF.bossFarm == true, "an earlier firewall zone arrives already beaten")
+check(BF.hpMax == bossHp, "with its stats on the target")
+check(BF.timer == 0, "and no clock, because there is nothing to beat")
+
+-- a normal zone behind the frontier keeps normal stats
+Combat.travel_to(BF, 4)
+check(BF.bossFarm == nil and BF.hpMax == F.vuln_hp(4), "a plain zone stays plain")
+
 -- ---------------------------------------------------------------- content
 print("content")
 local Agents, Skills, Upgrades = require("data.agents"), require("data.skills"), require("data.upgrades")

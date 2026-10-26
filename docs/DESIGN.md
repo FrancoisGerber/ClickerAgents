@@ -206,3 +206,13 @@ modules need a number, it lives in `tuning.lua` and both read it.
 The suite proves it rather than trusting it — it moves `probe.share`, `vuln.linear` and
 `agent.cost_growth` at runtime and watches the formulas follow, then greps the sim modules
 for the old literals.
+
+## 12. A beaten firewall
+
+Killing the firewall opens the gate but does not shrink the target: `advance()` sets
+`boss = false` and `bossFarm = true`, and the vuln that takes its place keeps the
+firewall's HP and its three-times payout. Every respawn in that zone keeps those numbers
+until `X` moves the run on, which clears the flag for the new zone.
+
+Walking back to a firewall zone you have already beaten (`travel_to`) sets the same flag,
+so an old boss zone arrives open, at boss scale, with no clock to beat.

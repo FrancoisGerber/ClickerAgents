@@ -35,6 +35,7 @@ function M.snapshot(st)
     zone = st.zone,
     kills = st.kills,
     cleared = st.cleared or false,
+    bossFarm = st.bossFarm or false,
     killsRequired = st.killsRequired or 10,
     rootkits = st.rootkits,
     bossKills = st.bossKills or 0,
@@ -101,9 +102,11 @@ function M.apply(st, data)
   for i, v in ipairs(data.daemons or {}) do st.daemons[i] = v end
   st.zoneSel = st.zone
   Economy.recalc(st)
-  -- a firewall never resumes half-fought: the clock restarts with the attempt
-  if F.is_boss_zone(st.zone) then st.kills = 0 end
+  -- a firewall never resumes half-fought: the clock restarts with the attempt. A
+  -- beaten one keeps its kill count, because the gate it opened stays open.
+  if F.is_boss_zone(st.zone) and not st.cleared then st.kills = 0 end
   Combat.spawn(st)
+  st.bossFarm = data.bossFarm or nil
   if st.cleared then st.boss, st.timer = false, 0 end
   return true
 end
@@ -160,7 +163,7 @@ function M.replay_offline(st, data)
     zones = st.zone - zones0,
     credits = st.credits - credits0,
     stopped_at = st.zone,
-    boss = st.boss,
+    boss = st.boss or st.bossFarm or false,
   }
 end
 

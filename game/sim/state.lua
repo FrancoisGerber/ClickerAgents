@@ -19,7 +19,7 @@ function M.new_run()
     -- economy
     credits = 0, creditsKill = 0, dps = 0, click = 1,
     -- the run
-    zone = 1, kills = 0, hp = 0, hpMax = 0, boss = false, timer = 0, cleared = false, killsRequired = 10, bossFails = 0, bossKills = 0,
+    zone = 1, kills = 0, hp = 0, hpMax = 0, boss = false, bossFarm = nil, timer = 0, cleared = false, killsRequired = 10, bossFails = 0, bossKills = 0,
     -- meta, kept across ascensions
     rootkits = 0, systems = 0, bestZone = 1,
     -- ui

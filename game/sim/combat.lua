@@ -21,12 +21,18 @@ function M.boss_seconds(st)
   return BOSS_SECONDS + Systems.daemon_mults(st).boss_seconds
 end
 
+-- The HP the current target should have. A beaten firewall keeps its stats on the
+-- vuln that replaces it, so clearing a boss zone never pays less than the boss did.
+function M.target_hp(st)
+  local base = (st.boss or st.bossFarm) and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
+  return math.max(1, math.floor(base * Buffs.multipliers(st).vulnHp))
+end
+
 -- put a fresh target in front of the player for the current zone
 function M.spawn(st)
-  st.boss = F.is_boss_zone(st.zone)
-  st.killsRequired = st.boss and 1 or KILLS_PER_ZONE
-  local base = st.boss and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
-  st.hpMax = math.floor(base * Buffs.multipliers(st).vulnHp)
+  st.boss = F.is_boss_zone(st.zone) and not st.bossFarm
+  st.killsRequired = (st.boss or st.bossFarm) and 1 or KILLS_PER_ZONE
+  st.hpMax = M.target_hp(st)
   st.hp = st.hpMax
   st.timer = st.boss and M.boss_seconds(st) or 0
   Economy.recalc(st)
@@ -50,10 +56,11 @@ local function advance(st)
       st.bossKills = (st.bossKills or 0) + 1
       st.totalBosses = (st.totalBosses or 0) + 1
     end
-    st.boss = false            -- a beaten firewall leaves plain vulns to farm
+    st.boss = false            -- the gate is open, but the firewall's stats stay
+    st.bossFarm = F.is_boss_zone(st.zone)
     st.timer = 0
   end
-  st.hpMax = F.vuln_hp(st.zone)
+  st.hpMax = M.target_hp(st)
   st.hp = st.hpMax
 end
 
@@ -66,11 +73,16 @@ function M.travel_to(st, z)
   st.zoneSel = z
   st.kills = 0
   st.bossFails = st.bossFails or 0
+  -- walking into a zone behind the frontier means its firewall is already beaten:
+  -- you arrive with the gate open and the boss stats still on the target
+  st.bossFarm = (z < top) and F.is_boss_zone(z) or nil
   M.spawn(st)
   st.cleared = z < top
   if st.cleared then
     st.kills = st.killsRequired
     st.boss, st.timer = false, 0
+    st.hpMax = M.target_hp(st)
+    st.hp = st.hpMax
   end
   st.saveRequest = true
   return true
@@ -83,6 +95,7 @@ function M.advance_zone(st)
   st.kills = 0
   st.cleared = false
   st.killsRequired = nil
+  st.bossFarm = nil
   if st.zone > st.bestZone then st.bestZone = st.zone end
   st.zoneSel = st.zone
   M.spawn(st)
@@ -95,7 +108,7 @@ local function kill(st)
   st.credits = st.credits + st.creditsKill
   st.totalKills = (st.totalKills or 0) + 1
   if st.cleared then
-    st.hpMax = math.floor(F.vuln_hp(st.zone) * Buffs.multipliers(st).vulnHp)
+    st.hpMax = M.target_hp(st)
     st.hp = st.hpMax
     return
   end
