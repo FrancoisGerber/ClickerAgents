@@ -36,9 +36,9 @@ when the agent column gets under ~264 px rather than squeezing three numbers tog
 
 | Device | SoC / screen | Firmware | State |
 |---|---|---|---|
-| Anbernic RG34XXSP | Allwinner H700, 720×480 3:2 | Knulli with PortMaster | played end to end, v1 installed and verified |
-| Anbernic RG34XX | same SoC, same 720×480 3:2 panel | Knulli with PortMaster | v1 installed and verified by hash; not yet played through |
-| Desktop (Arch) | any | LÖVE 11.5 | development target; the suite and the captures run here |
+| Anbernic RG34XXSP | Allwinner H700, 720×480 3:2 | Knulli with PortMaster | Working |
+| Anbernic RG34XX | same SoC, same 720×480 3:2 panel | Knulli with PortMaster | Working |
+| Desktop (Arch) | any | LÖVE 11.5 | Working |
 
 ## Design
 
