@@ -103,12 +103,14 @@ Keyboard equivalents when running on a desktop (the same keys the gptk sends):
 ```sh
 tools/test.sh                # syntax check + headless suite, all three screen sizes
 tools/build.sh               # game/ -> clickeragents.love -> port/ -> ClickerAgents.zip
-tools/push.sh                # build, SMB to the handheld, verify each file by hash
+tools/push.sh [host]         # build, SMB to a handheld, verify each file by hash
 tools/screens.sh             # capture every screen to design/ (Xvfb, no desktop needed)
 tools/shots.sh               # capture 720x480, 640x480 and 720x720 layout checks
 ```
 
-`push.sh` needs `.device` — copy `.device.example` and fill it in. Enable Samba on the
+`push.sh` needs `.device` — copy `.device.example` and fill it in. Both handhelds share
+the credentials; pass the address to target the second one (`tools/push.sh 192.168.8.148`
+for the RG34XX, no argument for the RG34XXSP). Enable Samba on the
 handheld first (System Settings → Network); the port then appears under Ports and
 launches from there.
 

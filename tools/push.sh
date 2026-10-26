@@ -6,12 +6,15 @@
 # size matches. A flaky link already truncated clickeragents.love to 0 bytes once;
 # this makes that impossible — the live copy is never touched by a bad upload.
 set -u
+# optional first argument: push to a specific host instead of the one in .device
+HOST_OVERRIDE=${1:-}
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT" || exit 1
 
 [ -f .device ] || { echo "no .device file — copy .device.example and fill it in"; exit 1; }
 # shellcheck disable=SC1091
 . ./.device
+[ -n "$HOST_OVERRIDE" ] && HOST=$HOST_OVERRIDE
 
 "$ROOT/tools/build.sh" || exit 1
 
