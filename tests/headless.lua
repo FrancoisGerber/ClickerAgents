@@ -224,6 +224,20 @@ Economy.select(pick, 99)
 check(pick.sel == #pick.agents, "selection clamps at the last agent")
 print("  row 0 <-> agent 1, clamped at both ends")
 
+-- ---------------------------------------------------------------- fresh save
+print("fresh save")
+local N = SimState.new_run()
+local ownedCount = 0
+for i = 1, #N.owned do if N.owned[i] then ownedCount = ownedCount + 1 end end
+check(ownedCount == 0, "a new save owns no skills at all")
+check(not Economy.skill_owned(N, Buffs.CRAWL), "not even CRAWL")
+N.credits = 1e4
+check(Economy.buy_skill(N, Buffs.CRAWL), "CRAWL can be bought for 2K")
+check(Economy.skill_owned(N, Buffs.CRAWL), "and then it is yours")
+local kept = SimState.new_run()
+Prestige.ascend(kept)   -- locked below 100, so nothing happens: just proving it is a no-op
+check(not Economy.skill_owned(kept, Buffs.CRAWL), "ascending does not hand skills back")
+
 -- ---------------------------------------------------------------- upgrades
 print("upgrades")
 local function fresh_with_level(lv)
@@ -683,8 +697,12 @@ check(g.hp < hp0b or g.kills > 0, "B probes the vuln")
 g.tab = 2
 g.cursor[2] = 1
 g.skillCd[1] = 0
+g.owned[1] = false
 love.keypressed(B.fire)
-check((g.skillCd[1] or 0) > 0, "X casts on the skills tab")
+check((g.skillCd[1] or 0) == 0, "X refuses a skill you have not bought")
+g.owned[1] = true
+love.keypressed(B.fire)
+check((g.skillCd[1] or 0) > 0, "X casts on the skills tab once it is owned")
 love.keypressed(B.fire)
 love.draw()
 

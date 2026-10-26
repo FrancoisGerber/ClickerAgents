@@ -105,7 +105,8 @@ than trivial.
 
 ## Skills
 
-Six actives, one per agent, each free once its agent is deployed, on a fixed cooldown.
+Six actives, one per agent, each bought with credits on the SKILLS tab. Nothing is
+granted on a new save: a fresh run owns no skills until you buy one.
 Bought and cast on the SKILLS tab: **A** buys, **X** fires. A cast starts a 30 second
 buff and its own cooldown; the row shows `ACTIVE nS` while the buff runs and the
 cooldown seconds afterwards, and X is refused until it clears. A crit is x10, per the

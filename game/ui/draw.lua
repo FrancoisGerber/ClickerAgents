@@ -42,9 +42,7 @@ local function drawText(s, x, y, colour, sc)
   lg.setColor(colour)
   local cx = x
   for _, ch in ipairs(chars(s)) do
-    -- the font deliberately has no zero: a slashed-only zero read as garbage on the
-    -- device. Digits fall back to the letter O, which is what a 5x7 zero looks like.
-    local rows = GL[ch] or GL[ch:upper()] or (ch == "0" and GL["O"]) or GL["?"]
+    local rows = GL[ch] or GL[ch:upper()] or GL["?"]
     local r = 0
     for bits in rows:gmatch("[^/]+") do
       for c = 1, 5 do
