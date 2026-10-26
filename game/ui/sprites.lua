@@ -151,5 +151,8 @@ local function drawMark(x, y, cell)
   end
 end
 
+-- visual centre of each sprite, in sprite units, so the arena can centre them
+-- instead of guessing an offset that only fits one of them
+M.CENTRE = { vuln = 76, boss = 80 }
 M.drawVuln, M.drawBossVuln, M.drawMark = drawVuln, drawBossVuln, drawMark
 return M

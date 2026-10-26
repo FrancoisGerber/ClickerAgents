@@ -4,6 +4,7 @@ local Agents = require("data.agents")
 local Skills = require("data.skills")
 local Upgrades = require("data.upgrades")
 local Achievements = require("data.achievements")
+local Systems = require("data.systems")
 
 local M = {}
 
@@ -24,15 +25,16 @@ function M.new_run()
     -- ui
     agents = agents, sel = 1, amount = 1,
     owned = {}, upOwned = {}, achDone = {}, skillCd = {},
-    buff = { 0, 0, 0, 0, 0, 0 },
-    daemons = { false, false, false, false },
+    buff = {},
+    daemons = {},
     saveClock = 0, saveRequest = false, saves = 0,
     playtime = 0, totalKills = 0, totalBosses = 0,
     screen = "splash", tab = 1, cursor = { 1, 1, 1, 1, 1, 1, 1 },
     splashT = 0, welcome = true, msg = nil, msgT = 0, flashT = 0,
     zoneSel = 1, idle = false,
   }
-  for i, sk in ipairs(Skills) do st.owned[i] = sk.owned end
+  for i, sk in ipairs(Skills) do st.owned[i] = sk.owned; st.buff[i] = 0 end
+  for i = 1, #Systems.daemons do st.daemons[i] = false end
   for i = 1, #Upgrades.list do st.upOwned[i] = false end
   for i = 1, #Achievements do st.achDone[i] = false end
   st.zoneSel = st.zone

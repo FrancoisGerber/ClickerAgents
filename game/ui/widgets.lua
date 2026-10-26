@@ -20,14 +20,33 @@ local function rowSel(x, y, w, h)
   px(x, y, w, h, C.panel)
 end
 
-local function rowsPanel(x, y, w, labels, title, sel, values)
+-- visible: how many rows fit. A longer list scrolls, keeping the selection in view;
+-- the title line then carries the position, so nothing is hidden without a number.
+local function rowsPanel(x, y, w, labels, title, sel, values, visible)
   local rowH = 32
-  local pad = title and 40 or 16
-  local h = pad + #labels * rowH
+  local n = #labels
+  local shown = (visible and visible < n) and visible or n
+  -- a scrolling list takes a header line even when it has no title, because the
+  -- position has to live somewhere that is not on top of a row
+  local pad = (title or shown < n) and 40 or 16
+  local top = 1
+  if shown < n then
+    top = math.max(1, math.min((sel or 1) - math.floor(shown / 2), n - shown + 1))
+  end
+  local h = pad + shown * rowH
   frame(x, y, w, h, 2, C.rule)
-  if title then drawText(title, x + 12, y + 10, C.dim, 2) end
-  for i, lb in ipairs(labels) do
-    local ly = y + pad + (i - 1) * rowH
+  if title then
+    -- keep the title clear of the position counter instead of drawing through it
+    local maxChars = math.floor((w - 24 - (shown < n and 64 or 0)) / 12)
+    drawText(title:sub(1, math.max(1, maxChars)), x + 12, y + 10, C.dim, 2)
+  end
+  if shown < n then
+    drawTextR((sel or 1) .. "/" .. n, x + w - 12, y + 10, C.dim, 2)
+  end
+  for j = 0, shown - 1 do
+    local i = top + j
+    local lb = labels[i]
+    local ly = y + pad + j * rowH
     if sel == i then rowSel(x + 4, ly - 6, w - 8, rowH - 2) end
     drawText(lb, x + 12, ly, sel == i and C.text or C.dim, 2)
     if values and values[i] then
@@ -38,7 +57,7 @@ local function rowsPanel(x, y, w, labels, title, sel, values)
         drawTextR(v, x + w - 12, ly, sel == i and C.gold or C.text, 2)
       end
     end
-    if i < #labels then px(x + 12, ly + 26, w - 24, 2, C.rowsplit) end
+    if j < shown - 1 then px(x + 12, ly + 26, w - 24, 2, C.rowsplit) end
   end
   return h
 end

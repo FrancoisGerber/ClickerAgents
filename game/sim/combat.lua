@@ -8,6 +8,7 @@ local Achievements = require("sim.achievements")
 local M = {}
 
 local T = require("tuning")
+local Systems = require("data.systems")
 
 local KILLS_PER_ZONE = T.zone.kills_per_zone
 local BOSS_SECONDS = T.boss.seconds
@@ -15,9 +16,9 @@ local BOSS_SECONDS = T.boss.seconds
 M.KILLS_PER_ZONE = KILLS_PER_ZONE
 M.BOSS_SECONDS = BOSS_SECONDS
 
--- HONEYPOT buys the firewall extra seconds
+-- HONEYPOT and friends buy the firewall extra seconds
 function M.boss_seconds(st)
-  return BOSS_SECONDS + ((st.daemons and st.daemons[4]) and T.boss.honeypot_seconds or 0)
+  return BOSS_SECONDS + Systems.daemon_mults(st).boss_seconds
 end
 
 -- put a fresh target in front of the player for the current zone
@@ -54,6 +55,25 @@ local function advance(st)
   end
   st.hpMax = F.vuln_hp(st.zone)
   st.hp = st.hpMax
+end
+
+-- Walk to any zone up to the furthest one reached. Everything behind the frontier
+-- is already open, so arriving there leaves you farming with the gate open.
+function M.travel_to(st, z)
+  local top = st.bestZone or st.zone
+  z = math.max(1, math.min(z, top))
+  st.zone = z
+  st.zoneSel = z
+  st.kills = 0
+  st.bossFails = st.bossFails or 0
+  M.spawn(st)
+  st.cleared = z < top
+  if st.cleared then
+    st.kills = st.killsRequired
+    st.boss, st.timer = false, 0
+  end
+  st.saveRequest = true
+  return true
 end
 
 -- the player's move: only from a cleared zone, and only forwards
@@ -106,13 +126,9 @@ function M.tick(st, dt)
   if Buffs.tick(st, dt) then Economy.recalc(st) end    -- a buff ended: stats revert
   if st.hp <= 0 then M.spawn(st) end
   if st.dps > 0 then M.damage(st, st.dps * dt) end
-  -- Crawl sends its own probes; they hit as hard as a manual one
-  if Buffs.active(st, Buffs.CRAWL) and st.click > 0 then
-    M.damage(st, Buffs.CRAWL_PROBES * st.click * dt)
-  end
-  -- CRON runs one extra probe a second, forever
-  if st.daemons and st.daemons[1] and st.click > 0 then
-    M.damage(st, st.click * dt)
+  -- skills and daemons both push extra probes; each hits as hard as a manual one
+  if (st.probes or 0) > 0 and st.click > 0 then
+    M.damage(st, st.probes * st.click * dt)
   end
   Achievements.check(st)
 

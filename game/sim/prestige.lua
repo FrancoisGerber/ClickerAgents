@@ -35,8 +35,8 @@ function M.buy_daemon(st, i)
   if not d then return false end
   st.daemons = st.daemons or {}
   if st.daemons[i] then return false end
-  if (st.rootkits or 0) < d[2] then return false end
-  st.rootkits = st.rootkits - d[2]
+  if (st.rootkits or 0) < d.cost then return false end
+  st.rootkits = st.rootkits - d.cost
   st.daemons[i] = true
   Economy.recalc(st)
   return true

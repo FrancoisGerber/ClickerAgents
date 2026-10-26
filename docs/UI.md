@@ -72,7 +72,7 @@ Device keys arrive through `clickeragents.gptk`: **on this unit the printed A ar
 | **X** | `c` | walk through a cleared zone, or snap the zone cursor back to the live zone |
 | **Y** | `v` | **unmapped on purpose** |
 | **L / R** | `q` / `e` | previous / next tab (battle → skills → upgrades → prestige → achievements → stats) |
-| **Start** | `return` | open the pause menu (tick stops, autosave, RESUME / SAVE / QUIT) |
+| **Start** | `return` | open the pause menu (tick stops, autosave, RESUME / QUIT) |
 | **Select** | `tab` | cycle amount 1 → 10 → 100 → MAX → 1 |
 | 1 / 2 / 3 | — | desktop only: normal / boss / holding-A states |
 | `m` | — | desktop only: cycle list width auto → narrow → wide |
@@ -113,7 +113,7 @@ selectable, with the chosen one spelled out beside it.
 `ASCEND · LOCKED · ZONE 100`, and a `SYSTEMS · ROOTKIT SPEND` panel listing the four
 earliest systems for the v1.1 rootkit sink.
 
-**Menu** (overlay) — opened with START from any screen. It pauses the ticker, writes a save, and shows `PAUSED`, the save status, and `RESUME / SAVE / QUIT`.
+**Menu** (overlay) — opened with START from any screen. It pauses the ticker, writes a save, and shows `PAUSED`, `SAVED` or `SAVE FAILED`, and `RESUME / QUIT`. There is no save button: every purchase, zone change, ascension, focus loss and quit already saves, plus one beat a minute.
 
 Tabs 2–7 show their real labels and, where the content exists (upgrade names and
 prices), real values. Seven dots at the bottom-right track the tab; L/R cycles

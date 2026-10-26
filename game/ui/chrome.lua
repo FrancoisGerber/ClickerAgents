@@ -63,7 +63,11 @@ local function hintBar()
   local backChip = { k = "B", t = "BACK" }
   local chips
   if st.tab == 1 then
-    local zoneChip = st.cleared and { k = "X", t = "ADVANCE" } or K.ZN
+    local sel = st.zoneSel or st.zone
+    local zoneChip
+    if sel ~= st.zone then zoneChip = { k = "X", t = "GO" }
+    elseif st.cleared then zoneChip = { k = "X", t = "ADVANCE" }
+    else zoneChip = K.ZN end
     chips = { aChip, bChip, zoneChip, K.SE, K.ST }
   elseif st.tab == 2 then
     chips = { buyChip, useChip, backChip, K.LR }

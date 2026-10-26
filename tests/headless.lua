@@ -76,6 +76,21 @@ for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 720, 720 } }) do
   print(string.format("  %dx%d  profile=%-7s agent=%d battle=%d rows=%d",
     SW, SH, L.profile or "?", L.heroW, L.battleW, L.rows))
 end
+-- the bottom of every list, where a window that does not scroll would spill
+for _, size in ipairs({ { 720, 480 }, { 640, 480 } }) do
+  SW, SH = size[1], size[2]
+  love.load()
+  local s2 = st()
+  s2.screen = "game"
+  local last = { 2, #require("data.skills"), #require("data.upgrades").list,
+                 #require("data.systems").daemons + 1, #require("data.achievements"),
+                 1, 1 }
+  for tab = 2, 7 do
+    s2.tab = tab
+    s2.cursor[tab] = last[tab]
+    love.draw()
+  end
+end
 check(#calls.errors == 0, "geometry: " .. tostring(calls.errors[1]))
 print("  rects drawn: " .. calls.rect)
 
@@ -241,19 +256,28 @@ for _ = 1, 10 do Combat.probe(Z) end
 check(Z.credits == 1, "ten probes into a zone-1 vuln pays one credit")
 check(Z.dps == 0, "and no throughput has appeared on its own")
 
+-- ---------------------------------------------------------------- skills
+local SI = {}
+for i, sk in ipairs(Skills) do SI[sk.name] = i end
+local function effOf(name, kind)
+  for _, e in ipairs(Skills[SI[name]].effects or {}) do
+    if e[1] == kind then return e[2] end
+  end
+end
+
 -- ---------------------------------------------------------------- fresh save
 print("fresh save")
 local N = SimState.new_run()
 local ownedCount = 0
 for i = 1, #N.owned do if N.owned[i] then ownedCount = ownedCount + 1 end end
 check(ownedCount == 0, "a new save owns no skills at all")
-check(not Economy.skill_owned(N, Buffs.CRAWL), "not even CRAWL")
+check(not Economy.skill_owned(N, SI.CRAWL), "not even CRAWL")
 N.credits = 1e4
-check(Economy.buy_skill(N, Buffs.CRAWL), "CRAWL can be bought for 2K")
-check(Economy.skill_owned(N, Buffs.CRAWL), "and then it is yours")
+check(Economy.buy_skill(N, SI.CRAWL), "CRAWL can be bought for 2K")
+check(Economy.skill_owned(N, SI.CRAWL), "and then it is yours")
 local kept = SimState.new_run()
 Prestige.ascend(kept)   -- locked below 100, so nothing happens: just proving it is a no-op
-check(not Economy.skill_owned(kept, Buffs.CRAWL), "ascending does not hand skills back")
+check(not Economy.skill_owned(kept, SI.CRAWL), "ascending does not hand skills back")
 
 -- ---------------------------------------------------------------- upgrades
 print("upgrades")
@@ -327,33 +351,41 @@ for i = 1, #Skills do
 end
 local d0, c0, g0 = K.dps, K.click, K.creditsKill
 
-Actions.cast_skill(K, Buffs.SPRAY)
-check(Buffs.active(K, Buffs.SPRAY), "a cast starts a 30 second buff")
+Actions.cast_skill(K, SI.SPRAY)
+check(Buffs.active(K, SI.SPRAY), "a cast starts a 30 second buff")
 check(K.dps == d0 * 2, "SPRAY doubles throughput")
-check(K.skillCd[Buffs.SPRAY] == Skills[Buffs.SPRAY].cd, "and starts its own cooldown")
+check(K.skillCd[SI.SPRAY] == Skills[SI.SPRAY].cd, "and starts its own cooldown")
 Buffs.tick(K, 31)
 Economy.recalc(K)
-check(not Buffs.active(K, Buffs.SPRAY) and K.dps == d0, "when it expires throughput returns")
+check(not Buffs.active(K, SI.SPRAY) and K.dps == d0, "when it expires throughput returns")
 
-Actions.cast_skill(K, Buffs.SIPHON)
+Actions.cast_skill(K, SI.SIPHON)
 check(K.creditsKill == g0 * 3, "SIPHON triples the payout")
 Buffs.tick(K, 31); Economy.recalc(K)
 check(K.creditsKill == g0, "and the payout comes back")
 
-Actions.cast_skill(K, Buffs.FLOOD)
-check(K.click == math.floor(F.probe_damage(K.dps) * 2), "FLOOD doubles probe damage")
+Actions.cast_skill(K, SI.FLOOD)
+check(K.dps > d0, "FLOOD raises throughput")
+Buffs.tick(K, 31); Economy.recalc(K)
+check(K.dps == d0, "and it drops back when the buff ends")
+
+-- SPLICE is the probe skill now
+Actions.cast_skill(K, SI.SPLICE)
+check(K.click == math.floor(F.probe_damage(K.dps) * effOf("SPLICE", "click_mul")),
+      "SPLICE multiplies probe damage")
 Buffs.tick(K, 31); Economy.recalc(K)
 
-Actions.cast_skill(K, Buffs.PHISH)
+Actions.cast_skill(K, SI.PHISH)
 check(K.click == math.floor(F.probe_damage(K.dps) * Buffs.CRIT_MUL), "PHISH makes every probe crit for x10")
 Buffs.tick(K, 31); Economy.recalc(K)
 check(K.click == c0, "probe damage returns to normal")
 
-Actions.cast_skill(K, Buffs.BLACKOUT)
+Actions.cast_skill(K, SI.BLACKOUT)
+local cut = 1 - effOf("BLACKOUT", "vulnhp_mul")
 local beforeMax = K.hpMax
-local expectedMax = math.max(1, beforeMax - math.floor(beforeMax * Buffs.BLACKOUT_CUT))
-check(K.hpMax == expectedMax, "BLACKOUT cuts 15% off the vuln in front of you")
-local spawnMax = F.vuln_hp(K.zone) * (1 - Buffs.BLACKOUT_CUT)
+local expectedMax = math.max(1, beforeMax - math.floor(beforeMax * cut))
+check(K.hpMax == expectedMax, "BLACKOUT cuts the vuln in front of you")
+local spawnMax = F.vuln_hp(K.zone) * (1 - cut)
 K.cleared = false
 Combat.spawn(K)
 check(K.hpMax == math.floor(spawnMax), "and the next vuln spawns weakened too")
@@ -367,15 +399,15 @@ C.agents[1].lv = 10
 C.zone = 3
 Economy.recalc(C)
 C.credits = 1e12
-if not Economy.skill_owned(C, Buffs.CRAWL) then Economy.buy_skill(C, Buffs.CRAWL) end
+if not Economy.skill_owned(C, SI.CRAWL) then Economy.buy_skill(C, SI.CRAWL) end
 C.dps = 0
 C.hp, C.hpMax = 1e6, 1e6
-Actions.cast_skill(C, Buffs.CRAWL)
+Actions.cast_skill(C, SI.CRAWL)
 C.dps = 0                       -- isolate the probes from the agents' throughput
 local hpBefore = C.hp
 Combat.tick(C, 1.0)
 local crawlDmg = hpBefore - C.hp
-check(math.abs(crawlDmg - Buffs.CRAWL_PROBES * C.click) < 1e-6,
+check(math.abs(crawlDmg - effOf("CRAWL", "probes") * C.click) < 1e-6,
       string.format("CRAWL lands ten probes a second (%.0f damage, click %.0f)", crawlDmg, C.click))
 
 -- ---------------------------------------------------------------- click beats idle
@@ -543,18 +575,23 @@ R.rootkits = 10
 Economy.recalc(R)
 check(R.dps == math.floor(plain * 2), "ten held rootkits double throughput")
 
+local DI = {}
+for i, d in ipairs(Systems.daemons) do DI[d.name] = i end
+local function daemonCost(name) return Systems.daemons[DI[name]].cost end
+
 -- daemons: bought with rootkits, permanent, and they change the maths
 local D = SimState.new_run()
 D.agents[1].lv = 10
-D.rootkits = 30
+local beaconCost = daemonCost("BEACON")
+D.rootkits = beaconCost
 Economy.recalc(D)
-check(Prestige.buy_daemon(D, 3), "BEACON can be bought for 30 rootkits")       -- +10% throughput
-check(Prestige.daemon_owned(D, 3), "the daemon is online")
+check(Prestige.buy_daemon(D, DI.BEACON), "BEACON can be bought for " .. beaconCost .. " rootkits")
+check(Prestige.daemon_owned(D, DI.BEACON), "the daemon is online")
 check(D.rootkits == 0, "the rootkits are spent")
-check(not Prestige.buy_daemon(D, 3), "a daemon cannot be bought twice")
+check(not Prestige.buy_daemon(D, DI.BEACON), "a daemon cannot be bought twice")
 
 local beforeBeacon = D.dps
-D.daemons[3] = false
+D.daemons[DI.BEACON] = false
 Economy.recalc(D)
 check(math.abs(D.dps - (beforeBeacon / 1.10)) < 2, "BEACON is worth exactly +10% throughput")
 
@@ -570,7 +607,7 @@ local H = SimState.new_run()
 H.zone = 5
 Combat.new_run_spawn(H)
 check(H.timer == Combat.BOSS_SECONDS, "a firewall clock is 30 s by default")
-H.daemons[4] = true
+H.daemons[DI.HONEYPOT] = true
 Combat.spawn(H)
 check(H.timer == Combat.BOSS_SECONDS + 10, "HONEYPOT buys ten more seconds")
 
@@ -706,6 +743,85 @@ local before = L2.playtime
 Combat.tick(L2, 1)
 check(L2.playtime > before, "playtime accumulates with the tick")
 
+-- ---------------------------------------------------------------- content
+print("content")
+local Agents, Skills, Upgrades = require("data.agents"), require("data.skills"), require("data.upgrades")
+local SystemsData = require("data.systems")
+local AchData = require("data.achievements")
+
+check(#Agents.list == 12, "twelve agents")
+check(#Skills == 12, "twelve skills, one for each agent")
+check(#Upgrades.list == 10, "ten tools")
+check(#SystemsData.daemons == 10, "ten daemons")
+check(#AchData == 10, "ten achievements")
+check(#Achievements.rules == #AchData, "every achievement has a rule")
+
+-- one skill per agent, named after it, and no agent without a skill
+local seenAgents, seenSkills = {}, {}
+for _, sk in ipairs(Skills) do
+  check(not seenSkills[sk.name], "skill names are unique: " .. sk.name)
+  seenSkills[sk.name] = true
+  check(not seenAgents[sk.agent], "one skill per agent: " .. sk.agent)
+  seenAgents[sk.agent] = true
+end
+local roster = {}
+for _, a in ipairs(Agents.list) do roster[a.name:upper()] = true end
+for agent in pairs(seenAgents) do
+  check(roster[agent] == true, "skill agent exists in the roster: " .. agent)
+end
+for _, a in ipairs(Agents.list) do
+  check(seenAgents[a.name:upper()] == true, "every agent owns a skill: " .. a.name)
+end
+
+-- skill and daemon effects are all kinds the readers understand
+local skillKinds = { dps_mul = 1, credits_mul = 1, click_mul = 1, vulnhp_mul = 1,
+                     probes = 1, crit = 1 }
+for _, sk in ipairs(Skills) do
+  check(#sk.effects > 0, sk.name .. " does something")
+  for _, e in ipairs(sk.effects) do
+    check(skillKinds[e[1]] == 1, sk.name .. " effect kind is known: " .. tostring(e[1]))
+  end
+end
+local daemonKinds = { dps_mul = 1, credits_mul = 1, click_mul = 1, probes = 1,
+                      boss_seconds = 1, rootkit_bonus = 1, offline_hours = 1 }
+local prevCost = 0
+for _, d in ipairs(SystemsData.daemons) do
+  check(#d.effects > 0, d.name .. " does something")
+  for _, e in ipairs(d.effects) do
+    check(daemonKinds[e[1]] == 1, d.name .. " effect kind is known: " .. tostring(e[1]))
+  end
+  check(d.cost > prevCost, "daemon prices climb: " .. d.name)
+  prevCost = d.cost
+end
+
+-- every daemon effect actually reaches the state when it is owned
+local allOwned = SimState.new_run()
+for i = 1, #SystemsData.daemons do allOwned.daemons[i] = true end
+local dm = SystemsData.daemon_mults(allOwned)
+check(dm.dps > 1 and dm.credits > 1 and dm.click > 1, "daemon multipliers land in the reader")
+check(dm.probes == 4, "CRON and TUNNEL give four extra probes")
+check(dm.boss_seconds == 10, "HONEYPOT gives the firewall ten seconds")
+check(dm.rootkit_bonus == 1, "SQUID adds a rootkit on ascension")
+check(dm.offline_hours == 2, "SENTRY adds two offline hours")
+
+-- ---------------------------------------------------------------- sprites
+print("sprites")
+local Sprites = require("ui.sprites")
+local bw = 720
+check(math.abs((math.floor(bw / 2 - Sprites.CENTRE.vuln * 1.4) + Sprites.CENTRE.vuln * 1.4) - bw / 2) < 1,
+      "the vuln sprite is centred on its own bounds")
+check(math.abs((math.floor(bw / 2 - Sprites.CENTRE.boss * 1.1) + Sprites.CENTRE.boss * 1.1) - bw / 2) < 1,
+      "and so is the firewall sprite")
+
+-- ---------------------------------------------------------------- menu
+print("menu")
+check(Actions.MENU_ROWS == 2, "the pause menu has two rows")
+local M2 = SimState.new_run()
+Actions.open_menu(M2)
+local row = M2.cursor.menu
+check(row == 1, "the menu opens on RESUME")
+check(not M2.idle, "opening the menu stops the clock")
+
 -- ---------------------------------------------------------------- tuning
 print("tuning")
 local TUNE = require("tuning")
@@ -812,11 +928,18 @@ love.draw()
 
 g.tab = 1
 g.zone = 12
+g.bestZone = 14
 g.zoneSel = 12
 love.keypressed(B.prevSkill)
 check(g.zoneSel == 11, "L2 steps a zone back")
 love.keypressed(B.fire)
-check(g.zoneSel == 12, "X snaps back to the live zone")
+check(g.zone == 11 and g.zoneSel == 11, "X walks the run to the zone you are looking at")
+check(g.cleared, "a zone behind the frontier arrives open")
+love.keypressed(B.nextSkill)
+check(g.zoneSel == 12, "R2 steps forward again")
+love.keypressed(B.fire)
+check(g.zone == 12, "and X follows it")
+g.zoneSel = 14
 
 local visited = {}
 for _ = 1, 6 do

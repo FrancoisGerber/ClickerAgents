@@ -39,7 +39,7 @@ local function skillsScreen()
     end
   end
   local sel = st.cursor[2]
-  local h = rowsPanel(m, y, w, names, nil, sel, states)
+  local h = rowsPanel(m, y, w, names, nil, sel, states, L.rows - 3)
   local x2 = m + w + gap
   local pw = L.W - m - x2 - 24
   panel(x2, y, L.W - m - x2, h)

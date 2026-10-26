@@ -1,6 +1,7 @@
 # Content — v1
 
-Small on purpose. Twelve agents, six security zones, ten tools. Every number here is data,
+Small on purpose. Twelve agents, twelve skills, ten tools, ten daemons, ten achievements.
+Every number here is data,
 not code: the game loads these from tables so content can be tuned without touching the loop.
 
 ## Agents
@@ -105,7 +106,7 @@ than trivial.
 
 ## Skills
 
-Six actives, one per agent, each bought with credits on the SKILLS tab. Nothing is
+Twelve actives, one per agent, each bought with credits on the SKILLS tab. Nothing is
 granted on a new save: a fresh run owns no skills until you buy one.
 Bought and cast on the SKILLS tab: **A** buys, **X** fires. A cast starts a 30 second
 buff and its own cooldown; the row shows `ACTIVE nS` while the buff runs and the
@@ -116,14 +117,20 @@ design; Phish is what turns every probe into one.
 |---|---|---|---|---|
 | Crawl | Spider | 2,000 | 30s | +10 probes/s for 30s |
 | Spray | Pick | 25,000 | 45s | ×2 throughput for 30s |
-| Phish | Bait | 250,000 | 60s | every probe crits (x10), 30s |
-| Siphon | Mule | 2,000,000 | 90s | ×3 credits for 30s |
-| Flood | Relay | 25,000,000 | 120s | +100% probe damage, 30s |
-| Blackout | Onyx | 500,000,000 | 180s | −15% vuln HP, 30s |
+| Phish | Bait | 250,000 | 60s | every probe crits (×10), 30s |
+| Splice | Splice | 750,000 | 60s | ×3 probe damage for 30s |
+| Flood | Relay | 2,000,000 | 90s | ×1.5 throughput for 30s |
+| Grind | Grind | 10,000,000 | 90s | ×1.5 credits for 30s |
+| Cicada | Cicada | 25,000,000 | 120s | +25 probes/s for 30s |
+| Siphon | Mule | 50,000,000 | 120s | ×3 credits for 30s |
+| Taint | Taint | 150,000,000 | 150s | −20% vuln HP for 30s |
+| Hush | Hush | 400,000,000 | 180s | ×2 probe damage for 30s |
+| Badge | Badge | 1,000,000,000 | 180s | ×3 throughput for 30s |
+| Blackout | Onyx | 2,000,000,000 | 240s | −30% vuln HP for 30s |
 
 ## Achievements
 
-Eight, checked against run state. They exist to give the Stats and Achievements screens
+Ten, checked against run state. They exist to give the Stats and Achievements screens
 something real to show, and to mark the milestones the design already tunes around.
 
 | Achievement | Requirement |
@@ -136,10 +143,12 @@ something real to show, and to mark the milestones the design already tunes arou
 | Full Roster | deploy all 12 agents |
 | Silent Run | clear 100 vulns |
 | Root | reach zone 250 |
+| Full Armoury | own all ten tools |
+| Every Script | own all twelve skills |
 
 ## Out of scope for v1
 
-Rootkit spend beyond the four starting systems, gilds, relics, mercenaries, clans,
+Rootkit spend beyond the ten systems, gilds, relics, mercenaries, clans,
   auto-probes as purchases, daily quests,
 and a second framework. Each is a screen or a timer; none is needed for the loop to be good.
 
@@ -162,15 +171,23 @@ credits, and the effect is applied the moment the purchase lands.
 | PERSISTENCE | 2B | +25% throughput, +1 rootkit per ascension |
 
 Skills are bought the same way on the SKILLS tab (A buys, X casts); their prices are
-2K, 25K, 250K, 2M, 25M and 500M in roster order.
+2K, 25K, 250K, 750K, 2M, 10M, 25M, 50M, 150M, 400M, 1B and 2B in roster order.
 
 ## Daemons
 
 Rootkit spend on the PRESTIGE tab. Permanent, survive every ascension.
 
+Ten of them, priced so each one costs more than the last.
+
 | Daemon | Rootkits | Effect |
 |---|---|---|
 | CRON | 5 | +1 probe per second, forever |
 | WATCHDOG | 12 | +15% credits from vulns |
-| BEACON | 30 | +10% throughput |
-| HONEYPOT | 75 | +10s on every firewall clock |
+| BEACON | 20 | +10% throughput |
+| WRAITH | 30 | +15% probe damage |
+| HONEYPOT | 45 | +10s on every firewall clock |
+| GRID | 75 | +25% credits from vulns |
+| SQUID | 110 | +1 rootkit on every ascension |
+| TUNNEL | 160 | +3 probes per second |
+| LEGION | 240 | +25% throughput |
+| SENTRY | 340 | +2h of offline progress replayed |

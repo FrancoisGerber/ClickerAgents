@@ -48,11 +48,12 @@ function M.cast_skill(st, i)
   st.flashT = 0.4
   Buffs.start(st, i)
   Economy.recalc(st)
-  if i == Buffs.BLACKOUT then
-    -- the mirror opens now: the vuln in front of you loses the same 15%
-    local cut = math.floor(st.hp * Buffs.BLACKOUT_CUT)
-    st.hp = math.max(1, st.hp - cut)
-    st.hpMax = math.max(1, st.hpMax - math.floor(st.hpMax * Buffs.BLACKOUT_CUT))
+  for _, e in ipairs(sk.effects or {}) do
+    if e[1] == "vulnhp_mul" then
+      -- the flaw opens now: the vuln in front of you loses the same share
+      st.hp = math.max(1, math.floor(st.hp * e[2]))
+      st.hpMax = math.max(1, math.floor(st.hpMax * e[2]))
+    end
   end
   M.say(st, sk.name .. " ACTIVE")
 end
@@ -60,20 +61,22 @@ end
 -- X does one of two things on the arena: walk through a cleared zone, or bring
 -- the view back to the live one. It never moves the run on by itself.
 function M.advance_or_snap(st)
-  if st.cleared then
+  local sel = st.zoneSel or st.zone
+  if sel ~= st.zone then
+    -- X acts on the zone you are looking at: walk there
+    if Combat.travel_to(st, sel) then M.say(st, "ZONE " .. st.zone) end
+  elseif st.cleared then
     if Combat.advance_zone(st) then M.say(st, "ZONE " .. st.zone) end
-  else
-    M.move_zone(st, st.zone - (st.zoneSel or st.zone))
   end
 end
 
 -- L2/R2 walk the zones you have already cleared; X snaps back to the live one
 function M.move_zone(st, d)
   local cur = st.zoneSel or st.zone
-  local nxt = math.max(1, math.min(st.zone, cur + d))
+  local nxt = math.max(1, math.min(st.bestZone or st.zone, cur + d))
   if nxt == cur then return end
   st.zoneSel = nxt
-  M.say(st, "ZONE " .. nxt .. (nxt == st.zone and "" or " · EARLIER"))
+  if nxt ~= st.zone then M.say(st, "ZONE " .. nxt .. " · X TO GO") end
 end
 
 function M.buy_selected(st)
@@ -126,11 +129,11 @@ function M.activate(st)
     else
       local d = Systems.daemons[c]
       if Prestige.daemon_owned(st, c) then
-        M.say(st, d[1] .. " ONLINE")
+        M.say(st, d.name .. " ONLINE")
       elseif Prestige.buy_daemon(st, c) then
-        M.say(st, d[1] .. " ONLINE")
+        M.say(st, d.name .. " ONLINE")
       else
-        M.say(st, d[1] .. " · " .. d[2] .. " ROOTKITS")
+        M.say(st, d.name .. " · " .. d.cost .. " ROOTKITS")
       end
     end
 
@@ -142,7 +145,7 @@ end
 
 -- The menu is an overlay, not a tab: START opens it from anywhere, pauses the
 -- clock and writes a save before it appears.
-M.MENU_ROWS = 3
+M.MENU_ROWS = 2
 
 function M.open_menu(st)
   st.screen = "menu"
@@ -160,8 +163,6 @@ function M.activate_menu(st)
   local c = st.cursor.menu or 1
   if c == 1 then
     M.close_menu(st)
-  elseif c == 2 then
-    M.say(st, Save.write(st) and "SAVED" or "SAVE FAILED")
   else
     love.event.quit()
   end

@@ -1,4 +1,4 @@
--- Eight milestones, checked against run state.
+-- Ten milestones, checked against run state.
 local M = {}
 
 local ACHIEVEMENTS = {
@@ -10,6 +10,8 @@ local ACHIEVEMENTS = {
   { "FULL ROSTER",   "deploy all 12 agents" },
   { "SILENT RUN",    "clear 100 vulns" },
   { "ROOT",          "reach zone 250" },
+  { "FULL ARMOURY",  "own all ten tools" },
+  { "EVERY SCRIPT",  "own all twelve skills" },
 }
 
 local st                     -- the run state, filled in below

@@ -88,9 +88,9 @@ local function battleCol(o)
   local mx = math.floor(bw / 2) - 76
   local frac = st.hpMax > 0 and (st.hp / st.hpMax) or 1
   if isBoss then
-    drawBossVuln(math.floor(bw / 2) - 86, monY - 12, frac, 1.1)
+    drawBossVuln(math.floor(bw / 2 - Sprites.CENTRE.boss * 1.1), monY - 12, frac, 1.1)
   else
-    drawVuln(math.floor(bw / 2) - 88, monY - 4, frac, flash, 1.4)
+    drawVuln(math.floor(bw / 2 - Sprites.CENTRE.vuln * 1.4), monY - 4, frac, flash, 1.4)
   end
 
   px(plateX, nameY - 4, plateW, 20, ART.floor)  -- nameplate hides the floor studs

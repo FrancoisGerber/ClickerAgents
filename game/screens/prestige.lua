@@ -40,8 +40,9 @@ local function prestigeScreen()
   local c = st.cursor[4]
   local ready = Prestige.can_ascend(st)
   local confirm = st.confirmAscend == true
-  if c == 5 then rowSel(m + 4, ay - 6, w - 8, 60) end
-  frame(m, ay, w, 48, 2, c == 5 and C.gold or C.rule)
+  local ascRow = #DAEMONS + 1
+  if c == ascRow then rowSel(m + 4, ay - 6, w - 8, 60) end
+  frame(m, ay, w, 48, 2, c == ascRow and C.gold or C.rule)
   drawText(confirm and "CONFIRM" or "ASCEND", m + 12, ay + 12,
            confirm and C.warn or (ready and C.text or C.dim), 2)
   if confirm then
@@ -56,10 +57,10 @@ local function prestigeScreen()
   local wR = L.W - m - x2
   local names, costs = {}, {}
   for i, d in ipairs(DAEMONS) do
-    names[i] = d[1]
-    costs[i] = (st.daemons and st.daemons[i]) and { "ONLINE", C.gold } or { fmt(d[2]), C.dim }
+    names[i] = d.name
+    costs[i] = (st.daemons and st.daemons[i]) and { "ONLINE", C.gold } or { fmt(d.cost), C.dim }
   end
-  rowsPanel(x2, y, wR, names, "DAEMONS · ROOTKIT SPEND", (c <= 4) and c or nil, costs)
+  rowsPanel(x2, y, wR, names, "DAEMONS", (c <= #DAEMONS) and c or nil, costs, 6)
 end
 
 function M.draw(ctx)

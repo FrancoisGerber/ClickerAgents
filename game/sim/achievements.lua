@@ -1,4 +1,4 @@
--- The eight achievements, checked against the run. Cheap enough to evaluate on
+-- The ten achievements, checked against the run. Cheap enough to evaluate on
 -- every tick, and the only place st.achDone is written. Pure logic.
 local M = {}
 
@@ -17,6 +17,18 @@ local RULES = {
     end)() end,                                                          -- FULL ROSTER
   function(st) return (st.totalKills or 0) >= 100 end,                    -- SILENT RUN
   function(st) return (st.bestZone or 1) >= 250 end,                      -- ROOT
+  function(st) return (function()                                          -- FULL ARMOURY
+      for i = 1, #require("data.upgrades").list do
+        if not (st.upOwned or {})[i] then return false end
+      end
+      return true
+    end)() end,
+  function(st) return (function()                                          -- EVERY SCRIPT
+      for i = 1, #require("data.skills") do
+        if not (st.owned or {})[i] then return false end
+      end
+      return true
+    end)() end,
 }
 
 M.rules = RULES

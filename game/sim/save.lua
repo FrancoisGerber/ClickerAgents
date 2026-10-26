@@ -147,7 +147,9 @@ function M.replay_offline(st, data)
   if not saved then return nil end
   local elapsed = math.max(0, math.floor(os.time() - saved))
   if elapsed < T.save.offline_min then return nil end
-  local capped = math.min(elapsed, M.OFFLINE_CAP)
+  -- SENTRY buys two more hours of replayed time
+  local extra = require("data.systems").daemon_mults(st).offline_hours * 3600
+  local capped = math.min(elapsed, M.OFFLINE_CAP + extra)
 
   local zones0 = st.zone
   local credits0 = st.credits
