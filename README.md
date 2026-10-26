@@ -2,14 +2,14 @@
 
 ![Clicker Agents](art/logo.png)
 
-![Clicker Agents running at 720x480 on a handheld: agent list, a live vuln, credits, zone](port/screenshot.png)
-
 An open-source idle (incremental) RPG for PortMaster handhelds — built to be played on the Anbernic RG34XXSP's 3.4" 720×480 screen with a D-pad and four face buttons.
 
 You are a rogue intrusion framework with no owner and no account. Deploy **agents**, tear
 through **vulns**, break the **boss firewall** every fifth zone, and when a system's CORE
 falls, consume it and move to a bigger target. Credits buy better agents; **rootkits**
 survive the reset.
+
+![Clicker Agents running at 720x480 on a handheld: agent list, a live vuln, credits, zone](port/screenshot.png)
 
 - **Licence:** GPL-3.0-or-later (`LICENSE`)
 - **Runtime:** LÖVE 11.5, supplied by PortMaster — the port ships as a `.love` file, no compiled binary
@@ -35,7 +35,7 @@ Clicker Agents/
 │   ├── data/     agents, skills, tools, achievements, systems, daemons
 │   ├── sim/      state, formulas, economy, combat, save
 │   ├── ui/       draw primitives, widgets, sprites, chrome, toast
-│   ├��─ screens/  one file per screen
+│   ├── screens/  one file per screen
 │   ├── app/      actions a button press can fire
 │   └── main.lua  lifecycle and routing only
 ├── port/       PortMaster pak: ClickerAgents.sh, port.json, gameinfo.xml, clickeragents/
