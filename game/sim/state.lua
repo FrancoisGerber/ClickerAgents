@@ -7,14 +7,11 @@ local Achievements = require("data.achievements")
 
 local M = {}
 
--- one agent owned at the start, so the first minute is not empty
-local START_AGENT = 1
-
 function M.new_run()
   local agents = {}
   for i, a in ipairs(Agents.list) do
-    agents[i] = { name = a.name, lv = (i == START_AGENT) and 1 or 0, cost = a.cost, base = a.base,
-                  lock = a.lock }
+    -- nothing is deployed for free: the first Spider is the player's first purchase
+    agents[i] = { name = a.name, lv = 0, cost = a.cost, base = a.base, lock = a.lock }
   end
 
   local st = {

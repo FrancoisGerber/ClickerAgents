@@ -111,6 +111,8 @@ check(s.zone == 1 and s.cleared, "clearing ten vulns stops the run in that zone"
 check(s.credits > 0, "kills pay credits")
 
 -- the gate holds, but the farm does not stop: DPS keeps paying in the same zone
+s.agents[1].lv = 1                       -- the player bought their first Spider
+Economy.recalc(s)
 local gateZone, gateKills = s.zone, s.kills
 local creditsBeforeFarm = s.credits
 for _ = 1, 20 do Combat.tick(s, 0.5) end
@@ -169,7 +171,7 @@ check(b.credits == 100000 - cost, "exactly the price was spent")
 local poor = SimState.new_run()
 poor.credits = 0
 check(not Economy.buy(poor, 1), "buying without credits fails")
-check(poor.agents[1].lv == 1, "a failed buy changes nothing")
+check(poor.agents[1].lv == 0, "a failed buy changes nothing")
 print(string.format("  agent 1 lvl %.0f -> %.0f, credits 100000 -> %.0f, dps %.0f",
   lvl, b.agents[1].lv, b.credits, b.dps))
 
@@ -223,6 +225,21 @@ check(pick.sel == 1, "selection clamps at the first agent")
 Economy.select(pick, 99)
 check(pick.sel == #pick.agents, "selection clamps at the last agent")
 print("  row 0 <-> agent 1, clamped at both ends")
+
+-- ---------------------------------------------------------------- fresh run
+print("fresh run")
+local Z = SimState.new_run()
+Combat.new_run_spawn(Z)
+check(Z.credits == 0, "credits start at zero")
+check(Z.dps == 0, "and no agent is deployed for free")
+check(Z.agents[1].lv == 0, "not even the first Spider")
+check(Economy.next_cost(Z, 1) == 12, "which costs 12 credits when you buy it")
+
+-- probing is the only income before that
+Z.click = 1
+for _ = 1, 10 do Combat.probe(Z) end
+check(Z.credits == 1, "ten probes into a zone-1 vuln pays one credit")
+check(Z.dps == 0, "and no throughput has appeared on its own")
 
 -- ---------------------------------------------------------------- fresh save
 print("fresh save")
@@ -364,6 +381,7 @@ check(math.abs(crawlDmg - Buffs.CRAWL_PROBES * C.click) < 1e-6,
 -- ---------------------------------------------------------------- balance
 print("balance (M1 acceptance)")
 local run = SimState.new_run()
+run.agents[1].lv = 1                     -- the first Spider is the first thing a run buys
 Combat.new_run_spawn(run)
 local t, dt, zone10 = 0, 0.1, nil
 while t < 240 do
@@ -388,6 +406,7 @@ print(string.format("  zone 10 at %s, zone %d after 240s, dps %d",
 -- ---------------------------------------------------------------- M2 acceptance
 print("balance (M2 acceptance)")
 local run2 = SimState.new_run()
+run2.agents[1].lv = 1
 Combat.new_run_spawn(run2)
 local dt2, t2, zone100 = 0.1, 0, nil
 while t2 < 1500 do
@@ -419,6 +438,7 @@ print(string.format("  zone 100 at %s, final zone %d", zone100 and string.format
 -- ---------------------------------------------------------------- M3 acceptance
 print("balance (M3 acceptance)")
 local run3 = SimState.new_run()
+run3.agents[1].lv = 1
 Combat.new_run_spawn(run3)
 local dt3, t3, lastBest, monotone = 0.1, 0, 1, true
 local function shop3()
@@ -554,6 +574,7 @@ local function play_to(st, target, cap)
 end
 
 local R4 = SimState.new_run()
+R4.agents[1].lv = 1
 Combat.new_run_spawn(R4)
 local first100, firstTime, firstZone = play_to(R4, 140)
 check(first100 ~= nil, "the first run reaches zone 100")
