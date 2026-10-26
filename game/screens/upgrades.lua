@@ -33,7 +33,7 @@ local function upgradesScreen()
   local names = upgradeLabels()
   local states = {}
   for i = 1, #names do
-    states[i] = st.upOwned[i] and { "OWNED", C.gold } or { "LOCKED", C.rule }
+    states[i] = st.upOwned[i] and { "OWNED", C.gold } or { fmt(UPGRADES[i][2]), C.dim }
   end
   local sel = st.cursor[3]
   local h = rowsPanel(m, y, w, names, nil, sel, states)
@@ -44,7 +44,7 @@ local function upgradesScreen()
   local wR3 = L.W - m - x2
   wire(u[1], x2 + 12, y + 14, C.text, pw)
   wire("COST", x2 + 12, y + 42, C.dim, pw)
-  drawTextR(u[2], x2 + wR3 - 12, y + 42, C.gold, 2)
+  drawTextR(fmt(u[2]), x2 + wR3 - 12, y + 42, C.gold, 2)
   wire("EFFECT", x2 + 12, y + 68, C.dim, pw)
   wireWrap(u[3], x2 + 12, y + 94, C.text, pw, 24)
 end

@@ -82,11 +82,23 @@ function M.activate(st)
   local c = st.cursor[st.tab] or 1
   if st.tab == 2 then
     local sk = Skills[c]
-    if st.owned[c] then M.say(st, sk.name .. " OWNED")
-    else M.say(st, "NEED " .. sk.cost .. " CREDITS") end
+    if Economy.skill_owned(st, c) then
+      M.say(st, sk.name .. " OWNED")
+    elseif Economy.buy_skill(st, c) then
+      M.say(st, sk.name .. " BOUGHT")
+    else
+      M.say(st, "NEED " .. fmt(sk.cost) .. " CREDITS")
+    end
 
   elseif st.tab == 3 then
-    M.say(st, "NEED " .. Upgrades.list[c][2] .. " CREDITS")
+    local u = Upgrades.list[c]
+    if Economy.tool_owned(st, c) then
+      M.say(st, u[1] .. " OWNED")
+    elseif Economy.buy_tool(st, c) then
+      M.say(st, u[1] .. " BOUGHT")
+    else
+      M.say(st, "NEED " .. fmt(u[2]) .. " CREDITS")
+    end
 
   elseif st.tab == 4 then
     if c == #Systems.daemons + 1 then

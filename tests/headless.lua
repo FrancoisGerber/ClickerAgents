@@ -42,6 +42,7 @@ local F = require("sim.formulas")
 local Chrome = require("ui.chrome")
 local Combat = require("sim.combat")
 local Economy = require("sim.economy")
+local Upgrades = require("data.upgrades")
 local Save = require("sim.save")
 local SimState = require("sim.state")
 
@@ -235,6 +236,31 @@ local totals = F.upgrade_totals(p.upOwned)
 check(totals.rootkit_bonus == 1, "PERSISTENCE adds a rootkit per ascension")
 check(F.rootkits_for_run(0, 0, totals.rootkit_bonus) == 1, "and the ascension payout sees it")
 
+-- ---------------------------------------------------------------- purchases
+print("purchases")
+local shop = SimState.new_run()
+shop.zone = 3
+shop.agents[1].lv = 5
+Economy.recalc(shop)
+shop.credits = 0
+check(not Economy.buy_tool(shop, 1), "a tool cannot be bought without credits")
+check(not Economy.tool_owned(shop, 1), "and it stays unowned")
+
+shop.credits = 1e4
+local dpsBeforeTool = shop.dps
+check(Economy.buy_tool(shop, 2), "WORDLIST can be bought once affordable")     -- +10% throughput, 5K
+check(Economy.tool_owned(shop, 2), "the purchase marks it owned")
+check(shop.credits == 1e4 - 5e3, "the price is deducted")
+check(shop.dps == math.floor(dpsBeforeTool * 1.10), "and the effect lands immediately")
+check(not Economy.buy_tool(shop, 2), "a tool cannot be bought twice")
+
+check(not Economy.buy_skill(shop, 3), "a skill cannot be bought without credits")
+shop.credits = 3e5
+check(Economy.buy_skill(shop, 3), "PHISH can be bought for 250K")              -- cost 250e3
+check(Economy.skill_owned(shop, 3), "the skill is owned after buying")
+check(shop.credits == 3e5 - 250e3, "the skill price is deducted")
+check(not Economy.buy_skill(shop, 3), "a skill cannot be bought twice")
+
 -- ---------------------------------------------------------------- balance
 print("balance (M1 acceptance)")
 local run = SimState.new_run()
@@ -258,6 +284,37 @@ check(zone10 ~= nil, "a greedy player reaches zone 10 inside four minutes")
 check(run.zone >= 17, "and zone 17 inside the same four minutes")
 print(string.format("  zone 10 at %s, zone %d after 240s, dps %d",
   zone10 and string.format("%.0fs", zone10) or "never", run.zone, run.dps))
+
+-- ---------------------------------------------------------------- M2 acceptance
+print("balance (M2 acceptance)")
+local run2 = SimState.new_run()
+Combat.new_run_spawn(run2)
+local dt2, t2, zone100 = 0.1, 0, nil
+while t2 < 1500 do
+  if run2.cleared then Combat.advance_zone(run2) end
+  Combat.tick(run2, dt2)
+  t2 = t2 + dt2
+  -- greedy buyer: cheapest agent level first, then the next tool in order
+  local best, bestCost = nil, math.huge
+  for i = 1, #run2.agents do
+    if Economy.unlocked(run2, i) then
+      local c = Economy.next_cost(run2, i)
+      if c <= run2.credits and c < bestCost then best, bestCost = i, c end
+    end
+  end
+  if best then
+    Economy.buy(run2, best)
+  else
+    for i = 1, #Upgrades.list do
+      if not Economy.tool_owned(run2, i) and Economy.buy_tool(run2, i) then break end
+    end
+  end
+  if not zone100 and run2.zone >= 100 then zone100 = t2 end
+end
+check(zone100 ~= nil, "a greedy player reaches zone 100 at all")
+check(zone100 and zone100 >= 900, "but not before 15 minutes")
+check(zone100 and zone100 <= 1500, "and inside 25 minutes")
+print(string.format("  zone 100 at %s, final zone %d", zone100 and string.format("%.0fs", zone100) or "never", run2.zone))
 
 -- ---------------------------------------------------------------- binds
 print("binds")

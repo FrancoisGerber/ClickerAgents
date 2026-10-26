@@ -21,15 +21,16 @@ outside the canvas, and the gptk agrees with the game on every binding.
 
 **Acceptance:** start fresh, reach zone 10 in under four minutes, quit, relaunch, and continue at zone 10 with the same credits and level. A headless test asserts vuln HP and agent cost against the formulas at zones 1, 5, 50 and 140.
 
-## M2 — The full agent ladder
+## M2 — The full agent ladder  ✅ shipped
 
 - All 12 agents in `game/data/agents.lua`, unlocked by zone
 - Buy amounts ×1 / ×10 / ×100 / MAX from SELECT (START opens the pause menu)
 - Clearing a zone stops the run there; X walks you through. Nothing advances on its own while you play.
-- Ten global tools
+- Ten global tools, bought with A and applied to throughput, probe damage and credits
+- Skills bought with A on SKILLS, cast with X
 - Agent list with scrolling, six visible rows, affordability colours
 
-**Acceptance:** a scripted player that only buys MAX on the newest affordable agent reaches **zone 100 in 15–25 minutes** of simulated time. That simulation is the balance test — if it lands outside the window, the content numbers change, not the code.
+**Acceptance:** met — a greedy player that buys the cheapest agent level, then the next tool, and walks through every gate reaches **zone 100 at 1053 s (17.6 min)**, final zone 105 at 25 min. The assertion lives in `tests/headless.lua` and fails if it drifts outside 15–25 minutes, so the content numbers have to move, not the code.
 
 ## M3 — Bosses and the clock
 

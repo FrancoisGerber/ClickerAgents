@@ -2,17 +2,17 @@
 local M = {}
 
 local SKILLS = {
-  { name = "CRAWL",    agent = "SPIDER",   cost = "2K",   cd = 30,
+  { name = "CRAWL",    agent = "SPIDER",   cost = 2e3,   cd = 30,
     eff = "+10 probes/s for 30s",   owned = true },
-  { name = "SPRAY",    agent = "PICK",  cost = "25K",  cd = 45,
+  { name = "SPRAY",    agent = "PICK",  cost = 25e3,  cd = 45,
     eff = "x2 throughput for 30s",  owned = true },
-  { name = "PHISH",    agent = "BAIT",     cost = "250K", cd = 60,
+  { name = "PHISH",    agent = "BAIT",     cost = 250e3, cd = 60,
     eff = "every hit crits, 30s",   owned = false },
-  { name = "SIPHON",   agent = "MULE",     cost = "2M",   cd = 90,
+  { name = "SIPHON",   agent = "MULE",     cost = 2e6,   cd = 90,
     eff = "x3 credits for 30s",     owned = false },
-  { name = "FLOOD",    agent = "RELAY",    cost = "25M",  cd = 120,
+  { name = "FLOOD",    agent = "RELAY",    cost = 25e6,  cd = 120,
     eff = "+100% probe dmg, 30s",   owned = false },
-  { name = "BLACKOUT", agent = "ONYX", cost = "500M", cd = 180,
+  { name = "BLACKOUT", agent = "ONYX", cost = 500e6, cd = 180,
     eff = "-15% vuln HP, 30s",      owned = false },
 }
 

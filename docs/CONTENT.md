@@ -139,3 +139,24 @@ something real to show, and to mark the milestones the design already tunes arou
 Rootkit spend beyond the four starting systems, gilds, relics, mercenaries, clans,
   auto-probes as purchases, daily quests,
 and a second framework. Each is a screen or a timer; none is needed for the loop to be good.
+
+## Tools
+
+Ten one-shot global purchases from the UPGRADES tab (A buys, one each). Prices are in
+credits, and the effect is applied the moment the purchase lands.
+
+| Tool | Price | Effect |
+|---|---|---|
+| SCANNER | 1K | +25% probe damage |
+| WORDLIST | 5K | +10% throughput |
+| SKIMMER | 20K | +25% credits from vulns |
+| EXPLOIT KIT | 100K | x2 probe damage |
+| BOTNET | 500K | +15% throughput |
+| LAUNDERER | 2M | +50% credits from vulns |
+| 0-DAY | 10M | x3 probe damage |
+| BACKDOOR | 50M | +20% throughput |
+| MIXER | 250M | +100% credits from vulns |
+| PERSISTENCE | 2B | +25% throughput, +1 rootkit per ascension |
+
+Skills are bought the same way on the SKILLS tab (A buys, X casts); their prices are
+2K, 25K, 250K, 2M, 25M and 500M in roster order.

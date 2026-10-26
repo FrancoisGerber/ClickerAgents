@@ -31,7 +31,7 @@ local function skillsScreen()
     elseif st.owned[i] then
       states[i] = { "OWNED", C.gold }
     else
-      states[i] = { "LOCKED", C.rule }
+      states[i] = { fmt(SKILLS[i].cost), C.dim }
     end
   end
   local sel = st.cursor[2]
@@ -53,7 +53,7 @@ local function skillsScreen()
   end
   if not st.owned[sel] then
     wire("COST", x2 + 12, y + 94, C.dim, pw)
-    drawTextR(sk.cost, x2 + wR2 - 12, y + 94, C.gold, 2)
+    drawTextR(fmt(sk.cost), x2 + wR2 - 12, y + 94, C.gold, 2)
   end
   wire("EFFECT", x2 + 12, st.owned[sel] and y + 94 or y + 120, C.dim, pw)
   wireWrap(sk.eff, x2 + 12, st.owned[sel] and y + 118 or y + 144, C.text, pw, 24)

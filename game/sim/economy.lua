@@ -2,6 +2,7 @@
 -- credits, levels or tool ownership.
 local F = require("sim.formulas")
 local Upgrades = require("data.upgrades")
+local Skills = require("data.skills")
 
 local M = {}
 
@@ -51,6 +52,33 @@ function M.buy_amount(st, i, amount)
     bought = bought + 1
   end
   return bought
+end
+
+-- one-shot global tools
+function M.tool_cost(i) return Upgrades.list[i][2] end
+function M.tool_owned(st, i) return st.upOwned[i] == true end
+
+function M.buy_tool(st, i)
+  local cost = M.tool_cost(i)
+  if not cost or M.tool_owned(st, i) then return false end
+  if st.credits < cost then return false end
+  st.credits = st.credits - cost
+  st.upOwned[i] = true
+  M.recalc(st)
+  return true
+end
+
+-- skills are bought once, then cast from the SKILLS tab
+function M.skill_cost(i) return Skills[i] and Skills[i].cost end
+function M.skill_owned(st, i) return st.owned[i] == true end
+
+function M.buy_skill(st, i)
+  local cost = M.skill_cost(i)
+  if not cost or M.skill_owned(st, i) then return false end
+  if st.credits < cost then return false end
+  st.credits = st.credits - cost
+  st.owned[i] = true
+  return true
 end
 
 function M.select(st, i)
