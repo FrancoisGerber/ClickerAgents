@@ -5,6 +5,7 @@ local Config = require("config")
 local Numbers = require("core/numbers")
 
 local px, frame, rrect = Draw.px, Draw.frame, Draw.rrect
+local fit = Draw.fit
 local text, textR, textW = Draw.text, Draw.textR, Draw.textW
 local drawText, drawTextR, drawTextC = Draw.text, Draw.textR, Draw.textC
 local C = Config.C
@@ -13,25 +14,43 @@ local fmt = Numbers.fmt
 local M = {}
 local st, L, opts
 
+-- The bar is divided by need, not by even columns: credits and throughput carry the
+-- long figures, rootkits and zone stay small. Each slot has a minimum that its label
+-- plus its widest value needs, and whatever width is left over is handed out with
+-- credits and throughput first, so the bar spreads out on a wide screen instead of
+-- bunching to the left.
+M.MINS = { 180, 140, 156, 108 }        -- credits, dps, rootkits, zone at scale 2
+M.WEIGHTS = { 0.42, 0.36, 0.12, 0.10 }
+
+function M.slotWidths(W)
+  local usable = W - 32
+  local base = 0
+  for i = 1, 4 do base = base + M.MINS[i] end
+  local spare = math.max(0, usable - base)
+  local out = {}
+  for i = 1, 4 do out[i] = M.MINS[i] + spare * M.WEIGHTS[i] end
+  return out
+end
+
 local function topBar()
   px(0, 0, L.W, L.topH, C.panel)
   local W = L.W
-  -- fixed-width slots: label + right-aligned value, so the fields never collide
-  -- when a number grows and never jitter while one does
-  local function slot(x, w, label, value, vc)
-    drawText(label, x, 8, C.dim, 2)
-    drawTextR(value, x + w - 16, 8, vc, 2)
-    return x + w
-  end
+  local INSET = 12
+  local slots = {
+    { label = "CREDITS",  value = fmt(st.credits),       colour = C.gold },
+    { label = "DPS",      value = fmt(st.dps),           colour = C.gain },
+    { label = "ROOTKITS", value = tostring(st.rootkits), colour = C.gold },
+    { label = "ZONE",     value = tostring(st.zone),     colour = C.text },
+  }
+  local widths = M.slotWidths(W)
   local x = 16
-  -- the label owns a fixed column and the value has its own right-aligned box, so a
-  -- long credit figure cannot run into the word CREDITS
-  drawText("CREDITS", x, 8, C.dim, 2)
-  drawTextR(fmt(st.credits), x + 176 - 16, 8, C.gold, 2)
-  x = x + 176
-  x = slot(x, 128, "DPS", fmt(st.dps), C.gain)
-  x = slot(x, 148, "ROOTKITS", tostring(st.rootkits), C.gold)
-  x = slot(x, 100, "ZONE", tostring(st.zone), C.text)
+  for i, slot in ipairs(slots) do
+    local w = math.floor(widths[i])
+    drawText(slot.label, x, 8, C.dim, 2)
+    local room = w - INSET - textW(slot.label, 2) - INSET
+    drawTextR(fit(slot.value, math.max(24, room)), x + w - INSET, 8, slot.colour, 2)
+    x = x + w
+  end
   -- no clock up here: the firewall's own bar on the arena carries the time
   px(0, L.topH - 2, W, 2, C.rule)
 end

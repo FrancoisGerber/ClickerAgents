@@ -167,6 +167,14 @@ every rectangle is inside the window, that the columns tile the width and the
 bands tile the height, and that pressing A actually spends credits and raises a
 level. Current: 54,832 rects, 0 errors.
 
+## Top bar
+
+Four fields: `CREDITS`, `DPS`, `ROOTKITS`, `ZONE`. Credits and throughput carry the long
+figures, so the bar is divided by need rather than into even columns: each field has a
+minimum width (its label plus a six-character value) and the leftover width is handed out
+with credits first, then throughput. `M.slotWidths(W)` is the one place that decides this,
+and the suite checks the widest figures still fit at 640, 720 and square.
+
 ## Panels
 
 Every tab paints its panels at one height, `L.panelH = 40 + (L.rows - 3) * 32` — 328 px at 720×480. A list longer than the window scrolls with a `n/N` position counter on the header line, so the panels line up tab to tab and nothing is hidden without a number.

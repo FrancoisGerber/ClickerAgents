@@ -896,6 +896,33 @@ for tab = 2, 6 do
 end
 check(#calls.errors == 0, "no tab spills at the shared panel height")
 
+-- ---------------------------------------------------------------- top bar
+print("top bar")
+local Numbers = require("core.numbers")
+local D = require("ui.draw")
+for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 720, 720 } }) do
+  local W = size[1]
+  local widths = Chrome.slotWidths(W)
+  local labels = { "CREDITS", "DPS", "ROOTKITS", "ZONE" }
+  local values = { Numbers.fmt(9.99e24), Numbers.fmt(9.99e24), "999", "999" }
+  local fits = true
+  for i = 1, 4 do
+    local need = D.textW(labels[i], 2) + D.textW(values[i], 2) + 24
+    if need > widths[i] then fits = false end
+  end
+  check(fits, string.format("the widest figures fit their slot at %d wide", W))
+  check(widths[1] > widths[3] and widths[1] > widths[4],
+        string.format("credits takes the most width at %d", W))
+  -- ROOTKITS is a long word: at a narrow width its minimum is what keeps it legible,
+  -- so throughput only outranks the zone there. Credits outranks everything, always.
+  check(widths[2] > widths[4],
+        string.format("throughput takes more than the zone slot at %d", W))
+  local total = 0
+  for i = 1, 4 do total = total + math.floor(widths[i]) end
+  check(total <= W - 32 + 4 and total >= W - 32 - 4,
+        string.format("the slots span the bar at %d (%d of %d)", W, total, W - 32))
+end
+
 -- ---------------------------------------------------------------- tuning
 print("tuning")
 local TUNE = require("tuning")
