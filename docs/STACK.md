@@ -22,50 +22,75 @@ For an agent-built game whose entire content is text and rectangles, the fast lo
 
 ```
 game/
-├── conf.lua            identity, window 720×480, modules
-├── main.lua            boot, scene switch
-├── sim/                pure Lua: no love.* calls, fully testable
-│   ├── numbers.lua     formatting, fixed-point helpers
-│   ├── formulas.lua    vuln HP, costs, milestones, rootkits
-│   ├── combat.lua      probes, kills, zones, boss clock
-│   ├── save.lua        snapshot, serialise, offline replay
-│   ├── combat.lua      DPS ticks, clicks, boss timer
-│   └── save.lua        serialize / deserialize / versioned
-├── ui/                 screens: battle, stats, prestige, menu
-└── data/               heroes.lua, biomes.lua, upgrades.lua — the CONTENT tables
+├── conf.lua            identity, window 720x480, LÖVE modules
+├── main.lua            boot, routing, the frame
+├── config.lua          palette, type, version
+├── tuning.lua          every balance value in the game, and nothing else
+├── layout.lua          screen size -> anchors (panelH, panelRows, battle column)
+├── font.lua            5x7 bitmap font, drawn from a glyph table
+├── core/               binds.lua (reads the gptk), numbers.lua (K/M/B/T), log.lua
+├── data/               agents, skills, upgrades, systems (daemons), achievements
+├── sim/                state, formulas, economy, combat, buffs, prestige, save, achievements
+├── ui/                 draw primitives, widgets, sprites, chrome (top bar + hints), toast
+├── screens/            one file per screen: splash, welcome, battle, skills, upgrades,
+│                       prestige, achievements, stats, menu
+└── app/actions.lua     everything a button press can do
 ```
 
-The one rule that matters: **`sim/` never calls `love.*`**. That is what makes it testable on the desktop without a window, and what lets an agent run a thousand simulated zones in a second.
+The one rule that matters: **`sim/` never calls `love.*`**. That is what makes it testable on
+the desktop without a window, and what lets a test run thousands of simulated seconds in a
+second. `ui/` and `screens/` are the only layers that know a graphics API exists.
 
 ## PortMaster pak layout
 
 ```
-ports/
-├── ClickerAgents.sh          launcher
-└── Clicker Agents/
-    ├── clickeragents.love    the game
-    └── saves/            XDG_DATA_HOME, created on first run
+port/
+├── ClickerAgents.sh                launcher
+├── port.json                       catalogue metadata
+├── gameinfo.xml                    entry for frontends that read it
+├── README.md                       notes, controls, build steps (required by PortMaster)
+├── screenshot.png                  720x480 capture, required
+├── cover.png                       optional catalogue art
+└── clickeragents/
+    ├── clickeragents.love          the game: a zip of game/
+    ├── clickeragents.gptk          the button map the game reads at load
+    ├── images/{cover,logo}.png     art the pak itself uses
+    └── licenses/                   GPL-3.0 text and what the runtime brings
 ```
 
-`port.json` declares `arch: [aarch64, x86_64]` (LÖVE is architecture-agnostic once the runtime exists) and `rtr: true` with empty `reqs` — there are no external files to supply, which is the whole point of an original game.
+On the card that lands as `roms/ports/ClickerAgents.sh` next to `roms/ports/clickeragents/`,
+and the launcher points `XDG_DATA_HOME` at `clickeragents/saves` so a save travels with the
+folder. `port.json` declares `rtr: true` with empty `reqs`: there are no external game files
+to supply, which is the whole point of an original game.
 
-Knulli reads ports from `/userdata/roms/ports`, muOS from `/roms/ports`. The launcher should behave like every other PortMaster script: source `control.txt`, call `get_controls`, export `XDG_DATA_HOME` into the port's own folder, pipe output to `log.txt`, and call `pm_finish` on exit.
+Knulli reads ports from `/userdata/roms/ports`, muOS from `/roms/ports`. The launcher behaves
+like every other PortMaster script: source `control.txt`, `get_controls`, export
+`XDG_DATA_HOME`, tee output to `log.txt`, source the `love_11.5` runtime, `pm_finish` on exit.
 
 ## Save files
 
-- `love.filesystem` writes into `$XDG_DATA_HOME/clickeragents/`, which the launcher points inside the port folder — so saves travel with the port when the SD card moves.
-- Format: JSON, one file, with `version` at the top. On load, unknown versions migrate or are refused with a message; never silently reset.
-- Autosave: on purchase, on zone change, and every 60 seconds. The RG34XXSP's power button kills the process without warning.
+- `love.filesystem` writes into `$XDG_DATA_HOME/clickeragents/save.lua` — a Lua table
+  literal, not JSON, so it loads without a parser and reads as plain data in a diff.
+- `version = 2` sits at the top of the snapshot. `Save.apply` copies what it knows onto a
+  fresh run and leaves anything it does not understand at its default, so an older save
+  loads into a newer build without a migration step.
+- Autosave: on purchase, on zone change, on ascension, every 60 s, on focus loss and on
+  quit — all through `Save.sync`, which is the only beat that writes.
+- Offline replay: the time away is replayed through the same combat rules, capped at eight
+  hours (plus anything SENTRY buys), and never paid twice.
 
 ## Testing on this machine
 
 ```sh
-sudo pacman -S love
-love game                 # run
-luajit tests/run.lua      # headless sim tests, no window
+tools/test.sh             # luac -p over every file, then the headless suite
+tools/build.sh            # game/ -> clickeragents.love -> port/ -> ClickerAgents.zip
+tools/push.sh [host]      # build, SMB to a handheld, verify every file by hash
+love game                 # play it; x buys, z probes, q/e tabs
 ```
 
-The simulation tests are the important ones: vuln HP at zones 1/50/140/500 against the formula, agent cost at levels 1/25/200, rootkits at zones 100/150/250/500, and a full offline simulation of 8 hours landing on a sane zone.
+`tests/headless.lua` runs 390 checks with a stubbed `love`: three screen sizes with no rect
+outside the canvas, the formulas, the tick, buying, the save round trip and offline replay,
+the gptk contract, the menu, the ascension reset and the pacing acceptance numbers.
 
 ## Performance
 
@@ -73,7 +98,8 @@ The H700 is four Cortex-A53s with a Mali-G31 — no problem for a 2D game drawin
 
 - Recompute DPS on purchase only, never per frame.
 - One `love.graphics.print` per text run, batched by screen, with a cached font.
-- Draw the agent list as 6 rows, not 12 — scroll, do not render what is off-screen.
+- Draw only the rows that fit (`L.panelRows`, 9 at 720x480) and scroll the rest — 12 agents
+  and 10 daemons do not fit, and drawing them anyway is free work for pixels nobody sees.
 - Target 60 fps, and accept 30 while a boss timer runs; the timer must still tick at real seconds, so use `dt` accumulation, not frame counts.
 
 ## Licence compliance

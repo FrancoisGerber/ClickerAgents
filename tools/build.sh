@@ -11,7 +11,7 @@ cp /tmp/clickeragents.love port/clickeragents/clickeragents.love
 mkdir -p port/clickeragents/images
 cp art/logo.png port/clickeragents/images/logo.png
 cp art/cover.png port/clickeragents/images/cover.png
-(cd port && zip -9 -q -r ../ClickerAgents.zip ClickerAgents.sh clickeragents/ port.json gameinfo.xml)
+(cd port && zip -9 -q -r ../ClickerAgents.zip ClickerAgents.sh clickeragents/ port.json gameinfo.xml README.md screenshot.png cover.png)
 
 echo "clickeragents.love  $(sha256sum port/clickeragents/clickeragents.love | cut -c1-16)  $(du -h port/clickeragents/clickeragents.love | cut -f1)"
 echo "ClickerAgents.zip   $(sha256sum ClickerAgents.zip | cut -c1-16)  $(du -h ClickerAgents.zip | cut -f1)"

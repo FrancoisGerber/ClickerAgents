@@ -5,10 +5,10 @@
 		<name>Clicker Agents</name>
 		<desc>An idle intrusion clicker: deploy agents, tear through vulns, break the boss firewall every fifth zone, ascend to consume the system and open a bigger one.</desc>
 		<image>./clickeragents/images/cover.png</image>
-		<genre>Incremental</genre>
+		<genre>Incremental/RPG</genre>
 		<players>1</players>
-		<developer>francois</developer>
-		<publisher>francois</publisher>
-		<releasedate>20261101T000000</releasedate>
+		<developer>FrancoisGerber</developer>
+		<publisher>FrancoisGerber</publisher>
+		<releasedate>20261026T000000</releasedate>
 	</game>
 </gameList>

@@ -14,28 +14,35 @@ local fmt = Numbers.fmt
 local M = {}
 local st, L, opts
 
--- The bar is divided by need, not by even columns: credits and throughput carry the
--- long figures, rootkits and zone stay small. Each slot has a minimum that its label
--- plus its widest value needs, and whatever width is left over is handed out with
--- credits and throughput first, so the bar spreads out on a wide screen instead of
--- bunching to the left.
-M.MINS = { 180, 140, 156, 108 }        -- credits, dps, rootkits, zone at scale 2
-M.WEIGHTS = { 0.42, 0.36, 0.12, 0.10 }
+-- The bar is built from what each field actually needs: its label, a gap, and a value
+-- box wide enough for the longest figure it will ever show (six characters for credits
+-- and throughput, four for rootkits and zone). Whatever width is left over becomes the
+-- space *between* the fields, so the bar reads across the whole screen instead of
+-- bunching on the left, and a growing number eats its own gap rather than its neighbour.
+M.VALUE_W = { 72, 72, 48, 48 }     -- px at scale 2
+M.LABEL_GAP = 12                   -- between a label and its own value
+M.EDGE = 16                        -- screen margin
 
 function M.slotWidths(W)
-  local usable = W - 32
-  local base = 0
-  for i = 1, 4 do base = base + M.MINS[i] end
-  local spare = math.max(0, usable - base)
-  local out = {}
-  for i = 1, 4 do out[i] = M.MINS[i] + spare * M.WEIGHTS[i] end
-  return out
+  local labels = { "CREDITS", "DPS", "ROOTKITS", "ZONE" }
+  local out, total = {}, 0
+  for i = 1, 4 do
+    local w = #labels[i] * 12 + M.LABEL_GAP + M.VALUE_W[i]
+    out[i] = w
+    total = total + w
+  end
+  return out, total
+end
+
+function M.gap(W)
+  local _, total = M.slotWidths(W)
+  local spare = W - M.EDGE * 2 - total
+  return math.max(8, math.floor(spare / 3))
 end
 
 local function topBar()
   px(0, 0, L.W, L.topH, C.panel)
   local W = L.W
-  local INSET = 12
   local slots = {
     { label = "CREDITS",  value = fmt(st.credits),       colour = C.gold },
     { label = "DPS",      value = fmt(st.dps),           colour = C.gain },
@@ -43,13 +50,13 @@ local function topBar()
     { label = "ZONE",     value = tostring(st.zone),     colour = C.text },
   }
   local widths = M.slotWidths(W)
-  local x = 16
+  local gap = M.gap(W)
+  local x = M.EDGE
   for i, slot in ipairs(slots) do
-    local w = math.floor(widths[i])
     drawText(slot.label, x, 8, C.dim, 2)
-    local room = w - INSET - textW(slot.label, 2) - INSET
-    drawTextR(fit(slot.value, math.max(24, room)), x + w - INSET, 8, slot.colour, 2)
-    x = x + w
+    local vx = x + #slot.label * 12 + M.LABEL_GAP
+    drawTextR(fit(slot.value, M.VALUE_W[i]), vx + M.VALUE_W[i], 8, slot.colour, 2)
+    x = x + widths[i] + gap
   end
   -- no clock up here: the firewall's own bar on the arena carries the time
   px(0, L.topH - 2, W, 2, C.rule)

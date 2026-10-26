@@ -936,7 +936,6 @@ local PL = Game.layoutOf()
 check(PL.panelRows == PL.rows - 3, "a panel holds the rows that fit, minus its header")
 check(PL.panelH == 40 + PL.panelRows * PL.rowH, "and one height is derived from them")
 check(PL.panelH == 328, "at 720x480 that is 328 px, the achievements height")
-
 check(not fileHas("game/ui/chrome.lua", "BOSS"), "the top bar draws no boss clock")
 check(not fileHas("game/screens/menu.lua", "START OR B"), "the pause menu has no resume hint")
 
@@ -954,25 +953,21 @@ local Numbers = require("core.numbers")
 local D = require("ui.draw")
 for _, size in ipairs({ { 720, 480 }, { 640, 480 }, { 720, 720 } }) do
   local W = size[1]
-  local widths = Chrome.slotWidths(W)
+  local widths, total = Chrome.slotWidths(W)
+  local gap = Chrome.gap(W)
   local labels = { "CREDITS", "DPS", "ROOTKITS", "ZONE" }
-  local values = { Numbers.fmt(9.99e24), Numbers.fmt(9.99e24), "999", "999" }
+  local widest = { Numbers.fmt(9.99e24), Numbers.fmt(9.99e24), "9999", "9999" }
   local fits = true
   for i = 1, 4 do
-    local need = D.textW(labels[i], 2) + D.textW(values[i], 2) + 24
+    local need = D.textW(labels[i], 2) + Chrome.LABEL_GAP + D.textW(widest[i], 2)
     if need > widths[i] then fits = false end
   end
-  check(fits, string.format("the widest figures fit their slot at %d wide", W))
+  check(fits, string.format("the widest figures fit their field at %d wide", W))
+  check(total + gap * 3 <= W - Chrome.EDGE * 2 + 1,
+        string.format("the bar fits edge to edge at %d (%d + 3 gaps of %d)", W, total, gap))
+  check(gap >= 12, string.format("the fields are separated by a real gap at %d (%d px)", W, gap))
   check(widths[1] > widths[3] and widths[1] > widths[4],
         string.format("credits takes the most width at %d", W))
-  -- ROOTKITS is a long word: at a narrow width its minimum is what keeps it legible,
-  -- so throughput only outranks the zone there. Credits outranks everything, always.
-  check(widths[2] > widths[4],
-        string.format("throughput takes more than the zone slot at %d", W))
-  local total = 0
-  for i = 1, 4 do total = total + math.floor(widths[i]) end
-  check(total <= W - 32 + 4 and total >= W - 32 - 4,
-        string.format("the slots span the bar at %d (%d of %d)", W, total, W - 32))
 end
 
 -- ---------------------------------------------------------------- tuning

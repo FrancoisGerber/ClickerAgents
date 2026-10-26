@@ -36,9 +36,7 @@ end
 local function battleCol(o)
   o = o or {}
   local bw = L.battleW
-  -- the arena reads the boss from the run unless a preview explicitly overrides it
-  local isBoss = o.boss
-  if isBoss == nil then isBoss = st.boss end
+  local isBoss = st.boss
   local flash = o.flash or st.flashT > 0
   -- vertical rhythm from the body height, so a 720-tall panel spreads its
   -- content instead of leaving the bottom half empty
@@ -68,7 +66,7 @@ local function battleCol(o)
   pillar(0.80, 152, 16, 72)
   pillar(0.87, 128, 32, 96, true)
   local zSel = st.zoneSel or st.zone
-  local cleared = st.cleared and not o.preview
+  local cleared = st.cleared
   local nm = isBoss and "BOSS FIREWALL" or vulnName(zSel)
   local nw = textW(nm, 2)
   local plateW = math.max(nw + 16, 200)
@@ -113,14 +111,6 @@ local function battleCol(o)
   local dpsTxt = fmt(st.dps)
   drawTextR("DPS", L.labelR - textW(dpsTxt, 2) - 14, clickY, C.dim, 2)
   drawTextR(dpsTxt, L.labelR, clickY, C.gain, 2)
-  if o.held then drawText("10/s", 168, clickY, C.dim, 2) end
-
-  if o.held then
-    px(mx + 132, monY + 42, 8, 8, C.gold); px(mx + 140, monY + 70, 8, 8, C.text)
-    px(mx + 134, monY + 98, 8, 8, C.gold)
-    drawText("-" .. fmt(st.click), mx + 148, monY, C.gold, 3)
-    drawText("-" .. fmt(st.dps), mx + 148, monY + 28, C.gain, 2)
-  end
 
   if cleared then
     drawText("NEXT ZONE READY", 32, nextY, C.gold, 2)

@@ -1,9 +1,10 @@
 # Copy to .device, fill in, keep it out of version control (chmod 600).
 # Samba is enabled on the handheld under System Settings > Network.
-HOST=192.168.8.106        # RG34XXSP
-# the second handheld (RG34XX) answers at 192.168.8.148; pass it as an argument:
-#   tools/push.sh 192.168.8.148
+HOST=192.168.1.50          # your handheld's address, as shown on its network screen
 SHARE=share
 USER=root
 PASS=your-samba-password
 REMOTE=roms/ports/clickeragents
+
+# tools/push.sh takes an optional address, so one .device serves several handhelds:
+#   tools/push.sh 192.168.1.51

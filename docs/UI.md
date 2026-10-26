@@ -27,15 +27,17 @@ then `heroW / battleX / battleW`, `rows / rowY / footY`.
 
 | Band | y | content |
 |---|---|---|
-| Top bar | 0 | fixed-width slots: `CREDITS` · `DPS` · `ROOTKITS` · `ZONE`, plus `BOSS m:ss` on the right **only while a boss is live** |
+| Top bar | 0 | `CREDITS` · `DPS` · `ROOTKITS` · `ZONE`, sized by need (see below) |
 | Agent header | 32 | `AGENT` · `LV` · `COST` · `DPS`, dim |
 | Agent rows | 48 | `rows` × 32 px: 16-px icon, name, level, cost, DPS |
 | Agent footer | `footY` | `BUY ×n` left, `+n DPS` right |
 | Hint bar | `H - 32` | chips + labels, then four tab dots at the right |
 
-Top-bar slots are 124/124/124/100 px wide with the value right-aligned inside
-its slot, so a number growing from `999` to `1.24K` never nudges its neighbours.
-`BOSS` is dropped below ~608 px of remaining room and the timer keeps the corner.
+Top-bar slots are sized from a minimum (label plus a six-character value) plus a weighted
+share of the leftover width: credits first, then throughput, then rootkits and zone. Values
+are right-aligned and clipped to their own box, so a number growing from `999` to `1.24K`
+never nudges its neighbours. There is no boss clock in the bar — a firewall's time lives on
+its own bar in the arena.
 
 The battle column's vertical rhythm is measured from the body bottom
 (`H - hintH`): HP bar at `-184`, kills at `-144`, click/DPS at `-112`,
