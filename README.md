@@ -67,12 +67,16 @@ disagree.
 | **D-pad left / right** | buy amount −1 / +1 (1 → 100) | same — the amount is global |
 | **A** | buy `amount` levels of the selected agent | buy on SKILLS and UPGRADES, activate elsewhere (MENU: resume / save / quit) |
 | **B** | one manual probe into the vuln; a killing probe clears it | back to battle |
-| **X** | snap the zone cursor back to the live zone | cast the highlighted skill (SKILLS only); refused while it is cooling |
+| **X** | **walk through a cleared zone**; when you are looking at an earlier zone, snap the cursor back to the live one | cast the highlighted skill (SKILLS only); refused while it is cooling |
 | **Y** | unused — mapped in the gptk (`y = v`) and reserved | unused |
 | **L1 / R1** | previous / next tab | previous / next tab |
 | **L2 / R2** | step the zone cursor back / forward through cleared zones | unused |
 | **START** | open the pause menu (from any screen): the clock stops, the game autosaves, and RESUME / SAVE / QUIT appear | same |
 | **SELECT** | cycle the buy amount: ×1 → ×10 → ×100 → MAX | same |
+
+The game never moves you on by itself: clear a zone's ten vulns and the run stops there
+until you press **X** to walk through. The only thing that advances zones without you is the
+offline replay on launch.
 
 Also: the splash screen closes on **any** button, **Welcome Back** closes on **A** only, and
 the six tabs are BATTLE / SKILLS / UPGRADES / PRESTIGE / ACHIEVEMENTS / STATS — the menu is
@@ -83,7 +87,7 @@ Keyboard equivalents when running on a desktop (the same keys the gptk sends):
 | Key | Acts as |
 |---|---|
 | `x` / `z` | A (buy) / B (probe) |
-| `c` / `v` | X (cast or snap zone) / Y |
+| `c` / `v` | X (advance or snap zone, cast skill) / Y |
 | `q` / `e` | L1 / R1 (previous / next tab) |
 | `f` / `g` | L2 / R2 (zone back / forward) |
 | arrows | D-pad |

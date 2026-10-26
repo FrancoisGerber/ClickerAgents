@@ -25,17 +25,33 @@ function M.new_run_spawn(st)
   M.spawn(st)
 end
 
+-- Cleared is a state, not a step: the zone stops when its last vuln dies and the
+-- player has to walk through. Nothing moves them on while they are playing.
 local function advance(st)
   st.kills = st.kills + 1
-  if st.kills >= (st.boss and 1 or KILLS_PER_ZONE) then
-    st.zone = st.zone + 1
-    st.kills = 0
-    if st.zone > st.bestZone then st.bestZone = st.zone end
-    M.spawn(st)
+  local target = st.boss and 1 or KILLS_PER_ZONE
+  if st.kills >= target then
+    st.kills = target
+    st.cleared = true
+    st.hp = 0
+    st.hpMax = 0
+    st.timer = 0
   else
     st.hpMax = st.boss and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
     st.hp = st.hpMax
   end
+end
+
+-- the player's move: only from a cleared zone, and only forwards
+function M.advance_zone(st)
+  if not st.cleared then return false end
+  st.zone = st.zone + 1
+  st.kills = 0
+  st.cleared = false
+  if st.zone > st.bestZone then st.bestZone = st.zone end
+  st.zoneSel = st.zone
+  M.spawn(st)
+  return true
 end
 
 -- a kill pays, then the next vuln takes its place
@@ -45,15 +61,15 @@ local function kill(st)
 end
 
 function M.damage(st, amount)
-  if amount <= 0 then return end
+  if amount <= 0 or st.cleared then return end
   st.hp = st.hp - amount
-  while st.hp <= 0 do
+  while st.hp <= 0 and not st.cleared do
     local over = -st.hp
     kill(st)
+    if st.cleared then break end
     if st.hp > over then
       st.hp = st.hp - over
     end
-    if st.hp > 0 then break end
   end
 end
 
@@ -64,6 +80,7 @@ end
 
 -- passive damage plus the boss clock; dt is seconds
 function M.tick(st, dt)
+  if st.cleared then return end          -- waiting on the player, not on the clock
   if st.hp <= 0 then M.spawn(st) end
   if st.dps > 0 then M.damage(st, st.dps * dt) end
 
@@ -80,10 +97,15 @@ function M.tick(st, dt)
 end
 
 -- the offline report: run the same rules without a frame loop
+-- Offline time is the exception: the framework keeps going without the player,
+-- so a cleared zone is walked through automatically. Never used while playing.
 function M.simulate(st, seconds, step)
   step = step or 1
   local done = 0
   while done < seconds do
+    if st.cleared then
+      if not M.advance_zone(st) then break end
+    end
     M.tick(st, step)
     done = done + step
     if st.boss and st.timer <= 0 then break end

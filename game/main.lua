@@ -161,7 +161,7 @@ function love.keypressed(key)
   elseif key == B.nextSkill then
     if st.tab == 1 then Actions.move_zone(st, 1) end
   elseif key == B.fire then
-    if st.tab == 1 then Actions.move_zone(st, st.zone - st.zoneSel)
+    if st.tab == 1 then Actions.advance_or_snap(st)
     elseif st.tab == 2 then Actions.cast_skill(st, st.cursor[2]) end
   elseif key == B.click then
     if st.tab == 1 then Actions.probe(st) else Actions.set_tab(st, 1) end

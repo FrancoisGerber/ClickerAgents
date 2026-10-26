@@ -9,9 +9,10 @@ local M = {}
 function M.recalc(st)
   local dps = 0
   for _, a in ipairs(st.agents) do dps = dps + F.agent_dps(a) end
-  st.dps = math.floor(dps)
-  st.creditsKill = F.credits_per_vuln(st.zone)
-  st.click = math.max(1, math.floor(1 + 0.005 * st.dps))
+  local t = F.upgrade_totals(st.upOwned)
+  st.dps = math.floor(dps * (1 + t.dps_add))
+  st.creditsKill = math.max(1, math.floor(F.credits_per_vuln(st.zone) * (1 + t.credits_add)))
+  st.click = math.max(1, math.floor((1 + 0.005 * st.dps) * t.click_mul * (1 + t.click_add)))
 end
 
 function M.next_cost(st, i)

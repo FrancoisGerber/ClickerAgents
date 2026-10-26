@@ -172,3 +172,11 @@ does not have.
 | Zone 100 (CORE) | 15–25 minutes of play |
 | First ascension | 25–40 minutes |
 | Second system | 15 minutes, reaching zone 150 |
+
+## Pacing rule
+
+Nothing moves the player on. Clearing a zone's vulns (or its firewall) stops the run
+in that zone: the tick still runs, the agents still hold their damage, but no new
+zone is entered until the player presses **X**. Autosave, autobuy and auto-zone-walk
+are forbidden during play; the only automation is the agents' own throughput, and the
+only place zones advance unattended is the offline replay on launch.

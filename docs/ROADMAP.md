@@ -24,7 +24,8 @@ outside the canvas, and the gptk agrees with the game on every binding.
 ## M2 — The full agent ladder
 
 - All 12 agents in `game/data/agents.lua`, unlocked by zone
-- Buy amounts ×1 / ×10 / ×100 / MAX from the START button
+- Buy amounts ×1 / ×10 / ×100 / MAX from SELECT (START opens the pause menu)
+- Clearing a zone stops the run there; X walks you through. Nothing advances on its own while you play.
 - Ten global tools
 - Agent list with scrolling, six visible rows, affordability colours
 

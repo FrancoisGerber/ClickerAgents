@@ -100,8 +100,23 @@ check(s.hp == hp0 - 1 or s.kills == 1, "a probe takes 1 HP off")
 
 s.click = 100000
 for _ = 1, 40 do Combat.probe(s) end
-check(s.zone > 1, "clearing ten vulns advances the zone")
+check(s.zone == 1 and s.cleared, "clearing ten vulns stops the run in that zone")
 check(s.credits > 0, "kills pay credits")
+
+-- nothing moves the player on: not the tick, not more probes
+local frozenZone, frozenCredits = s.zone, s.credits
+for _ = 1, 30 do Combat.tick(s, 1.0) end
+for _ = 1, 5 do Combat.probe(s) end
+check(s.zone == frozenZone and s.credits == frozenCredits, "a cleared zone waits for the player")
+check(Combat.advance_zone(s) and s.zone == 2 and not s.cleared, "X walks through into the next zone")
+check(s.hpMax > 0, "the next zone spawns a fresh target")
+
+-- offline replay is the exception: it walks through cleared zones by itself
+local off = SimState.new_run()
+Combat.new_run_spawn(off)
+off.dps = 100000
+Combat.simulate(off, 120, 1)
+check(off.zone > 1, "offline time advances zones without the player")
 
 local boss = SimState.new_run()
 boss.zone = 5
@@ -186,12 +201,44 @@ Economy.select(pick, 99)
 check(pick.sel == #pick.agents, "selection clamps at the last agent")
 print("  row 0 <-> agent 1, clamped at both ends")
 
+-- ---------------------------------------------------------------- upgrades
+print("upgrades")
+local function fresh_with_level(lv)
+  local u = SimState.new_run()
+  u.agents[1].lv = lv
+  u.zone = 3
+  Economy.recalc(u)
+  return u
+end
+
+local base = fresh_with_level(10)
+local bDps, bClick, bCredits = base.dps, base.click, base.creditsKill
+
+local w = fresh_with_level(10); w.upOwned[2] = true; Economy.recalc(w)      -- WORDLIST +10% throughput
+check(w.dps == math.floor(bDps * 1.10), "+10% throughput tools lift DPS")
+
+local s2 = fresh_with_level(10); s2.upOwned[1] = true; Economy.recalc(s2)    -- SCANNER +25% probe
+check(s2.click == math.floor((1 + 0.005 * s2.dps) * 1.25), "+25% probe tools lift click damage")
+
+local e = fresh_with_level(10); e.upOwned[4] = true; Economy.recalc(e)       -- EXPLOIT KIT x2 probe
+check(e.click == math.floor((1 + 0.005 * e.dps) * 2), "x2 probe tools double click damage")
+
+local m = fresh_with_level(10); m.upOwned[9] = true; Economy.recalc(m)       -- MIXER +100% credits
+check(m.creditsKill == bCredits * 2, "+100% credit tools double the payout")
+
+local p = fresh_with_level(10); p.upOwned[10] = true; Economy.recalc(p)      -- PERSISTENCE
+check(p.dps == math.floor(bDps * 1.25), "PERSISTENCE lifts throughput")
+local totals = F.upgrade_totals(p.upOwned)
+check(totals.rootkit_bonus == 1, "PERSISTENCE adds a rootkit per ascension")
+check(F.rootkits_for_run(0, 0, totals.rootkit_bonus) == 1, "and the ascension payout sees it")
+
 -- ---------------------------------------------------------------- balance
 print("balance (M1 acceptance)")
 local run = SimState.new_run()
 Combat.new_run_spawn(run)
 local t, dt, zone10 = 0, 0.1, nil
 while t < 240 do
+  if run.cleared then Combat.advance_zone(run) end   -- a present player walks through
   Combat.tick(run, dt)
   t = t + dt
   local best, bestCost = nil, math.huge
@@ -205,6 +252,7 @@ while t < 240 do
   if not zone10 and run.zone >= 10 then zone10 = t end
 end
 check(zone10 ~= nil, "a greedy player reaches zone 10 inside four minutes")
+check(run.zone >= 17, "and zone 17 inside the same four minutes")
 print(string.format("  zone 10 at %s, zone %d after 240s, dps %d",
   zone10 and string.format("%.0fs", zone10) or "never", run.zone, run.dps))
 

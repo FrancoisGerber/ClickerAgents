@@ -69,10 +69,11 @@ Device keys arrive through `clickeragents.gptk`: **on this unit the printed A ar
 | D-pad left/right | arrows | buy amount 1…100 |
 | **A** | `x` | buy `amount` of the selected agent |
 | **B** | `z` | one manual click into the vuln: HP drops by click damage, the sprite flashes; a killing click refills the bar and ticks the kills counter. On a wireframe tab it returns to battle |
-| **X / Y** | `c` / `v` | **unmapped on purpose** |
-| **L / R** | `q` / `e` | previous / next tab (battle → stats → prestige → menu) |
-| **Start** | `return` | cycle amount 1 → 10 → 100 → MAX → 1 |
-| **Select** | `tab` | auto-click toggle (the idle switch; chip lights) |
+| **X** | `c` | walk through a cleared zone, or snap the zone cursor back to the live zone |
+| **Y** | `v` | **unmapped on purpose** |
+| **L / R** | `q` / `e` | previous / next tab (battle → skills → upgrades → prestige → achievements → stats) |
+| **Start** | `return` | open the pause menu (tick stops, autosave, RESUME / SAVE / QUIT) |
+| **Select** | `tab` | cycle amount 1 → 10 → 100 → MAX → 1 |
 | 1 / 2 / 3 | — | desktop only: normal / boss / holding-A states |
 | `m` | — | desktop only: cycle list width auto → narrow → wide |
 

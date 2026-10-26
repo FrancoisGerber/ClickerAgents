@@ -5,7 +5,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT" || exit 1
 
 rm -f /tmp/clickeragents.love ClickerAgents.zip
-(cd game && zip -9 -q -r /tmp/clickeragents.love conf.lua main.lua layout.lua font.lua)
+(cd game && zip -9 -q -r /tmp/clickeragents.love . -x '*.love')   # every module, not a file list
 cp /tmp/clickeragents.love port/clickeragents/clickeragents.love
 # the pak ships the same artwork the repo and the device images folder get
 mkdir -p port/clickeragents/images

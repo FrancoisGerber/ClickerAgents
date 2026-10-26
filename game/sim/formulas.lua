@@ -58,8 +58,26 @@ function M.layer_index(zone)
   return 1
 end
 
-function M.rootkits_for_run(total_agent_levels, boss_kills)
-  return math.floor(total_agent_levels / 2000) + boss_kills
+-- what the owned one-shot tools add up to; the only place their effects live
+function M.upgrade_totals(upOwned)
+  local Upgrades = require("data.upgrades")
+  local t = { click_add = 0, click_mul = 1, dps_add = 0, credits_add = 0, rootkit_bonus = 0 }
+  for i, u in ipairs(Upgrades.list) do
+    if upOwned[i] and u[4] then
+      for _, e in ipairs(u[4]) do
+        if e[1] == "click_add" then t.click_add = t.click_add + e[2]
+        elseif e[1] == "click_mul" then t.click_mul = t.click_mul * e[2]
+        elseif e[1] == "dps_add" then t.dps_add = t.dps_add + e[2]
+        elseif e[1] == "credits_add" then t.credits_add = t.credits_add + e[2]
+        elseif e[1] == "rootkit_bonus" then t.rootkit_bonus = t.rootkit_bonus + e[2] end
+      end
+    end
+  end
+  return t
+end
+
+function M.rootkits_for_run(total_agent_levels, boss_kills, bonus)
+  return math.floor(total_agent_levels / 2000) + boss_kills + (bonus or 0)
 end
 
 return M

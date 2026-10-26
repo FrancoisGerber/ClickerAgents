@@ -46,6 +46,16 @@ function M.cast_skill(st, i)
   M.say(st, sk.name .. " ACTIVE")
 end
 
+-- X does one of two things on the arena: walk through a cleared zone, or bring
+-- the view back to the live one. It never moves the run on by itself.
+function M.advance_or_snap(st)
+  if st.cleared then
+    if Combat.advance_zone(st) then M.say(st, "ZONE " .. st.zone) end
+  else
+    M.move_zone(st, st.zone - (st.zoneSel or st.zone))
+  end
+end
+
 -- L2/R2 walk the zones you have already cleared; X snaps back to the live one
 function M.move_zone(st, d)
   local cur = st.zoneSel or st.zone

@@ -25,7 +25,7 @@ local function topBar()
   end
   local x = 16
   x = slot(x, 176, "CREDITS", fmt(st.credits), C.gold)
-  x = slot(x, 104, "DPS", fmt(st.dps), C.gain)
+  x = slot(x, 128, "DPS", fmt(st.dps), C.gain)
   x = slot(x, 160, "ROOTKITS", tostring(st.rootkits), C.gold)
   x = slot(x, 96, "ZONE", tostring(st.zone), C.text)
   -- the boss timer earns its corner only while there is a boss to lose to
@@ -59,7 +59,8 @@ local function hintBar()
   local backChip = { k = "B", t = "BACK" }
   local chips
   if st.tab == 1 then
-    chips = { aChip, bChip, K.ZN, K.SE, K.ST }
+    local zoneChip = st.cleared and { k = "X", t = "ADVANCE" } or K.ZN
+    chips = { aChip, bChip, zoneChip, K.SE, K.ST }
   elseif st.tab == 2 then
     chips = { buyChip, useChip, backChip, K.LR }
   elseif st.tab == 3 then
