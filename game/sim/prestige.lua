@@ -10,10 +10,17 @@ local Agents = require("data.agents")
 local T = require("tuning")
 local M = {}
 
-M.UNLOCK_ZONE = T.prestige.unlock_zone
+M.UNLOCK_ZONE = T.prestige.unlock_zone   -- the first gate
+
+-- the zone this ascension needs: 100, then 200, 400, 800, ... one doubling per system
+function M.unlock_zone(st)
+  local n = (st and st.systems) or 0
+  if not T.prestige.gate_doubles then n = 0 end
+  return M.UNLOCK_ZONE * (2 ^ n)
+end
 
 function M.can_ascend(st)
-  return st.zone >= M.UNLOCK_ZONE
+  return st.zone >= M.unlock_zone(st)
 end
 
 -- every agent level you paid for, plus every firewall you broke, is worth keeping

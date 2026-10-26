@@ -117,7 +117,9 @@ decision in this game follows from that gap.
 
 ## 7. Ascension — the next system
 
-- **Unlocks:** at zone 100, when CORE is in reach. A visible confirm screen, not a hidden
+- **Unlocks:** at zone 100, when CORE is in reach — and the gate doubles with every
+  ascension you take: 100, then 200, 400, 800. Each system has to reach twice as deep
+  as the last before it can be cashed in. A visible confirm screen, not a hidden
   purchase — a handheld player should not have to discover a 1.9e19 purchase.
 - **Wipes:** credits, agent levels, tooling, zone (back to 1), skill unlocks. Nothing is
   handed back for free: a new system has an empty roster, so the first Spider is bought
@@ -218,3 +220,10 @@ until `X` moves the run on, which clears the flag for the new zone.
 
 Walking back to a firewall zone you have already beaten (`travel_to`) sets the same flag,
 so an old boss zone arrives open, at boss scale, with no clock to beat.
+
+## 13. What one press is worth
+
+`probe.share = 1.5` at zone 1, falling on a half-life of `probe.half_life = 70` zones and
+settling on `probe.share_floor = 1.06`: ×1.225 at zone 100, ×1.171 at 140, ×1.083 at 300.
+Clicking always beats waiting, but the margin shrinks as the agents take over, and the
+economy enforces at least `dps + 1` so rounding can never tie them.

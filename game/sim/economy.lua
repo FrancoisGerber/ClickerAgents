@@ -19,7 +19,11 @@ function M.recalc(st)
   st.dps = math.floor(dps * (1 + t.dps_add) * b.dps * dm.dps * (1 + T.prestige.hold_bonus * (st.rootkits or 0)))
   local payout = F.credits_per_vuln(st.zone) * ((st.boss or st.bossFarm) and T.payout.boss_multiplier or 1)
   st.creditsKill = math.max(1, math.floor(payout * (1 + t.credits_add) * b.credits * dm.credits))
-  st.click = math.max(1, math.floor(F.probe_damage(st.dps) * t.click_mul * (1 + t.click_add) * b.click * dm.click))
+  st.click = math.max(1, math.floor(F.probe_damage(st.dps, st.zone) * t.click_mul * (1 + t.click_add) * b.click * dm.click))
+  -- the rule the whole design rests on: a press always beats a second of waiting. At a
+  -- low level in a deep zone the share is close to 1.0 and rounding could tie them, so
+  -- the probe wins by at least one point of damage.
+  if st.dps > 0 then st.click = math.max(st.click, st.dps + 1) end
   st.probes = b.probes + dm.probes
 end
 

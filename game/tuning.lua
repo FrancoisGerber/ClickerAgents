@@ -40,10 +40,15 @@ T.agent = {
 
 -- ---------------------------------------------------------------- probes
 T.probe = {
-  -- one press is worth this many seconds of the agents' output, so a steady tap is
-  -- always faster than waiting. Never set this at or below 1.0.
+  -- One press is worth this many seconds of the agents' output at zone 1, so a steady
+  -- tap is always the faster way to kill something. The bonus over 1.0 halves every
+  -- half_life zones, settling on share_floor: clicking still always beats waiting, but
+  -- by less and less as the run grows, until the agents carry the zone on their own.
+  -- Never set share_floor at or below 1.0.
   share = 1.5,
-  min = 1,                    -- floor, so a run with no agents can still open
+  share_floor = 1.06,
+  half_life = 70,             -- zones for the bonus to halve
+  min = 1,                    -- damage floor, so a run with no agents can still open
 }
 
 -- ---------------------------------------------------------------- firewalls
@@ -63,7 +68,8 @@ T.buff = {
 
 -- ---------------------------------------------------------------- prestige
 T.prestige = {
-  unlock_zone = 100,          -- ascension becomes available here
+  unlock_zone = 100,          -- first ascension becomes available here
+  gate_doubles = true,        -- and every ascension after that doubles it: 200, 400, 800
   levels_per_rootkit = 2000,  -- agent levels needed per rootkit on offer
   hold_bonus = 0.10,          -- throughput multiplier per unspent rootkit
 }

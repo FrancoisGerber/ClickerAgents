@@ -61,7 +61,7 @@ local function prestigeScreen()
   elseif ready then
     drawTextR("ZONE " .. st.zone, m + w - 20, ay + 14, C.gold, 2)
   else
-    drawTextR("LOCKED · ZONE " .. Prestige.UNLOCK_ZONE, m + w - 20, ay + 14, C.poor, 2)
+    drawTextR("LOCKED · ZONE " .. Prestige.unlock_zone(st), m + w - 20, ay + 14, C.poor, 2)
   end
 
   local x2 = m + w + gap

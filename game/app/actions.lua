@@ -117,7 +117,7 @@ function M.activate(st)
   elseif st.tab == 4 then
     if c == #Systems.daemons + 1 then
       if not Prestige.can_ascend(st) then
-        M.say(st, "LOCKED · ZONE " .. Prestige.UNLOCK_ZONE)
+        M.say(st, "LOCKED · ZONE " .. Prestige.unlock_zone(st))
       elseif not st.confirmAscend then
         st.confirmAscend = true
         M.say(st, "PRESS A AGAIN TO ASCEND")

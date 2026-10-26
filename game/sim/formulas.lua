@@ -4,8 +4,16 @@ local T = require("tuning")
 
 local M = {}
 
--- kept as a field for callers that ask the formula what it is using
+-- the share at zone 1, for callers that just want the starting figure
 M.PROBE_SHARE = T.probe.share
+
+-- how many seconds of throughput one press is worth in this zone: 1.5 at the start,
+-- halving its bonus every T.probe.half_life zones, and never below the floor
+function M.probe_share(zone)
+  local p = T.probe
+  local n = math.max(0, (zone or 1) - 1)
+  return p.share_floor + (p.share - p.share_floor) * (0.5 ^ (n / p.half_life))
+end
 
 function M.vuln_hp(zone)
   local v = T.vuln
@@ -45,8 +53,8 @@ function M.agent_dps(agent)
   return agent.base * agent.lv * (T.agent.milestone_step ^ M.milestones(agent.lv))
 end
 
-function M.probe_damage(dps)
-  return math.max(T.probe.min, math.floor((dps or 0) * T.probe.share))
+function M.probe_damage(dps, zone)
+  return math.max(T.probe.min, math.floor((dps or 0) * M.probe_share(zone)))
 end
 
 function M.is_boss_zone(zone)

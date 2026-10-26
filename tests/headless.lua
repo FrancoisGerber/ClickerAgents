@@ -296,10 +296,10 @@ local w = fresh_with_level(10); w.upOwned[2] = true; Economy.recalc(w)      -- W
 check(w.dps == math.floor(bDps * 1.10), "+10% throughput tools lift DPS")
 
 local s2 = fresh_with_level(10); s2.upOwned[1] = true; Economy.recalc(s2)    -- SCANNER +25% probe
-check(s2.click == math.floor(F.probe_damage(s2.dps) * 1.25), "+25% probe tools lift click damage")
+check(s2.click == math.floor(F.probe_damage(s2.dps, s2.zone) * 1.25), "+25% probe tools lift click damage")
 
 local e = fresh_with_level(10); e.upOwned[4] = true; Economy.recalc(e)       -- EXPLOIT KIT x2 probe
-check(e.click == math.floor(F.probe_damage(e.dps) * 2), "x2 probe tools double click damage")
+check(e.click == math.floor(F.probe_damage(e.dps, e.zone) * 2), "x2 probe tools double click damage")
 
 local m = fresh_with_level(10); m.upOwned[9] = true; Economy.recalc(m)       -- MIXER +100% credits
 check(m.creditsKill == bCredits * 2, "+100% credit tools double the payout")
@@ -371,12 +371,12 @@ check(K.dps == d0, "and it drops back when the buff ends")
 
 -- SPLICE is the probe skill now
 Actions.cast_skill(K, SI.SPLICE)
-check(K.click == math.floor(F.probe_damage(K.dps) * effOf("SPLICE", "click_mul")),
+check(K.click == math.floor(F.probe_damage(K.dps, K.zone) * effOf("SPLICE", "click_mul")),
       "SPLICE multiplies probe damage")
 Buffs.tick(K, 31); Economy.recalc(K)
 
 Actions.cast_skill(K, SI.PHISH)
-check(K.click == math.floor(F.probe_damage(K.dps) * Buffs.CRIT_MUL), "PHISH makes every probe crit for x10")
+check(K.click == math.floor(F.probe_damage(K.dps, K.zone) * Buffs.CRIT_MUL), "PHISH makes every probe crit for x10")
 Buffs.tick(K, 31); Economy.recalc(K)
 check(K.click == c0, "probe damage returns to normal")
 
@@ -423,6 +423,31 @@ for _, lv in ipairs({ 1, 25, 100, 400 }) do
   end
 end
 check(n == 16, "one probe is worth more than one second of idling at every level and zone")
+
+-- the share itself: starts at 1.5, decays, never reaches 1.0
+check(math.abs(F.probe_share(1) - require("tuning").probe.share) < 1e-9, "the probe share starts at 1.5")
+check(F.probe_share(100) < F.probe_share(50) and F.probe_share(50) < F.probe_share(1),
+      "and falls as the zones climb")
+local floorShare = 1.06
+local aboveFloor = true
+for _, z in ipairs({ 1, 50, 100, 200, 400, 1000, 5000 }) do
+  if F.probe_share(z) <= 1.0 then aboveFloor = false end
+end
+check(aboveFloor, "it never falls to 1.0, so clicking always beats waiting")
+check(math.abs(F.probe_share(5000) - floorShare) < 0.01, "and settles on its floor")
+
+-- rounding must never let idle catch up with a tap
+local ties = 0
+for _, lv in ipairs({ 1, 2, 12, 100 }) do
+  for _, z in ipairs({ 1, 140, 300, 900 }) do
+    local R = SimState.new_run()
+    R.agents[1].lv = lv
+    R.zone = z
+    Economy.recalc(R)
+    if not (R.click > R.dps) then ties = ties + 1 end
+  end
+end
+check(ties == 0, "a press always out-damages a second of throughput, rounding included")
 
 local D = SimState.new_run()
 D.agents[1].lv = 60
@@ -975,6 +1000,21 @@ check(Combat.KILLS_PER_ZONE == TUNE.zone.kills_per_zone, "kills per zone comes f
 check(Combat.BOSS_SECONDS == TUNE.boss.seconds, "the firewall clock comes from tuning")
 check(Buffs.DURATION == TUNE.buff.duration, "skill duration comes from tuning")
 check(Prestige.UNLOCK_ZONE == TUNE.prestige.unlock_zone, "the ascension gate comes from tuning")
+local gate = SimState.new_run()
+check(Prestige.unlock_zone(gate) == 100, "the first ascension needs zone 100")
+gate.systems = 1
+check(Prestige.unlock_zone(gate) == 200, "the second needs 200")
+gate.systems = 2
+check(Prestige.unlock_zone(gate) == 400, "the third 400")
+gate.systems = 3
+check(Prestige.unlock_zone(gate) == 800, "the fourth 800")
+gate.systems = 0
+gate.zone = 150
+check(Prestige.can_ascend(gate), "zone 150 is enough at 100")
+gate.systems = 1
+check(not Prestige.can_ascend(gate), "and not enough at 200")
+gate.zone = 200
+check(Prestige.can_ascend(gate), "until you reach 200")
 check(Save.INTERVAL == TUNE.save.interval, "the autosave beat comes from tuning")
 check(Save.OFFLINE_CAP == TUNE.save.offline_cap, "the offline cap comes from tuning")
 

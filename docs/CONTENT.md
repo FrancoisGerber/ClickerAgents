@@ -100,7 +100,7 @@ Boss firewalls on zones divisible by 5 and ≥ 100 pay
 
 Unspent rootkits are +10% throughput each, permanently, across every system.
 
-First ascension should land at zone 130–150 with roughly 8–15 rootkits: enough that the
+First ascension should land at zone 130–150 (the gate is 100, then 200, 400, 800) with roughly 8–15 rootkits: enough that the
 bonus is felt immediately, small enough that the second system is clearly better rather
 than trivial.
 
