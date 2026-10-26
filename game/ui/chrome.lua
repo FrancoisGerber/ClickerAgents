@@ -39,13 +39,13 @@ local function topBar()
   px(0, L.topH - 2, W, 2, C.rule)
 end
 
-local TABS = { "BATTLE", "SKILLS", "UPGRADES", "PRESTIGE", "ACHIEVEMENTS", "STATS", "MENU" }
+local TABS = { "BATTLE", "SKILLS", "UPGRADES", "PRESTIGE", "ACHIEVEMENTS", "STATS" }
 local NTABS = #TABS
 
 local K = {
   LR = { k = "L/R",    t = "TAB" },
-  ST = { k = "START",  t = "AMOUNT" },
-  SE = { k = "SELECT", t = "AUTO" },
+  ST = { k = "START",  t = "MENU" },
+  SE = { k = "SELECT", t = "AMOUNT" },
   ZN = { k = "L2/R2",  t = "ZONE" },
 }
 
@@ -53,18 +53,19 @@ local function hintBar()
   local aChip = { k = "A", t = "BUY" }
   local bChip = { k = "B", t = "CLICK" }
   local selChip = { k = "A", t = "SELECT" }
+
   local buyChip = { k = "A", t = "BUY" }
   local useChip = { k = "X", t = "USE" }
   local backChip = { k = "B", t = "BACK" }
   local chips
   if st.tab == 1 then
-    chips = { aChip, bChip, K.ZN, K.ST, K.SE }
+    chips = { aChip, bChip, K.ZN, K.SE, K.ST }
   elseif st.tab == 2 then
     chips = { buyChip, useChip, backChip, K.LR }
   elseif st.tab == 3 then
     chips = { buyChip, backChip, K.LR }
   elseif st.tab == 6 then
-    chips = { backChip, K.LR }
+    chips = { backChip, K.LR, K.ST }
   else
     chips = { selChip, backChip, K.LR }
   end
@@ -79,7 +80,7 @@ local function hintBar()
     local cw = 6 * #b.k + 8
     local wNeed = cw + 6 + textW(b.t, 2) + 18
     if x + wNeed > limit then break end
-    local lit = (b.t == "CLICK" and st.flashT > 0) or (b.t == "AUTO" and st.idle)
+    local lit = (b.t == "CLICK" and st.flashT > 0)
     rrect(x, L.H - L.hintH + 8, cw, 16, 2, lit and C.gold or C.rule)
     drawText(b.k, x + math.floor((cw - 6 * #b.k) / 2), L.H - L.hintH + 13,
              lit and C.ground or C.text, 1)

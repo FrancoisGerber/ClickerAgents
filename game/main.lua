@@ -50,7 +50,6 @@ local function screen_for(tab)
   if tab == 4 then return PrestigeScreen end
   if tab == 5 then return AchievementsScreen end
   if tab == 6 then return StatsScreen end
-  if tab == 7 then return MenuScreen end
   return Battle
 end
 
@@ -81,6 +80,7 @@ function love.draw()
   local st = ctx.state
   if st.screen == "splash" then Splash.draw(ctx) return end
   if st.screen == "welcome" then Welcome.draw(ctx, ctx.report) return end
+  if st.screen == "menu" then MenuScreen.draw(ctx) return end
 
   Chrome.topBar(ctx)
   screen_for(st.tab).draw(ctx)
@@ -101,6 +101,7 @@ function love.update(dt)
     if st.splashT > 2.5 then st.screen = st.welcome and "welcome" or "game" end
     return
   end
+  if st.screen == "menu" then return end        -- paused: no tick, no autosave
   if st.screen ~= "game" then return end
 
   Combat.tick(st, dt)
@@ -117,13 +118,6 @@ local function toggle_list_width()
   rebuild()
 end
 
-local function cycle_amount(st)
-  if st.amount == 1 then st.amount = 10
-  elseif st.amount == 10 then st.amount = 100
-  elseif st.amount == 100 then st.amount = 0      -- 0 = MAX
-  else st.amount = 1 end
-end
-
 function love.keypressed(key)
   local st = ctx.state
   local B = ctx.binds
@@ -138,6 +132,15 @@ function love.keypressed(key)
   if st.screen == "welcome" then
     if key == "escape" then love.event.quit()
     elseif key == B.buy then st.screen = "game" end    -- A continues, nothing else
+    return
+  end
+  if st.screen == "menu" then
+    if key == "up" then Actions.move_menu(st, -1)
+    elseif key == "down" then Actions.move_menu(st, 1)
+    elseif key == "return" or key == B.click then Actions.close_menu(st)
+    elseif key == B.buy then Actions.activate_menu(st)
+    elseif key == "escape" then Actions.activate_menu(st)   -- the QUIT row if selected
+    end
     return
   end
 
@@ -162,8 +165,8 @@ function love.keypressed(key)
     elseif st.tab == 2 then Actions.cast_skill(st, st.cursor[2]) end
   elseif key == B.click then
     if st.tab == 1 then Actions.probe(st) else Actions.set_tab(st, 1) end
-  elseif key == "tab" then st.idle = not st.idle
-  elseif key == "return" then cycle_amount(st)
+  elseif key == "return" then Actions.open_menu(st)      -- START: pause anywhere
+  elseif key == "tab" then Actions.cycle_amount(st)      -- SELECT: buy amount
   elseif key == "m" then toggle_list_width()
   elseif key == "escape" then love.event.quit()
   end

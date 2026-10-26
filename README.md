@@ -71,11 +71,12 @@ disagree.
 | **Y** | unused — mapped in the gptk (`y = v`) and reserved | unused |
 | **L1 / R1** | previous / next tab | previous / next tab |
 | **L2 / R2** | step the zone cursor back / forward through cleared zones | unused |
-| **START** | cycle buy amount: ×1 → ×10 → ×100 → MAX | same |
-| **SELECT** | toggle auto-probe — the flag and the lit indicator work, the probing itself lands with the simulation | same |
+| **START** | open the pause menu (from any screen): the clock stops, the game autosaves, and RESUME / SAVE / QUIT appear | same |
+| **SELECT** | cycle the buy amount: ×1 → ×10 → ×100 → MAX | same |
 
-Also: the splash screen closes on **any** button, and **Welcome Back** closes on **A**
-only, so a stray press cannot skip the offline report.
+Also: the splash screen closes on **any** button, **Welcome Back** closes on **A** only, and
+the six tabs are BATTLE / SKILLS / UPGRADES / PRESTIGE / ACHIEVEMENTS / STATS — the menu is
+an overlay, not a tab.
 
 Keyboard equivalents when running on a desktop (the same keys the gptk sends):
 
@@ -86,8 +87,8 @@ Keyboard equivalents when running on a desktop (the same keys the gptk sends):
 | `q` / `e` | L1 / R1 (previous / next tab) |
 | `f` / `g` | L2 / R2 (zone back / forward) |
 | arrows | D-pad |
-| `Enter` | START (buy amount) |
-| `Tab` | SELECT (auto-probe flag) |
+| `Enter` | START (pause menu) |
+| `Tab` | SELECT (buy amount) |
 | `m` | cycle list width (auto / narrow / wide) — desktop only |
 | `1` / `2` / `3` | preview battle / boss / held-probe states — desktop only |
 | `Escape` | quit |

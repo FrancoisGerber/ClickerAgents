@@ -39,6 +39,7 @@ _G.DS_TEST = true
 local Game = dofile("game/main.lua")
 
 local F = require("sim.formulas")
+local Chrome = require("ui.chrome")
 local Combat = require("sim.combat")
 local Economy = require("sim.economy")
 local Save = require("sim.save")
@@ -265,11 +266,35 @@ love.keypressed(B.fire)
 check(g.zoneSel == 12, "X snaps back to the live zone")
 
 local visited = {}
-for _ = 1, 7 do
+for _ = 1, 6 do
   love.keypressed("e")
   visited[#visited + 1] = g.tab
 end
-check(visited[7] == 1, "R cycles all seven screens back to battle")
+check(visited[6] == 1, "R cycles all six tabs back to battle")
+check(Chrome.NTABS == 6, "the menu is not a tab any more")
+
+-- START opens the pause menu from any screen, freezes the clock and saves
+g.tab = 3
+love.keypressed("return")
+check(g.screen == "menu", "START opens the menu from a list screen")
+check(g.paused == true, "opening the menu sets the paused flag")
+check(g.cursor.menu == 1, "the menu cursor starts on RESUME")
+local creditsBefore = g.credits
+local hpBefore = g.hp
+love.update(1.0)
+check(g.credits == creditsBefore and g.hp == hpBefore, "the ticker is frozen while paused")
+love.keypressed("b-placeholder")                  -- no-op key while paused
+love.keypressed(B.click)
+check(g.screen == "game" and g.paused == false, "B resumes the game")
+
+-- SELECT cycles the buy amount, START no longer does
+g.amount = 1
+love.keypressed("tab")
+check(g.amount == 10, "SELECT cycles the amount to x10")
+love.keypressed("tab"); love.keypressed("tab")
+check(g.amount == 0, "SELECT reaches MAX")
+love.keypressed("tab")
+check(g.amount == 1, "and wraps back to x1")
 
 g.tab = 4
 g.cursor[4] = 1

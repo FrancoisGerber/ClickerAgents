@@ -1,40 +1,50 @@
+-- The pause menu. An overlay rather than a tab: START opens it from any screen,
+-- the clock stops and a save lands on disk before it is drawn.
 local Draw = require("ui.draw")
 local W = require("ui.widgets")
 local Config = require("config")
-local Numbers = require("core/numbers")
 
-local px, rrect, frame = Draw.px, Draw.rrect, Draw.frame
+local px, frame, rrect = Draw.px, Draw.frame, Draw.rrect
 local text, textR, textC, textW = Draw.text, Draw.textR, Draw.textC, Draw.textW
-local fit, wire, wireWrap = Draw.fit, Draw.wire, Draw.wireWrap
-local drawText, drawTextR, drawTextC = Draw.text, Draw.textR, Draw.textC
-local panel, rowSel, rowsPanel = W.panel, W.rowSel, W.rowsPanel
+local panel, rowSel = W.panel, W.rowSel
 local C = Config.C
-local fmt = Numbers.fmt
 
 local M = {}
-local st, L, opts
+local st, L
+
+local ITEMS = { "RESUME", "SAVE", "QUIT" }
 
 local function menuScreen()
-  local m, gap = 24, 16
-  local bodyY = L.topH + 16
-  drawText("MENU", m, bodyY, C.text, 2)
-  local y = bodyY + 40
-  local w = math.floor((L.W - m * 2 - gap) / 2)
-  local c = st.cursor[7]
-  local items = { "RESUME", "SAVE", "QUIT" }
-  for i, it in ipairs(items) do
-    local ry = y + (i - 1) * 56
+  px(0, 0, L.W, L.H, C.ground)
+
+  local w = math.min(360, L.W - 80)
+  local rowH = 44
+  local pad = 20
+  local h = pad + 56 + #ITEMS * (rowH + 8) + 44
+  local x = math.floor((L.W - w) / 2)
+  local y = math.floor((L.H - h) / 2)
+
+  panel(x, y, w, h)
+  text("PAUSED", x + pad, y + 16, C.gold, 3)
+  textR("CLOCK STOPPED", x + w - pad, y + 22, C.dim, 2)
+  local saved = st.savedOnPause and "SAVED" or "SAVE FAILED"
+  text(saved, x + pad, y + 46, st.savedOnPause and C.gain or C.poor, 2)
+
+  local c = st.cursor.menu or 1
+  local ry = y + 76
+  for i, label in ipairs(ITEMS) do
     local on = (i == c)
-    if on then rowSel(m + 4, ry - 6, w - 8, 60) end
-    frame(m, ry, w, 48, 2, on and C.gold or C.rule)
-    drawText(it, m + 12, ry + 12, on and C.text or C.dim, 2)
+    if on then rowSel(x + pad - 8, ry - 6, w - pad * 2 + 16, rowH + 12) end
+    frame(x + pad, ry, w - pad * 2, rowH, 2, on and C.gold or C.rule)
+    text(label, x + pad + 12, ry + 12, on and C.text or C.dim, 2)
+    if i == 2 and st.savedOnPause then
+      textR("AUTOSAVED", x + w - pad - 12, ry + 12, C.dim, 2)
+    end
+    if i == 3 then textR("NO SAVE LOST", x + w - pad - 12, ry + 12, C.dim, 2) end
+    ry = ry + rowH + 8
   end
-  local x2 = m + w + gap
-  local pw = L.W - m - x2 - 24
-  panel(x2, y, L.W - m - x2, 104, "ABOUT")
-  wire("CLICKER AGENTS 0.1", x2 + 12, y + 40, C.text, pw)
-  wire("GPL-3.0-OR-LATER", x2 + 12, y + 64, nil, pw)
-  wire("LOVE 11.5 · PORTMASTER", x2 + 12, y + 88, nil, pw)
+
+  textC("START OR B TO RESUME", math.floor(L.W / 2), y + h - 26, C.dim, 2)
 end
 
 function M.draw(ctx)

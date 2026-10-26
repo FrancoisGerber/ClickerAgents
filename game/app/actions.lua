@@ -19,7 +19,7 @@ function M.row_count(st, tab)
   if tab == 4 then return #Systems.daemons + 1 end      -- daemons plus ASCEND
   if tab == 5 then return #Achievements end
   if tab == 6 then return 8 end                          -- stats: read-only rows
-  return 3                                               -- menu: resume/save/quit
+  return 0
 end
 
 function M.set_tab(st, n)
@@ -89,14 +89,47 @@ function M.activate(st)
   elseif st.tab == 5 then
     M.say(st, Achievements[c][1])
 
-  elseif st.tab == 7 then
-    if c == 1 then M.set_tab(st, 1); M.say(st, "RESUMED")
-    elseif c == 2 then
-      M.say(st, Save.write(st) and "SAVED" or "SAVE FAILED")
-    else
-      love.event.quit()
-    end
   end
+end
+
+-- The menu is an overlay, not a tab: START opens it from anywhere, pauses the
+-- clock and writes a save before it appears.
+M.MENU_ROWS = 3
+
+function M.open_menu(st)
+  st.screen = "menu"
+  st.cursor.menu = st.cursor.menu or 1
+  st.paused = true
+  st.savedOnPause = Save.write(st)
+end
+
+function M.close_menu(st)
+  st.screen = "game"
+  st.paused = false
+end
+
+function M.activate_menu(st)
+  local c = st.cursor.menu or 1
+  if c == 1 then
+    M.close_menu(st)
+  elseif c == 2 then
+    M.say(st, Save.write(st) and "SAVED" or "SAVE FAILED")
+  else
+    love.event.quit()
+  end
+end
+
+function M.move_menu(st, d)
+  local n = M.MENU_ROWS
+  st.cursor.menu = ((st.cursor.menu - 1 + d) % n) + 1
+end
+
+-- SELECT cycles the buy amount; it used to be START, which now belongs to the menu
+function M.cycle_amount(st)
+  if st.amount == 1 then st.amount = 10
+  elseif st.amount == 10 then st.amount = 100
+  elseif st.amount == 100 then st.amount = 0      -- 0 = MAX
+  else st.amount = 1 end
 end
 
 function M.probe(st)

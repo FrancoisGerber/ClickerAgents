@@ -112,7 +112,7 @@ selectable, with the chosen one spelled out beside it.
 `ASCEND · LOCKED · ZONE 100`, and a `SYSTEMS · ROOTKIT SPEND` panel listing the four
 earliest systems for the v1.1 rootkit sink.
 
-**Menu** (tab 7) — `RESUME / SAVE / QUIT` rows and an `ABOUT` box.
+**Menu** (overlay) — opened with START from any screen. It pauses the ticker, writes a save, and shows `PAUSED`, the save status, and `RESUME / SAVE / QUIT`.
 
 Tabs 2–7 show their real labels and, where the content exists (upgrade names and
 prices), real values. Seven dots at the bottom-right track the tab; L/R cycles
