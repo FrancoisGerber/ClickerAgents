@@ -2,6 +2,8 @@
 
 ![Clicker Agents](art/logo.png)
 
+![Clicker Agents running at 720x480 on a handheld: agent list, a live vuln, credits, zone](port/screenshot.png)
+
 An open-source idle (incremental) RPG for PortMaster handhelds — built to be played on the Anbernic RG34XXSP's 3.4" 720×480 screen with a D-pad and four face buttons.
 
 You are a rogue intrusion framework with no owner and no account. Deploy **agents**, tear
