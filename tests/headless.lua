@@ -938,6 +938,9 @@ check(PL.panelH == 40 + PL.panelRows * PL.rowH, "and one height is derived from 
 check(PL.panelH == 328, "at 720x480 that is 328 px, the achievements height")
 check(not fileHas("game/ui/chrome.lua", "BOSS"), "the top bar draws no boss clock")
 check(not fileHas("game/screens/menu.lua", "START OR B"), "the pause menu has no resume hint")
+-- one version string in the game: the splash must read it, not print its own
+check(fileHas("game/screens/splash.lua", "Config.VERSION"), "the splash reads its version from config")
+check(not fileHas("game/screens/splash.lua", 'drawText("0.'), "and does not print a hardcoded one")
 
 -- every tab paints its panels at that height: two per tab, left and right
 for tab = 2, 6 do

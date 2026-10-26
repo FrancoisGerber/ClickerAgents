@@ -31,7 +31,7 @@ local function splashScreen()
   drawTextC("AN UNLICENSED FRAMEWORK", cx, ty + 7 * scale + 12, C.text, 2)
   drawTextC("PRESS ANY BUTTON", cx, L.H - 72, C.dim, 2)
   px(0, L.H - 96, L.W, 2, C.rule)
-  drawText("0.1", 16, L.H - 28, C.rule, 2)
+  drawText(Config.VERSION, 16, L.H - 28, C.rule, 2)
   drawTextR("GPL-3.0-OR-LATER", L.W - 16, L.H - 28, C.rule, 2)
 end
 
