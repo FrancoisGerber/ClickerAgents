@@ -65,7 +65,7 @@ local function battleCol(o)
   pillar(0.87, 128, 32, 96, true)
   local zSel = st.zoneSel or st.zone
   local cleared = st.cleared and not o.preview
-  local nm = cleared and "ZONE CLEAR" or (o.boss and "BOSS FIREWALL" or vulnName(zSel))
+  local nm = o.boss and "BOSS FIREWALL" or vulnName(zSel)
   local nw = textW(nm, 2)
   local plateW = math.max(nw + 16, 200)
   local plateX = math.floor((bw - plateW) / 2)
@@ -92,16 +92,12 @@ local function battleCol(o)
   px(plateX, nameY - 4, plateW, 20, ART.floor)  -- nameplate hides the floor studs
   drawTextC(nm, math.floor(bw / 2), nameY, C.text, 2)
 
-  local frac = cleared and 0 or (st.hpMax > 0 and st.hp / st.hpMax or 0)
+  local frac = st.hpMax > 0 and (st.hp / st.hpMax) or 0
   hpBar(L.hpX, hpY, L.hpW, 32, frac, o.boss)
-  if cleared then
-    drawText("X TO ADVANCE", L.hpX + 8, hpY + 8, C.gold, 2)
-  else
-    drawText(fmt(st.hp) .. " / " .. fmt(st.hpMax), L.hpX + 8, hpY + 8, C.text, 2)
-    drawTextR(math.floor(frac * 100 + 0.5) .. "%", L.labelR, hpY + 8, o.boss and C.warn or C.dim, 2)
-  end
+  drawText(fmt(st.hp) .. " / " .. fmt(st.hpMax), L.hpX + 8, hpY + 8, C.text, 2)
+  drawTextR(math.floor(frac * 100 + 0.5) .. "%", L.labelR, hpY + 8, o.boss and C.warn or C.dim, 2)
 
-  drawText("vulns " .. st.kills .. " / " .. (st.boss and 1 or 10), 32, killsY, C.dim, 2)
+  drawText("vulns " .. st.kills .. " / " .. (st.killsRequired or 10), 32, killsY, cleared and C.gold or C.dim, 2)
   drawTextR("+" .. fmt(st.creditsKill) .. " credits", L.labelR, killsY, C.gold, 2)
 
   drawText("PROBE", 32, clickY, C.dim, 2)
@@ -118,7 +114,11 @@ local function battleCol(o)
     drawText("-" .. fmt(st.dps), mx + 148, monY + 28, C.gain, 2)
   end
 
-  if o.boss then
+  if cleared then
+    drawText("NEXT ZONE READY", 32, nextY, C.gold, 2)
+    drawTextR("X TO ADVANCE", L.labelR, nextY, C.gold, 2)
+    px(32, barY, L.hpW, 8, C.gold)
+  elseif o.boss then
     drawText("BOSS TIMER", 32, nextY, C.dim, 2)
     drawTextR("0:14", L.labelR, nextY, C.warn, 2)
     px(32, barY, L.hpW, 8, C.hpEmpty)

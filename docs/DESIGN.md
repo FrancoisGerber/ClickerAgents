@@ -175,8 +175,9 @@ does not have.
 
 ## Pacing rule
 
-Nothing moves the player on. Clearing a zone's vulns (or its firewall) stops the run
-in that zone: the tick still runs, the agents still hold their damage, but no new
-zone is entered until the player presses **X**. Autosave, autobuy and auto-zone-walk
+Nothing moves the player on. The tenth kill opens the gate to the next zone but does
+not walk through it: the player stays in the zone and keeps farming credits, with the
+agents still killing whatever spawns, until they press **X** to advance. That pause is
+the upgrade window — bank credits, level agents, then move on. Autobuy and auto-zone
 are forbidden during play; the only automation is the agents' own throughput, and the
 only place zones advance unattended is the offline replay on launch.

@@ -29,6 +29,7 @@ function M.snapshot(st)
     zone = st.zone,
     kills = st.kills,
     cleared = st.cleared or false,
+    killsRequired = st.killsRequired or 10,
     rootkits = st.rootkits,
     systems = st.systems,
     bestZone = st.bestZone,
@@ -72,6 +73,7 @@ function M.apply(st, data)
   st.zone = data.zone or 1
   st.kills = data.kills or 0
   st.cleared = data.cleared or false
+  st.killsRequired = data.killsRequired or 10
   st.rootkits = data.rootkits or 0
   st.systems = data.systems or 0
   st.bestZone = data.bestZone or st.zone
@@ -83,11 +85,8 @@ function M.apply(st, data)
   for i, v in ipairs(data.achDone or {}) do st.achDone[i] = v end
   st.zoneSel = st.zone
   Economy.recalc(st)
-  if st.cleared then
-    st.hp, st.hpMax, st.timer = 0, 0, 0
-  else
-    Combat.spawn(st)
-  end
+  Combat.spawn(st)
+  if st.cleared then st.boss, st.timer = false, 0 end
   return true
 end
 

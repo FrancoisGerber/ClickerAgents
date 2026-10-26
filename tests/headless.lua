@@ -103,11 +103,14 @@ for _ = 1, 40 do Combat.probe(s) end
 check(s.zone == 1 and s.cleared, "clearing ten vulns stops the run in that zone")
 check(s.credits > 0, "kills pay credits")
 
--- nothing moves the player on: not the tick, not more probes
-local frozenZone, frozenCredits = s.zone, s.credits
-for _ = 1, 30 do Combat.tick(s, 1.0) end
-for _ = 1, 5 do Combat.probe(s) end
-check(s.zone == frozenZone and s.credits == frozenCredits, "a cleared zone waits for the player")
+-- the gate holds, but the farm does not stop: DPS keeps paying in the same zone
+local gateZone, gateKills = s.zone, s.kills
+local creditsBeforeFarm = s.credits
+for _ = 1, 20 do Combat.tick(s, 0.5) end
+check(s.zone == gateZone, "a cleared zone holds the player in place")
+check(s.kills == gateKills, "the kill counter stops at the gate")
+check(s.credits > creditsBeforeFarm, "but DPS keeps farming credits in that zone")
+check(s.hpMax > 0 and s.hp > 0, "and a fresh vuln keeps the bar moving")
 check(Combat.advance_zone(s) and s.zone == 2 and not s.cleared, "X walks through into the next zone")
 check(s.hpMax > 0, "the next zone spawns a fresh target")
 

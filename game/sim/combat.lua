@@ -14,6 +14,7 @@ M.BOSS_SECONDS = BOSS_SECONDS
 -- put a fresh target in front of the player for the current zone
 function M.spawn(st)
   st.boss = F.is_boss_zone(st.zone)
+  st.killsRequired = st.boss and 1 or KILLS_PER_ZONE
   st.hpMax = st.boss and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
   st.hp = st.hpMax
   st.timer = st.boss and BOSS_SECONDS or 0
@@ -25,21 +26,20 @@ function M.new_run_spawn(st)
   M.spawn(st)
 end
 
--- Cleared is a state, not a step: the zone stops when its last vuln dies and the
--- player has to walk through. Nothing moves them on while they are playing.
+-- Cleared means the next zone is unlocked, not that the work stops. The player
+-- keeps farming the zone they are standing in for credits; only the gate to the
+-- next zone waits for them.
 local function advance(st)
   st.kills = st.kills + 1
-  local target = st.boss and 1 or KILLS_PER_ZONE
+  local target = st.killsRequired or KILLS_PER_ZONE
   if st.kills >= target then
     st.kills = target
     st.cleared = true
-    st.hp = 0
-    st.hpMax = 0
+    st.boss = false            -- a beaten firewall leaves plain vulns to farm
     st.timer = 0
-  else
-    st.hpMax = st.boss and F.boss_hp(st.zone) or F.vuln_hp(st.zone)
-    st.hp = st.hpMax
   end
+  st.hpMax = F.vuln_hp(st.zone)
+  st.hp = st.hpMax
 end
 
 -- the player's move: only from a cleared zone, and only forwards
@@ -48,22 +48,28 @@ function M.advance_zone(st)
   st.zone = st.zone + 1
   st.kills = 0
   st.cleared = false
+  st.killsRequired = nil
   if st.zone > st.bestZone then st.bestZone = st.zone end
   st.zoneSel = st.zone
   M.spawn(st)
   return true
 end
 
--- a kill pays, then the next vuln takes its place
+-- a kill pays, then the next vuln takes its place; past the gate it just pays
 local function kill(st)
   st.credits = st.credits + st.creditsKill
+  if st.cleared then
+    st.hpMax = F.vuln_hp(st.zone)
+    st.hp = st.hpMax
+    return
+  end
   advance(st)
 end
 
 function M.damage(st, amount)
-  if amount <= 0 or st.cleared then return end
+  if amount <= 0 then return end
   st.hp = st.hp - amount
-  while st.hp <= 0 and not st.cleared do
+  while st.hp <= 0 do
     local over = -st.hp
     kill(st)
     if st.cleared then break end
@@ -80,7 +86,6 @@ end
 
 -- passive damage plus the boss clock; dt is seconds
 function M.tick(st, dt)
-  if st.cleared then return end          -- waiting on the player, not on the clock
   if st.hp <= 0 then M.spawn(st) end
   if st.dps > 0 then M.damage(st, st.dps * dt) end
 

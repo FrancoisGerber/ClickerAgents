@@ -74,9 +74,10 @@ disagree.
 | **START** | open the pause menu (from any screen): the clock stops, the game autosaves, and RESUME / SAVE / QUIT appear | same |
 | **SELECT** | cycle the buy amount: ×1 → ×10 → ×100 → MAX | same |
 
-The game never moves you on by itself: clear a zone's ten vulns and the run stops there
-until you press **X** to walk through. The only thing that advances zones without you is the
-offline replay on launch.
+The game never moves you on by itself: the tenth kill unlocks the next zone but you stay
+where you are, still farming credits, until you press **X** to advance. That gap is the
+upgrade window. The only thing that advances zones without you is the offline replay on
+launch.
 
 Also: the splash screen closes on **any** button, **Welcome Back** closes on **A** only, and
 the six tabs are BATTLE / SKILLS / UPGRADES / PRESTIGE / ACHIEVEMENTS / STATS — the menu is
