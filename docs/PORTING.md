@@ -73,3 +73,30 @@ tools/push.sh [host]          # install on a handheld and verify by hash
 Then: play it on the device for a session, note the device and firmware in the pull request,
 and get a second pair of eyes in `#testing-n-dev`. Their guide is explicit that untested
 pull requests are rejected.
+
+## Releasing
+
+The convention this repository uses, so the releases page reads the same every time:
+
+- **Tag:** `v<major>.<minor>.<patch>` — `v1.0.0`, `v1.1.0`, `v2.0.0`. Annotated, on the
+  commit that is being shipped.
+- **Release title:** `<Game name> v<same version>` — `Clicker Agents v1.0.0`.
+- **Body:** starts with `## <Game name> v<same version>`, then the sections in this order:
+  what it is, **Install by hand**, **Controls**, **Files in the zip**, **Checks**
+  (size, sha256, test count, hardware played on), **Licence**.
+- The asset keeps its build name, `ClickerAgents.zip`, so the unzip line in the notes stays
+  true.
+- `Config.VERSION` carries the version without the `v` (`1`, `1.1`), because the splash and
+  the pause menu show it.
+
+```sh
+tools/build.sh                                   # .love + ClickerAgents.zip
+git tag -a v1.1.0 -m "Clicker Agents v1.1.0"
+git push origin main v1.1.0
+gh release create v1.1.0 ClickerAgents.zip \
+  --title "Clicker Agents v1.1.0" --notes-file /tmp/release-notes.md
+```
+
+If a release has to be redone (a bug in the build, not new features), move the tag, re-upload
+the asset with `--clobber`, and keep the version — do not burn a version number on a fix that
+was in the same change.
