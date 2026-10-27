@@ -23,11 +23,12 @@ window size: no sprite is scaled and the font stays 12 px, so text is crisp at e
 
 | Ratio | Profile | Tested at | How |
 |---|---|---|---|
-| ≥ 1.45 | wide | **720×480** (target), 960×544, 1280×720 | played on the handheld; suite draws every screen at all three |
-| 1.15 – 1.45 | classic | 640×480, 800×600 | suite |
-| < 1.15 | square | 720×720 | suite |
+| ≥ 1.45 | wide | **720×480** (target), 960×544, 1280×720 | played on two handhelds; suite draws every screen at all three |
+| 1.15 – 1.45 | classic | 640×480, 800×600 | played on a 4:3 handheld; suite draws both |
+| < 1.15 | square | 720×720 | played on a 1:1 handheld; suite draws it |
 
-Any resolution inside those bands works — the agent column clamps to 240–384 px, the list
+All three profiles are confirmed on real hardware, not only in the suite. Any resolution
+inside those bands works — the agent column clamps to 240–384 px, the list
 shows as many rows as fit (12 at 720×480, 19 at 720×720), and the DPS column is dropped
 when the agent column gets under ~264 px rather than squeezing three numbers together.
 `tools/shots.sh` captures 720×480, 640×480 and 720×720 for side-by-side checks.
@@ -38,6 +39,8 @@ when the agent column gets under ~264 px rather than squeezing three numbers tog
 |---|---|---|---|
 | Anbernic RG34XXSP | Allwinner H700, 720×480 3:2 | Knulli with PortMaster | Working |
 | Anbernic RG34XX | same SoC, same 720×480 3:2 panel | Knulli with PortMaster | Working |
+| XF40H | 4:3 panel | ArkOS 4 | Working |
+| SZDiier D007 Plus | 1:1 (square) panel | AmberELEC | Working |
 | Desktop (Arch) | any | LÖVE 11.5 | Working |
 
 ## Design
