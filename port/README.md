@@ -12,6 +12,13 @@ security layers. Saves live in `clickeragents/saves/` and travel with the folder
 Written in Lua on LÖVE 11.5, drawn entirely in code — the only image assets are the logo
 and the cover.
 
+## Screens
+
+The layout follows the window's aspect ratio rather than the device, so it fills whatever
+panel it finds: 3:2, 16:9, 4:3 and 1:1 all work, with the font fixed at 12 px and the list
+showing as many rows as fit. Played on a 720×480 RG34XXSP and RG34XX, a 720×720 XF40H and a
+640×480 D007 Plus; the 960×544, 1280×720 and 800×600 sizes are covered by the test suite.
+
 Source: https://github.com/FrancoisGerber/ClickerAgents
 
 License: GPL-3.0-or-later. The `.love` is a zip of the source, so the port distributes the
