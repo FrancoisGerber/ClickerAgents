@@ -39,8 +39,8 @@ when the agent column gets under ~264 px rather than squeezing three numbers tog
 |---|---|---|---|
 | Anbernic RG34XXSP | Allwinner H700, 720×480 3:2 | Knulli with PortMaster | Working |
 | Anbernic RG34XX | same SoC, same 720×480 3:2 panel | Knulli with PortMaster | Working |
-| XF40H | 4:3 panel | ArkOS 4 | Working |
-| SZDiier D007 Plus | 1:1 (square) panel | AmberELEC | Working |
+| Game Console XF40H | Rockchip RK3326, 720×720 1:1 | ArkOS 4 | Working |
+| SZDiier D007 Plus | Rockchip RK3326, 640×480 4:3 | AmberELEC | Working |
 | Desktop (Arch) | any | LÖVE 11.5 | Working |
 
 ## Design
